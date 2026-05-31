@@ -264,6 +264,9 @@ html, body {
 }
 .se-chat.show-logo .msg__platform-logo { display: inline-block; }
 
+/* Shared Chat (Stream Together) origin marker */
+.msg__shared { opacity: 0.5; margin-right: 4px; font-size: 0.8em; vertical-align: 0.05em; }
+
 /* Badges */
 .msg__badges { display: inline; }
 .badge {

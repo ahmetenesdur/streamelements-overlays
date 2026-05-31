@@ -85,8 +85,12 @@
     if (!data) return null;
     const tags = data.tags || {};
     if (tags['room-id']) loadChannelEmotes(tags['room-id']).catch(() => {});
+    // Shared Chat (Stream Together): message originates in another channel.
+    const srcRoom = tags['source-room-id'];
+    const shared = !!(srcRoom && tags['room-id'] && srcRoom !== tags['room-id']);
     return {
       platform: 'twitch',
+      shared: shared,
       msgId: data.msgId || tags.id || ('t' + Date.now()),
       userId: data.userId || tags['user-id'] || data.nick,
       login: (data.nick || tags.login || data.displayName || '').toLowerCase(),
@@ -231,6 +235,7 @@
     const row = document.createElement('div');
     row.className = 'msg msg--' + u.platform + roleClass(u);
     if (u.kind === 'alert') row.classList.add('msg--alert');
+    if (u.shared) row.classList.add('msg--shared');
     row.dataset.msgid = u.msgId;
     row.dataset.userid = u.userId;
     if (u.login) row.dataset.userlogin = u.login;
@@ -292,7 +297,9 @@
     const logo = '<img class="msg__platform-logo" alt="' + u.platform +
       '" src="' + platformLogo(u.platform) + '">';
     const nameStyle = nameColorStyle(u);
-    return '<span class="msg__head">' + logo +
+    const shared = (u.shared && yes(F.sharedChatIndicator))
+      ? '<span class="msg__shared" title="shared chat">⤵</span>' : '';
+    return '<span class="msg__head">' + shared + logo +
       '<span class="msg__badges">' + badges + '</span>' +
       '<span class="msg__name"' + nameStyle + '>' + htmlEncode(u.displayName) + '</span>' +
       pronounTag(u) +

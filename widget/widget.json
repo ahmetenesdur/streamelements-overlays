@@ -747,6 +747,16 @@
     },
     "group": "Multistream"
   },
+  "sharedChatIndicator": {
+    "type": "dropdown",
+    "label": "Shared Chat (Stream Together) origin marker",
+    "value": "yes",
+    "options": {
+      "yes": "Yes",
+      "no": "No"
+    },
+    "group": "Multistream"
+  },
   "showYouTube": {
     "type": "dropdown",
     "label": "Show YouTube chat",
@@ -819,7 +829,7 @@
   },
   "widgetVersion": {
     "type": "hidden",
-    "value": "0.12.0"
+    "value": "1.0.0"
   },
   "widgetUpdateUrl": {
     "type": "hidden",

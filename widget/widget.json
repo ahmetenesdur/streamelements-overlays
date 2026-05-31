@@ -2,12 +2,11 @@
   "stylePreset": {
     "type": "dropdown",
     "label": "Style preset",
-    "value": "liquid",
+    "value": "editorial",
     "options": {
-      "liquid": "Liquid Glass (default)",
-      "minimal": "Minimal Flat",
-      "solid": "Solid",
-      "neon": "Neon / Gamer"
+      "editorial": "Editorial (text on video, default)",
+      "frosted": "Frosted (clean glass panel)",
+      "slate": "Slate (solid chip)"
     },
     "group": "Style"
   },
@@ -111,7 +110,7 @@
   "fontName": {
     "type": "googleFont",
     "label": "Font",
-    "value": "Inter",
+    "value": "Hanken Grotesk",
     "group": "Typography"
   },
   "fontSize": {
@@ -289,14 +288,8 @@
   },
   "keywordColor": {
     "type": "colorpicker",
-    "label": "Keyword color",
-    "value": "rgba(255,221,87,1)",
-    "group": "Roles & Highlights"
-  },
-  "keywordBackground": {
-    "type": "colorpicker",
-    "label": "Keyword background",
-    "value": "rgba(255,221,87,0.16)",
+    "label": "Keyword color (empty = accent)",
+    "value": "",
     "group": "Roles & Highlights"
   },
   "hideAfter": {
@@ -482,12 +475,6 @@
     "value": "{name} raided with {amount}",
     "group": "Alerts"
   },
-  "alertAccent": {
-    "type": "colorpicker",
-    "label": "Alert accent color",
-    "value": "rgba(255,196,0,1)",
-    "group": "Alerts"
-  },
   "alertMinDuration": {
     "type": "number",
     "label": "Alert min. display (sec)",
@@ -580,7 +567,7 @@
   },
   "glassOverride": {
     "type": "dropdown",
-    "label": "Override preset glass values",
+    "label": "Override preset surface values",
     "value": "no",
     "options": {
       "no": "No (use preset)",
@@ -590,14 +577,14 @@
   },
   "glassTint": {
     "type": "colorpicker",
-    "label": "Glass tint (with opacity)",
-    "value": "rgba(20,22,30,0.45)",
+    "label": "Surface fill (with opacity)",
+    "value": "rgba(12,14,18,0.34)",
     "group": "Advanced glass"
   },
   "glassBlur": {
     "type": "slider",
-    "label": "Glass blur (px)",
-    "value": 20,
+    "label": "Backdrop blur (px)",
+    "value": 24,
     "min": 0,
     "max": 40,
     "step": 1,
@@ -606,25 +593,25 @@
   "glassRadius": {
     "type": "slider",
     "label": "Corner radius (px)",
-    "value": 18,
+    "value": 16,
     "min": 0,
-    "max": 40,
+    "max": 36,
     "step": 1,
     "group": "Advanced glass"
   },
-  "glassBorder": {
+  "glassHighlight": {
     "type": "slider",
-    "label": "Border strength (%)",
-    "value": 16,
+    "label": "Top highlight strength (%)",
+    "value": 10,
     "min": 0,
-    "max": 100,
+    "max": 40,
     "step": 1,
     "group": "Advanced glass"
   },
   "glassShadow": {
     "type": "slider",
     "label": "Shadow depth (%)",
-    "value": 32,
+    "value": 30,
     "min": 0,
     "max": 100,
     "step": 1,
@@ -682,7 +669,7 @@
   },
   "widgetVersion": {
     "type": "hidden",
-    "value": "0.6.0"
+    "value": "0.7.0"
   },
   "widgetUpdateUrl": {
     "type": "hidden",

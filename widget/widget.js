@@ -354,7 +354,7 @@
     const setIf = (k, v) => { if (v != null && v !== '' && v !== 'auto') set(k, v); };
 
     // ---- Typography (always applied) ----
-    set('--font-name', "'" + (f.fontName || 'Inter') + "'");
+    set('--font-name', "'" + (f.fontName || 'Hanken Grotesk') + "'");
     set('--font-size', num(f.fontSize, 22) + 'px');
     set('--font-weight', str(f.fontWeight, '500'));
     set('--font-color', f.fontColor || 'rgba(255,255,255,0.96)');
@@ -371,35 +371,33 @@
     setIf('--accent', f.accent);
     set('--overlay-bg', f.overlayBackground || 'rgba(0,0,0,0)');
 
-    // ---- Advanced glass overrides (only when the gate is on) ----
+    // ---- Surface overrides (only when the gate is on) ----
     if (yes(f.glassOverride)) {
-      setIf('--glass-tint', f.glassTint);
-      if (f.glassBlur != null && f.glassBlur !== '') set('--glass-blur', num(f.glassBlur, 20) + 'px');
-      if (f.glassRadius != null && f.glassRadius !== '') set('--glass-radius', num(f.glassRadius, 18) + 'px');
-      if (f.glassBorder != null && f.glassBorder !== '') set('--glass-border', 'rgba(255,255,255,' + (num(f.glassBorder, 16) / 100) + ')');
-      if (f.glassShadow != null && f.glassShadow !== '') set('--glass-shadow', String(num(f.glassShadow, 32) / 100));
+      setIf('--surface', f.glassTint);
+      if (f.glassBlur != null && f.glassBlur !== '') set('--surface-blur', num(f.glassBlur, 22) + 'px');
+      if (f.glassRadius != null && f.glassRadius !== '') set('--surface-radius', num(f.glassRadius, 16) + 'px');
+      if (f.glassShadow != null && f.glassShadow !== '') set('--surface-shadow', String(num(f.glassShadow, 30) / 100));
+      if (f.glassHighlight != null && f.glassHighlight !== '') set('--surface-highlight', String(num(f.glassHighlight, 10) / 100));
     }
 
-    // ---- Username / highlight / dots / roles / alert ----
-    set('--custom-nick-color', f.customNickColor || 'rgba(120,170,255,1)');
-    set('--keyword-color', f.keywordColor || 'rgba(255,221,87,1)');
-    set('--keyword-bg', f.keywordBackground || 'rgba(255,221,87,0.16)');
+    // ---- Username / highlight / dots / roles ----
+    set('--custom-nick-color', f.customNickColor || '#bcd0ff');
+    setIf('--keyword-color', f.keywordColor);   // empty → follows --accent
 
-    set('--dot-twitch', f.dotTwitch || '#9146ff');
-    set('--dot-youtube', f.dotYouTube || '#ff0000');
+    set('--dot-twitch', f.dotTwitch || '#a970ff');
+    set('--dot-youtube', f.dotYouTube || '#ff4e45');
     set('--dot-kick', f.dotKick || '#53fc18');
 
-    set('--role-broadcaster', f.colorBroadcaster || '#ff5a5a');
-    set('--role-mod', f.colorMod || '#3fb950');
-    set('--role-vip', f.colorVip || '#ff7ad9');
-    set('--role-sub', f.colorSub || '#6aa0ff');
-    set('--alert-accent', f.alertAccent || 'rgba(255,196,0,1)');
+    set('--role-broadcaster', f.colorBroadcaster || '#ff6a6a');
+    set('--role-mod', f.colorMod || '#66d27a');
+    set('--role-vip', f.colorVip || '#ff8fdc');
+    set('--role-sub', f.colorSub || '#82b1ff');
 
     set('--anim-duration', num(f.animationSpeed, 500) + 'ms');
     set('--perspective', num(f.perspective, 0) + 'deg');
 
     if (!rootEl) return;
-    rootEl.dataset.preset = str(f.stylePreset, 'liquid');
+    rootEl.dataset.preset = str(f.stylePreset, 'editorial');
     rootEl.dataset.layout = str(f.layoutMode, 'horizontal');
     rootEl.dataset.halign = str(f.hAlign, 'left');
     rootEl.dataset.valign = str(f.vAlign, 'bottom');
@@ -603,7 +601,7 @@
     if (document.getElementById(id)) return;
     const l = document.createElement('link');
     l.id = id; l.rel = 'stylesheet';
-    l.href = 'https://fonts.googleapis.com/css?family=' + fam + ':300,400,500,700,900&display=swap';
+    l.href = 'https://fonts.googleapis.com/css?family=' + fam + ':300,400,500,600,700,800,900&display=swap';
     document.head.appendChild(l);
   }
 

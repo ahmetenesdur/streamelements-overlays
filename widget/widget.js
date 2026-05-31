@@ -507,13 +507,14 @@
   //  Test buttons (widget-button)
   // ================================================================
   function handleButton(field) {
+    // Test buttons bypass the ignored/command filters so they ALWAYS render.
     if (field === 'testMessage') {
-      handleChat(normalizeTwitch(sampleTwitch()));
+      addMessage(normalizeTwitch(sampleTwitch()));
     } else if (field === 'testAlert') {
       const u = normalizeAlert('follower-latest', { name: 'TestUser', amount: 1 });
       if (u) addMessage(u);
     } else if (field === 'testKick') {
-      handleChat(normalizeKick({ displayName: 'KickViewer', text: 'Hello from Kick! KEKW',
+      addMessage(normalizeKick({ displayName: 'KickViewer', text: 'Hello from Kick! KEKW',
         color: '#53fc18', badges: [{ type: 'moderator' }] }));
     }
   }
@@ -617,8 +618,8 @@
 
   function sampleTwitch() {
     return {
-      text: 'Test message Kappa works great!',
-      displayName: 'StreamElements', nick: 'streamelements', userId: '1234',
+      text: 'Test message — multistream chat works!',
+      displayName: 'TestUser', nick: 'testuser', userId: '1234',
       displayColor: '#9146ff', isAction: false,
       tags: { badges: 'broadcaster/1', mod: '0', subscriber: '0', 'user-id': '1234', id: 't' + Date.now() },
       badges: [], emotes: []

@@ -1,122 +1,605 @@
 {
-  "testMessage": { "type": "button", "label": "▶ Test chat message", "value": "Test message", "group": "Test tools" },
-  "testAlert":   { "type": "button", "label": "▶ Test alert (follow)", "value": "Test alert", "group": "Test tools" },
-  "testKick":    { "type": "button", "label": "▶ Test Kick message", "value": "Test kick", "group": "Test tools" },
-
+  "testMessage": {
+    "type": "button",
+    "label": "▶ Test chat message",
+    "value": "Test message",
+    "group": "Test tools"
+  },
+  "testAlert": {
+    "type": "button",
+    "label": "▶ Test alert (follow)",
+    "value": "Test alert",
+    "group": "Test tools"
+  },
+  "testKick": {
+    "type": "button",
+    "label": "▶ Test Kick message",
+    "value": "Test kick",
+    "group": "Test tools"
+  },
   "layoutMode": {
-    "type": "dropdown", "label": "Layout", "value": "horizontal",
-    "options": { "horizontal": "Horizontal (corner box)", "fullscreen": "Fullscreen (wide)" },
+    "type": "dropdown",
+    "label": "Layout",
+    "value": "horizontal",
+    "options": {
+      "horizontal": "Horizontal (corner box)",
+      "fullscreen": "Fullscreen (wide)"
+    },
     "group": "Layout"
   },
   "hAlign": {
-    "type": "dropdown", "label": "Horizontal align", "value": "left",
-    "options": { "left": "Left", "right": "Right" }, "group": "Layout"
+    "type": "dropdown",
+    "label": "Horizontal align",
+    "value": "left",
+    "options": {
+      "left": "Left",
+      "right": "Right"
+    },
+    "group": "Layout"
   },
   "vAlign": {
-    "type": "dropdown", "label": "Vertical region", "value": "bottom",
-    "options": { "bottom": "Bottom (newest at bottom)", "top": "Top (newest at top)" }, "group": "Layout"
+    "type": "dropdown",
+    "label": "Vertical region",
+    "value": "bottom",
+    "options": {
+      "bottom": "Bottom (newest at bottom)",
+      "top": "Top (newest at top)"
+    },
+    "group": "Layout"
   },
-  "messagesLimit": { "type": "number", "label": "Max messages on screen", "value": 8, "group": "Layout" },
-  "rowMaxWidth":   { "type": "number", "label": "Message max width (px, horizontal mode)", "value": 460, "group": "Layout" },
-  "rowWidth":      { "type": "slider", "label": "Message width % (fullscreen mode)", "value": 100, "min": 30, "max": 100, "step": 1, "group": "Layout" },
-  "rowGap":        { "type": "number", "label": "Gap between messages (px)", "value": 8, "group": "Layout" },
-
-  "fontName":   { "type": "googleFont", "label": "Font", "value": "Inter", "group": "Typography" },
-  "fontSize":   { "type": "number", "label": "Font size (px)", "value": 22, "group": "Typography" },
-  "fontWeight": {
-    "type": "dropdown", "label": "Font weight", "value": "500",
-    "options": { "300": "Light", "400": "Regular", "500": "Medium", "700": "Bold", "900": "Black" },
+  "messagesLimit": {
+    "type": "number",
+    "label": "Max messages on screen",
+    "value": 8,
+    "group": "Layout"
+  },
+  "rowMaxWidth": {
+    "type": "number",
+    "label": "Message max width (px, horizontal mode)",
+    "value": 460,
+    "group": "Layout"
+  },
+  "rowWidth": {
+    "type": "slider",
+    "label": "Message width % (fullscreen mode)",
+    "value": 100,
+    "min": 30,
+    "max": 100,
+    "step": 1,
+    "group": "Layout"
+  },
+  "rowGap": {
+    "type": "number",
+    "label": "Gap between messages (px)",
+    "value": 8,
+    "group": "Layout"
+  },
+  "fontName": {
+    "type": "googleFont",
+    "label": "Font",
+    "value": "Inter",
     "group": "Typography"
   },
-  "fontColor":  { "type": "colorpicker", "label": "Text color", "value": "rgba(255,255,255,1)", "group": "Typography" },
-  "textShadow": { "type": "text", "label": "Text shadow (CSS)", "value": "rgba(0,0,0,0.6) 0 2px 4px", "group": "Typography" },
-  "emoteSize":  { "type": "number", "label": "Emote size (px)", "value": 28, "group": "Typography" },
-
+  "fontSize": {
+    "type": "number",
+    "label": "Font size (px)",
+    "value": 22,
+    "group": "Typography"
+  },
+  "fontWeight": {
+    "type": "dropdown",
+    "label": "Font weight",
+    "value": "500",
+    "options": {
+      "300": "Light",
+      "400": "Regular",
+      "500": "Medium",
+      "700": "Bold",
+      "900": "Black"
+    },
+    "group": "Typography"
+  },
+  "fontColor": {
+    "type": "colorpicker",
+    "label": "Text color",
+    "value": "rgba(255,255,255,1)",
+    "group": "Typography"
+  },
+  "textShadow": {
+    "type": "text",
+    "label": "Text shadow (CSS)",
+    "value": "rgba(0,0,0,0.6) 0 2px 4px",
+    "group": "Typography"
+  },
+  "emoteSize": {
+    "type": "number",
+    "label": "Emote size (px)",
+    "value": 28,
+    "group": "Typography"
+  },
   "nickColor": {
-    "type": "dropdown", "label": "Username color mode", "value": "user",
-    "options": { "user": "Platform color", "message": "Same as text", "custom": "Custom (below)", "remove": "Hide username" },
+    "type": "dropdown",
+    "label": "Username color mode",
+    "value": "user",
+    "options": {
+      "user": "Platform color",
+      "message": "Same as text",
+      "custom": "Custom (below)",
+      "remove": "Hide username"
+    },
     "group": "Username & Colors"
   },
-  "customNickColor": { "type": "colorpicker", "label": "Custom username color", "value": "rgba(120,170,255,1)", "group": "Username & Colors" },
-  "rowBackground":   { "type": "colorpicker", "label": "Message background", "value": "rgba(20,20,28,0.55)", "group": "Username & Colors" },
-  "overlayBackground": { "type": "colorpicker", "label": "Overlay background", "value": "rgba(0,0,0,0)", "group": "Username & Colors" },
-  "bubble": {
-    "type": "dropdown", "label": "Message skin", "value": "bubble",
-    "options": { "bubble": "Bubble", "plain": "Plain (no background)" }, "group": "Username & Colors"
+  "customNickColor": {
+    "type": "colorpicker",
+    "label": "Custom username color",
+    "value": "rgba(120,170,255,1)",
+    "group": "Username & Colors"
   },
-
-  "displayBadges": { "type": "dropdown", "label": "Show badges", "value": "yes", "options": { "yes": "Yes", "no": "No" }, "group": "Badges & Platform" },
-  "showPlatformLogo": { "type": "dropdown", "label": "Show platform logo (by name)", "value": "yes", "options": { "yes": "Yes", "no": "No" }, "group": "Badges & Platform" },
-  "showPlatformDot": { "type": "dropdown", "label": "Show platform dot indicator", "value": "no", "options": { "yes": "Yes", "no": "No" }, "group": "Badges & Platform" },
-  "showAvatar": { "type": "dropdown", "label": "Show avatar / icon bubble", "value": "no", "options": { "yes": "Yes", "no": "No" }, "group": "Badges & Platform" },
-  "showArrow": { "type": "dropdown", "label": "Show speech-bubble arrow", "value": "no", "options": { "yes": "Yes", "no": "No" }, "group": "Badges & Platform" },
-  "dotTwitch":  { "type": "colorpicker", "label": "Dot · Twitch", "value": "rgba(145,70,255,1)", "group": "Badges & Platform" },
-  "dotYouTube": { "type": "colorpicker", "label": "Dot · YouTube", "value": "rgba(255,0,0,1)", "group": "Badges & Platform" },
-  "dotKick":    { "type": "colorpicker", "label": "Dot · Kick", "value": "rgba(83,252,24,1)", "group": "Badges & Platform" },
-
-  "roleHighlight": { "type": "dropdown", "label": "Highlight roles", "value": "yes", "options": { "yes": "Yes", "no": "No" }, "group": "Roles & Highlights" },
-  "colorBroadcaster": { "type": "colorpicker", "label": "Role · Broadcaster", "value": "rgba(255,77,77,1)", "group": "Roles & Highlights" },
-  "colorMod": { "type": "colorpicker", "label": "Role · Moderator", "value": "rgba(63,185,80,1)", "group": "Roles & Highlights" },
-  "colorVip": { "type": "colorpicker", "label": "Role · VIP", "value": "rgba(255,122,217,1)", "group": "Roles & Highlights" },
-  "colorSub": { "type": "colorpicker", "label": "Role · Subscriber", "value": "rgba(106,160,255,1)", "group": "Roles & Highlights" },
-  "highlightKeywords": { "type": "text", "label": "Highlighted keywords (comma separated)", "value": "", "group": "Roles & Highlights" },
-  "keywordColor": { "type": "colorpicker", "label": "Keyword color", "value": "rgba(255,221,87,1)", "group": "Roles & Highlights" },
-  "keywordBackground": { "type": "colorpicker", "label": "Keyword background", "value": "rgba(255,221,87,0.14)", "group": "Roles & Highlights" },
-
+  "rowBackground": {
+    "type": "colorpicker",
+    "label": "Message background",
+    "value": "rgba(20,20,28,0.55)",
+    "group": "Username & Colors"
+  },
+  "overlayBackground": {
+    "type": "colorpicker",
+    "label": "Overlay background",
+    "value": "rgba(0,0,0,0)",
+    "group": "Username & Colors"
+  },
+  "bubble": {
+    "type": "dropdown",
+    "label": "Message skin",
+    "value": "bubble",
+    "options": {
+      "bubble": "Bubble",
+      "plain": "Plain (no background)"
+    },
+    "group": "Username & Colors"
+  },
+  "displayBadges": {
+    "type": "dropdown",
+    "label": "Show badges",
+    "value": "yes",
+    "options": {
+      "yes": "Yes",
+      "no": "No"
+    },
+    "group": "Badges & Platform"
+  },
+  "showPlatformLogo": {
+    "type": "dropdown",
+    "label": "Show platform logo (by name)",
+    "value": "yes",
+    "options": {
+      "yes": "Yes",
+      "no": "No"
+    },
+    "group": "Badges & Platform"
+  },
+  "showPlatformDot": {
+    "type": "dropdown",
+    "label": "Show platform dot indicator",
+    "value": "no",
+    "options": {
+      "yes": "Yes",
+      "no": "No"
+    },
+    "group": "Badges & Platform"
+  },
+  "showAvatar": {
+    "type": "dropdown",
+    "label": "Show avatar / icon bubble",
+    "value": "no",
+    "options": {
+      "yes": "Yes",
+      "no": "No"
+    },
+    "group": "Badges & Platform"
+  },
+  "showArrow": {
+    "type": "dropdown",
+    "label": "Show speech-bubble arrow",
+    "value": "no",
+    "options": {
+      "yes": "Yes",
+      "no": "No"
+    },
+    "group": "Badges & Platform"
+  },
+  "dotTwitch": {
+    "type": "colorpicker",
+    "label": "Dot · Twitch",
+    "value": "rgba(145,70,255,1)",
+    "group": "Badges & Platform"
+  },
+  "dotYouTube": {
+    "type": "colorpicker",
+    "label": "Dot · YouTube",
+    "value": "rgba(255,0,0,1)",
+    "group": "Badges & Platform"
+  },
+  "dotKick": {
+    "type": "colorpicker",
+    "label": "Dot · Kick",
+    "value": "rgba(83,252,24,1)",
+    "group": "Badges & Platform"
+  },
+  "roleHighlight": {
+    "type": "dropdown",
+    "label": "Highlight roles",
+    "value": "yes",
+    "options": {
+      "yes": "Yes",
+      "no": "No"
+    },
+    "group": "Roles & Highlights"
+  },
+  "colorBroadcaster": {
+    "type": "colorpicker",
+    "label": "Role · Broadcaster",
+    "value": "rgba(255,77,77,1)",
+    "group": "Roles & Highlights"
+  },
+  "colorMod": {
+    "type": "colorpicker",
+    "label": "Role · Moderator",
+    "value": "rgba(63,185,80,1)",
+    "group": "Roles & Highlights"
+  },
+  "colorVip": {
+    "type": "colorpicker",
+    "label": "Role · VIP",
+    "value": "rgba(255,122,217,1)",
+    "group": "Roles & Highlights"
+  },
+  "colorSub": {
+    "type": "colorpicker",
+    "label": "Role · Subscriber",
+    "value": "rgba(106,160,255,1)",
+    "group": "Roles & Highlights"
+  },
+  "highlightKeywords": {
+    "type": "text",
+    "label": "Highlighted keywords (comma separated)",
+    "value": "",
+    "group": "Roles & Highlights"
+  },
+  "keywordColor": {
+    "type": "colorpicker",
+    "label": "Keyword color",
+    "value": "rgba(255,221,87,1)",
+    "group": "Roles & Highlights"
+  },
+  "keywordBackground": {
+    "type": "colorpicker",
+    "label": "Keyword background",
+    "value": "rgba(255,221,87,0.14)",
+    "group": "Roles & Highlights"
+  },
   "animationIn": {
-    "type": "dropdown", "label": "Animation In", "value": "fadeInUp",
-    "options": { "none": "None", "fadeIn": "fadeIn", "fadeInUp": "fadeInUp", "fadeInDown": "fadeInDown", "fadeInLeft": "fadeInLeft", "fadeInRight": "fadeInRight", "bounceIn": "bounceIn", "bounceInUp": "bounceInUp", "slideInUp": "slideInUp", "slideInLeft": "slideInLeft", "slideInRight": "slideInRight", "zoomIn": "zoomIn", "flipInX": "flipInX", "lightSpeedInRight": "lightSpeedInRight", "backInUp": "backInUp" },
+    "type": "dropdown",
+    "label": "Animation In",
+    "value": "fadeInUp",
+    "options": {
+      "none": "None",
+      "fadeIn": "fadeIn",
+      "fadeInUp": "fadeInUp",
+      "fadeInDown": "fadeInDown",
+      "fadeInLeft": "fadeInLeft",
+      "fadeInRight": "fadeInRight",
+      "bounceIn": "bounceIn",
+      "bounceInUp": "bounceInUp",
+      "slideInUp": "slideInUp",
+      "slideInLeft": "slideInLeft",
+      "slideInRight": "slideInRight",
+      "zoomIn": "zoomIn",
+      "flipInX": "flipInX",
+      "lightSpeedInRight": "lightSpeedInRight",
+      "backInUp": "backInUp"
+    },
     "group": "Animations"
   },
   "animationOut": {
-    "type": "dropdown", "label": "Animation Out", "value": "fadeOut",
-    "options": { "none": "None", "fadeOut": "fadeOut", "fadeOutDown": "fadeOutDown", "fadeOutLeft": "fadeOutLeft", "fadeOutRight": "fadeOutRight", "bounceOut": "bounceOut", "zoomOut": "zoomOut", "slideOutDown": "slideOutDown", "backOutDown": "backOutDown" },
+    "type": "dropdown",
+    "label": "Animation Out",
+    "value": "fadeOut",
+    "options": {
+      "none": "None",
+      "fadeOut": "fadeOut",
+      "fadeOutDown": "fadeOutDown",
+      "fadeOutLeft": "fadeOutLeft",
+      "fadeOutRight": "fadeOutRight",
+      "bounceOut": "bounceOut",
+      "zoomOut": "zoomOut",
+      "slideOutDown": "slideOutDown",
+      "backOutDown": "backOutDown"
+    },
     "group": "Animations"
   },
-  "animationSpeed": { "type": "slider", "label": "Animation duration (ms)", "value": 500, "min": 100, "max": 1500, "step": 50, "group": "Animations" },
-  "disableAllAnimations": { "type": "dropdown", "label": "Disable all animations", "value": "no", "options": { "yes": "Yes", "no": "No" }, "group": "Animations" },
-
-  "hideAfter":   { "type": "number", "label": "Hide message after (sec, 0 = never)", "value": 0, "group": "Messages" },
-  "hideCommands": { "type": "dropdown", "label": "Hide ! commands", "value": "yes", "options": { "yes": "Yes", "no": "No" }, "group": "Messages" },
-  "mergeMessages": { "type": "dropdown", "label": "Merge consecutive messages from same user", "value": "no", "options": { "yes": "Yes", "no": "No" }, "group": "Messages" },
-  "ignoredUsers": { "type": "text", "label": "Ignored users (comma separated)", "value": "StreamElements,Nightbot,StreamLabs", "group": "Messages" },
-
-  "showAlerts": { "type": "dropdown", "label": "Show alerts inline", "value": "yes", "options": { "yes": "Yes", "no": "No" }, "group": "Alerts" },
-  "alertFollow": { "type": "dropdown", "label": "Alert · Follows", "value": "yes", "options": { "yes": "Yes", "no": "No" }, "group": "Alerts" },
-  "alertSub":    { "type": "dropdown", "label": "Alert · Subscriptions", "value": "yes", "options": { "yes": "Yes", "no": "No" }, "group": "Alerts" },
-  "alertTip":    { "type": "dropdown", "label": "Alert · Tips", "value": "yes", "options": { "yes": "Yes", "no": "No" }, "group": "Alerts" },
-  "alertCheer":  { "type": "dropdown", "label": "Alert · Cheers", "value": "yes", "options": { "yes": "Yes", "no": "No" }, "group": "Alerts" },
-  "alertRaid":   { "type": "dropdown", "label": "Alert · Raids", "value": "yes", "options": { "yes": "Yes", "no": "No" }, "group": "Alerts" },
-  "alertLabelFollow": { "type": "text", "label": "Label · Follow", "value": "{name} followed", "group": "Alerts" },
-  "alertLabelSub":    { "type": "text", "label": "Label · Sub", "value": "{name} subscribed ({amount} months)", "group": "Alerts" },
-  "alertLabelTip":    { "type": "text", "label": "Label · Tip", "value": "{name} tipped {amount}", "group": "Alerts" },
-  "alertLabelCheer":  { "type": "text", "label": "Label · Cheer", "value": "{name} cheered {amount} bits", "group": "Alerts" },
-  "alertLabelRaid":   { "type": "text", "label": "Label · Raid", "value": "{name} raided with {amount}", "group": "Alerts" },
-  "alertAccent":      { "type": "colorpicker", "label": "Alert accent color", "value": "rgba(255,196,0,1)", "group": "Alerts" },
-  "alertMinDuration": { "type": "number", "label": "Alert min. display (sec)", "value": 8, "group": "Alerts" },
-
-  "perspective": { "type": "slider", "label": "Perspective tilt (deg)", "value": 0, "min": -25, "max": 25, "step": 1, "group": "Effects" },
-  "maskFade": {
-    "type": "dropdown", "label": "Edge fade mask", "value": "none",
-    "options": { "none": "None", "top": "Top", "bottom": "Bottom", "both": "Both" }, "group": "Effects"
+  "animationSpeed": {
+    "type": "slider",
+    "label": "Animation duration (ms)",
+    "value": 500,
+    "min": 100,
+    "max": 1500,
+    "step": 50,
+    "group": "Animations"
   },
-  "crayonTexture": { "type": "dropdown", "label": "Crayon texture", "value": "no", "options": { "yes": "Yes", "no": "No" }, "group": "Effects" },
-
-  "soundEnabled": { "type": "dropdown", "label": "Enable sounds", "value": "no", "options": { "yes": "Yes", "no": "No" }, "group": "Sound" },
-  "soundVolume":  { "type": "slider", "label": "Sound volume", "value": 60, "min": 0, "max": 100, "step": 1, "group": "Sound" },
-  "soundMessage": { "type": "sound-input", "label": "Sound · message", "value": "", "group": "Sound" },
-  "soundFollow":  { "type": "sound-input", "label": "Sound · follow", "value": "", "group": "Sound" },
-  "soundSub":     { "type": "sound-input", "label": "Sound · sub", "value": "", "group": "Sound" },
-  "soundTip":     { "type": "sound-input", "label": "Sound · tip", "value": "", "group": "Sound" },
-
-  "relayUrl":   { "type": "text", "label": "Relay WebSocket URL (Railway, wss://...)", "value": "", "group": "Multistream" },
-  "kickChannel": { "type": "text", "label": "Kick channel (slug)", "value": "", "group": "Multistream" },
-  "enable7tv":  { "type": "dropdown", "label": "7TV emotes", "value": "yes", "options": { "yes": "Yes", "no": "No" }, "group": "Multistream" },
-  "enableBttv": { "type": "dropdown", "label": "BTTV emotes", "value": "yes", "options": { "yes": "Yes", "no": "No" }, "group": "Multistream" },
-  "enableFfz":  { "type": "dropdown", "label": "FFZ emotes", "value": "yes", "options": { "yes": "Yes", "no": "No" }, "group": "Multistream" },
-
-  "widgetName":      { "type": "hidden", "value": "Multistream Chat Overlay" },
-  "widgetAuthor":    { "type": "hidden", "value": "ahmetenesdur" },
-  "widgetVersion":   { "type": "hidden", "value": "0.1.0" },
-  "widgetUpdateUrl": { "type": "hidden", "value": "https://github.com/ahmetenesdur/streamelements-overlays/blob/main/widget/" }
+  "disableAllAnimations": {
+    "type": "dropdown",
+    "label": "Disable all animations",
+    "value": "no",
+    "options": {
+      "yes": "Yes",
+      "no": "No"
+    },
+    "group": "Animations"
+  },
+  "hideAfter": {
+    "type": "number",
+    "label": "Hide message after (sec, 0 = never)",
+    "value": 0,
+    "group": "Messages"
+  },
+  "hideCommands": {
+    "type": "dropdown",
+    "label": "Hide ! commands",
+    "value": "yes",
+    "options": {
+      "yes": "Yes",
+      "no": "No"
+    },
+    "group": "Messages"
+  },
+  "mergeMessages": {
+    "type": "dropdown",
+    "label": "Merge consecutive messages from same user",
+    "value": "no",
+    "options": {
+      "yes": "Yes",
+      "no": "No"
+    },
+    "group": "Messages"
+  },
+  "ignoredUsers": {
+    "type": "text",
+    "label": "Ignored users (comma separated)",
+    "value": "StreamElements,Nightbot,StreamLabs",
+    "group": "Messages"
+  },
+  "showAlerts": {
+    "type": "dropdown",
+    "label": "Show alerts inline",
+    "value": "yes",
+    "options": {
+      "yes": "Yes",
+      "no": "No"
+    },
+    "group": "Alerts"
+  },
+  "alertFollow": {
+    "type": "dropdown",
+    "label": "Alert · Follows",
+    "value": "yes",
+    "options": {
+      "yes": "Yes",
+      "no": "No"
+    },
+    "group": "Alerts"
+  },
+  "alertSub": {
+    "type": "dropdown",
+    "label": "Alert · Subscriptions",
+    "value": "yes",
+    "options": {
+      "yes": "Yes",
+      "no": "No"
+    },
+    "group": "Alerts"
+  },
+  "alertTip": {
+    "type": "dropdown",
+    "label": "Alert · Tips",
+    "value": "yes",
+    "options": {
+      "yes": "Yes",
+      "no": "No"
+    },
+    "group": "Alerts"
+  },
+  "alertCheer": {
+    "type": "dropdown",
+    "label": "Alert · Cheers",
+    "value": "yes",
+    "options": {
+      "yes": "Yes",
+      "no": "No"
+    },
+    "group": "Alerts"
+  },
+  "alertRaid": {
+    "type": "dropdown",
+    "label": "Alert · Raids",
+    "value": "yes",
+    "options": {
+      "yes": "Yes",
+      "no": "No"
+    },
+    "group": "Alerts"
+  },
+  "alertLabelFollow": {
+    "type": "text",
+    "label": "Label · Follow",
+    "value": "{name} followed",
+    "group": "Alerts"
+  },
+  "alertLabelSub": {
+    "type": "text",
+    "label": "Label · Sub",
+    "value": "{name} subscribed ({amount} months)",
+    "group": "Alerts"
+  },
+  "alertLabelTip": {
+    "type": "text",
+    "label": "Label · Tip",
+    "value": "{name} tipped {amount}",
+    "group": "Alerts"
+  },
+  "alertLabelCheer": {
+    "type": "text",
+    "label": "Label · Cheer",
+    "value": "{name} cheered {amount} bits",
+    "group": "Alerts"
+  },
+  "alertLabelRaid": {
+    "type": "text",
+    "label": "Label · Raid",
+    "value": "{name} raided with {amount}",
+    "group": "Alerts"
+  },
+  "alertAccent": {
+    "type": "colorpicker",
+    "label": "Alert accent color",
+    "value": "rgba(255,196,0,1)",
+    "group": "Alerts"
+  },
+  "alertMinDuration": {
+    "type": "number",
+    "label": "Alert min. display (sec)",
+    "value": 8,
+    "group": "Alerts"
+  },
+  "perspective": {
+    "type": "slider",
+    "label": "Perspective tilt (deg)",
+    "value": 0,
+    "min": -25,
+    "max": 25,
+    "step": 1,
+    "group": "Effects"
+  },
+  "maskFade": {
+    "type": "dropdown",
+    "label": "Edge fade mask",
+    "value": "none",
+    "options": {
+      "none": "None",
+      "top": "Top",
+      "bottom": "Bottom",
+      "both": "Both"
+    },
+    "group": "Effects"
+  },
+  "crayonTexture": {
+    "type": "dropdown",
+    "label": "Crayon texture",
+    "value": "no",
+    "options": {
+      "yes": "Yes",
+      "no": "No"
+    },
+    "group": "Effects"
+  },
+  "soundEnabled": {
+    "type": "dropdown",
+    "label": "Enable sounds",
+    "value": "no",
+    "options": {
+      "yes": "Yes",
+      "no": "No"
+    },
+    "group": "Sound"
+  },
+  "soundVolume": {
+    "type": "slider",
+    "label": "Sound volume",
+    "value": 60,
+    "min": 0,
+    "max": 100,
+    "step": 1,
+    "group": "Sound"
+  },
+  "soundMessage": {
+    "type": "sound-input",
+    "label": "Sound · message",
+    "value": "",
+    "group": "Sound"
+  },
+  "soundFollow": {
+    "type": "sound-input",
+    "label": "Sound · follow",
+    "value": "",
+    "group": "Sound"
+  },
+  "soundSub": {
+    "type": "sound-input",
+    "label": "Sound · sub",
+    "value": "",
+    "group": "Sound"
+  },
+  "soundTip": {
+    "type": "sound-input",
+    "label": "Sound · tip",
+    "value": "",
+    "group": "Sound"
+  },
+  "relayUrl": {
+    "type": "text",
+    "label": "Relay WebSocket URL (Railway, wss://...)",
+    "value": "",
+    "group": "Multistream"
+  },
+  "kickChannel": {
+    "type": "text",
+    "label": "Kick channel (slug)",
+    "value": "",
+    "group": "Multistream"
+  },
+  "enable7tv": {
+    "type": "dropdown",
+    "label": "7TV emotes",
+    "value": "yes",
+    "options": {
+      "yes": "Yes",
+      "no": "No"
+    },
+    "group": "Multistream"
+  },
+  "enableBttv": {
+    "type": "dropdown",
+    "label": "BTTV emotes",
+    "value": "yes",
+    "options": {
+      "yes": "Yes",
+      "no": "No"
+    },
+    "group": "Multistream"
+  },
+  "enableFfz": {
+    "type": "dropdown",
+    "label": "FFZ emotes",
+    "value": "yes",
+    "options": {
+      "yes": "Yes",
+      "no": "No"
+    },
+    "group": "Multistream"
+  },
+  "widgetName": {
+    "type": "hidden",
+    "value": "Multistream Chat Overlay"
+  },
+  "widgetAuthor": {
+    "type": "hidden",
+    "value": "ahmetenesdur"
+  },
+  "widgetVersion": {
+    "type": "hidden",
+    "value": "0.1.1"
+  },
+  "widgetUpdateUrl": {
+    "type": "hidden",
+    "value": "https://github.com/ahmetenesdur/streamelements-overlays/blob/main/widget/"
+  }
 }

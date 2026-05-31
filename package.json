@@ -1,6 +1,6 @@
 {
   "name": "streamelements-multistream-chat",
-  "version": "0.9.0",
+  "version": "0.10.0",
   "private": true,
   "type": "module",
   "description": "Customizable multistream (Twitch/YouTube/Kick) chat overlay for StreamElements: inline alerts, custom emotes (7TV/BTTV/FFZ), sound, visual effects and GitHub auto-update.",

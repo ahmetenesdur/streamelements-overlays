@@ -254,6 +254,52 @@
     "value": "rgba(106,160,255,1)",
     "group": "Roles & Highlights"
   },
+  "colorLeadMod": {
+    "type": "colorpicker",
+    "label": "Role · Lead mod",
+    "value": "rgba(40,200,160,1)",
+    "group": "Roles & Highlights"
+  },
+  "colorArtist": {
+    "type": "colorpicker",
+    "label": "Role · Artist",
+    "value": "rgba(255,159,77,1)",
+    "group": "Roles & Highlights"
+  },
+  "colorFav": {
+    "type": "colorpicker",
+    "label": "Role · Fav list",
+    "value": "rgba(255,209,102,1)",
+    "group": "Roles & Highlights"
+  },
+  "colorRegular": {
+    "type": "colorpicker",
+    "label": "Role · Regular (empty = keep own color)",
+    "value": "",
+    "group": "Roles & Highlights"
+  },
+  "leadModUsers": {
+    "type": "text",
+    "label": "Lead mod usernames (comma separated)",
+    "value": "",
+    "group": "Roles & Highlights"
+  },
+  "favUsers": {
+    "type": "text",
+    "label": "Fav list usernames (comma separated)",
+    "value": "",
+    "group": "Roles & Highlights"
+  },
+  "enablePronouns": {
+    "type": "dropdown",
+    "label": "Show pronouns (Twitch, via pronouns.alejo.io)",
+    "value": "no",
+    "options": {
+      "yes": "Yes",
+      "no": "No"
+    },
+    "group": "Roles & Highlights"
+  },
   "highlightKeywords": {
     "type": "text",
     "label": "Highlighted keywords (comma separated)",
@@ -673,7 +719,7 @@
   },
   "widgetVersion": {
     "type": "hidden",
-    "value": "0.9.0"
+    "value": "0.10.0"
   },
   "widgetUpdateUrl": {
     "type": "hidden",

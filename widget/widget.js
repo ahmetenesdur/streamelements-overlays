@@ -22,7 +22,9 @@
   let relaySocket = null;
   let relayRetry = 0;
 
-  const ROLE_PRIORITY = ['broadcaster', 'moderator', 'vip', 'subscriber'];
+  const ROLE_PRIORITY = ['broadcaster', 'leadmod', 'moderator', 'artist', 'vip', 'subscriber', 'fav', 'regular'];
+  const pronounCache = {};   // twitch login -> short pronoun label ('' = none)
+  let pronounMap = null;     // id -> short label (loaded once)
 
   // ================================================================
   //  Boot
@@ -40,6 +42,7 @@
 
     // Async enrichments (never block rendering; fail silently).
     loadCustomEmotes().catch(() => {});
+    loadPronounMap();
     connectRelay();
   });
 
@@ -86,6 +89,7 @@
       platform: 'twitch',
       msgId: data.msgId || tags.id || ('t' + Date.now()),
       userId: data.userId || tags['user-id'] || data.nick,
+      login: (data.nick || tags.login || data.displayName || '').toLowerCase(),
       displayName: data.displayName || tags['display-name'] || data.nick || 'anon',
       color: data.displayColor || tags.color || '',
       avatar: '',
@@ -193,6 +197,7 @@
     if (!platformEnabled(u.platform)) return;     // single-platform / combine filter
     if (str(F.hideCommands, 'yes') === 'yes' && u.text.trim().startsWith('!')) return;
     if (isIgnored(u.displayName)) return;
+    applyCustomRoles(u);                            // lead mod / fav / regular
 
     if (str(F.mergeMessages, 'no') === 'yes') {
       const key = u.platform + ':' + u.userId;
@@ -228,9 +233,10 @@
     if (u.kind === 'alert') row.classList.add('msg--alert');
     row.dataset.msgid = u.msgId;
     row.dataset.userid = u.userId;
+    if (u.login) row.dataset.userlogin = u.login;
     row.id = 'msg-' + total;
 
-    const animIn = str(F.animationIn, 'fadeInUp');
+    const animIn = str(F.animationIn, 'liquidIn');
     if (str(F.disableAllAnimations, 'no') !== 'yes' && animIn !== 'none') {
       row.classList.add('animate__animated', 'animate__' + animIn);
     }
@@ -260,6 +266,7 @@
     return '<span class="msg__head">' + logo +
       '<span class="msg__badges">' + badges + '</span>' +
       '<span class="msg__name"' + nameStyle + '>' + htmlEncode(u.displayName) + '</span>' +
+      pronounTag(u) +
       '<span class="msg__colon">:</span></span>';
   }
 
@@ -282,13 +289,16 @@
 
   // Map the highest-priority role to its CSS color variable.
   const ROLE_VAR = {
-    broadcaster: '--role-broadcaster', moderator: '--role-mod',
-    vip: '--role-vip', subscriber: '--role-sub', artist: '--role-artist',
-    leadmod: '--role-leadmod', regular: '--role-regular'
+    broadcaster: '--role-broadcaster', leadmod: '--role-leadmod', moderator: '--role-mod',
+    artist: '--role-artist', vip: '--role-vip', subscriber: '--role-sub',
+    fav: '--role-fav', regular: '--role-regular'
   };
   function roleColorVar(u) {
     for (const r of ROLE_PRIORITY) {
-      if (u.roles.indexOf(r) !== -1 && ROLE_VAR[r]) return ROLE_VAR[r];
+      if (u.roles.indexOf(r) === -1) continue;
+      // "regular" keeps the platform/user color unless a custom color is set.
+      if (r === 'regular' && !str(F.colorRegular, '')) return null;
+      if (ROLE_VAR[r]) return ROLE_VAR[r];
     }
     return null;
   }
@@ -345,12 +355,12 @@
 
   function animateOut(row) {
     if (!row || !row.parentNode) return;
-    const out = str(F.animationOut, 'fadeOut');
+    const out = str(F.animationOut, 'liquidOut');
     if (str(F.disableAllAnimations, 'no') === 'yes' || out === 'none') { row.remove(); return; }
-    const animIn = str(F.animationIn, 'fadeInUp');
+    const animIn = str(F.animationIn, 'liquidIn');
     row.classList.remove('animate__' + animIn);
     row.classList.add('animate__animated', 'animate__' + out);
-    setTimeout(() => row.remove(), num(F.animationSpeed, 500) + 60);
+    setTimeout(() => row.remove(), num(F.animationSpeed, 460) + 60);
   }
 
   function removeByMsgId(id) {
@@ -411,6 +421,10 @@
     set('--role-mod', f.colorMod || '#66d27a');
     set('--role-vip', f.colorVip || '#ff8fdc');
     set('--role-sub', f.colorSub || '#82b1ff');
+    set('--role-leadmod', f.colorLeadMod || '#28c8a0');
+    set('--role-artist', f.colorArtist || '#ff9f4d');
+    set('--role-fav', f.colorFav || '#ffd166');
+    setIf('--role-regular', f.colorRegular);   // empty → regulars keep their own color
 
     set('--anim-duration', num(f.animationSpeed, 460) + 'ms');
 
@@ -572,9 +586,22 @@
     const list = (tags.badges || '') + ',' + (badges || []).map(b => b.type).join(',');
     if (/broadcaster/.test(list)) roles.push('broadcaster');
     if (tags.mod === '1' || /moderator/.test(list)) roles.push('moderator');
+    if (/artist/.test(list)) roles.push('artist');
     if (/vip/.test(list)) roles.push('vip');
     if (tags.subscriber === '1' || /subscriber|founder/.test(list)) roles.push('subscriber');
     return roles;
+  }
+
+  // User-defined roles (lead mod / fav list) + "regular" fallback, applied to
+  // every message regardless of platform.
+  function applyCustomRoles(u) {
+    if (inCsv(F.leadModUsers, u.displayName) && u.roles.indexOf('leadmod') === -1) u.roles.unshift('leadmod');
+    if (inCsv(F.favUsers, u.displayName) && u.roles.indexOf('fav') === -1) u.roles.push('fav');
+    if (u.roles.length === 0) u.roles.push('regular');
+  }
+  function inCsv(csv, name) {
+    return (csv || '').toLowerCase().split(',').map(s => s.trim()).filter(Boolean)
+      .indexOf((name || '').toLowerCase()) !== -1;
   }
 
   function roleClass(u) {
@@ -596,6 +623,46 @@
     if (!yes(F.showAlerts)) return false;
     const map = { follow: F.alertFollow, sub: F.alertSub, tip: F.alertTip, cheer: F.alertCheer, raid: F.alertRaid, host: 'yes' };
     return yes(map[type] != null ? map[type] : 'yes');
+  }
+
+  // ================================================================
+  //  Pronouns (api.pronouns.alejo.io) — Twitch logins, cached
+  // ================================================================
+  function loadPronounMap() {
+    if (!yes(F.enablePronouns) || pronounMap) return;
+    getJSON('https://api.pronouns.alejo.io/v1/pronouns')
+      .then(m => {
+        pronounMap = {};
+        Object.keys(m || {}).forEach(id => {
+          const v = m[id];
+          if (typeof v === 'string') { pronounMap[id] = v; return; }
+          // Build a display like "He/Him" (or just "They" when singular).
+          const subj = v && v.subject ? v.subject : id;
+          pronounMap[id] = (v && v.singular) ? subj : (subj + '/' + (v.object || subj));
+        });
+      })
+      .catch(() => { pronounMap = {}; });
+  }
+  function fetchPronoun(login) {
+    if (!login || pronounCache[login] !== undefined) return;
+    pronounCache[login] = '';   // mark in-flight so we fetch once
+    getJSON('https://api.pronouns.alejo.io/v1/users/' + encodeURIComponent(login))
+      .then(d => {
+        const rec = Array.isArray(d) ? d[0] : d;
+        const id = rec && rec.pronoun_id;
+        const label = (id && pronounMap) ? (pronounMap[id] || '') : '';
+        pronounCache[login] = label;
+        if (label) {
+          document.querySelectorAll('.msg[data-userlogin="' + cssEsc(login) + '"] .msg__pronoun')
+            .forEach(el => { if (!el.textContent) el.textContent = label; });
+        }
+      })
+      .catch(() => {});
+  }
+  function pronounTag(u) {
+    if (!yes(F.enablePronouns) || u.platform !== 'twitch' || !u.login) return '';
+    if (pronounCache[u.login] === undefined) fetchPronoun(u.login);
+    return '<span class="msg__pronoun">' + htmlEncode(pronounCache[u.login] || '') + '</span>';
   }
 
   // Per-platform show/hide → pick one platform or combine any subset.

@@ -63,9 +63,13 @@
 
   /* Roles — username tint (no boxes) */
   --role-broadcaster: #ff6a6a;
+  --role-leadmod: #28c8a0;
   --role-mod: #66d27a;
+  --role-artist: #ff9f4d;
   --role-vip: #ff8fdc;
   --role-sub: #82b1ff;
+  --role-fav: #ffd166;
+  --role-regular: ;
 
   /* Animation */
   --anim-duration: 460ms;
@@ -280,6 +284,17 @@ html, body {
 .kw {
   color: var(--keyword-color);
   font-weight: 700;
+}
+
+/* Pronoun tag — small, muted, sits between name and message */
+.msg__pronoun:not(:empty) {
+  font-size: 0.62em;
+  font-weight: 700;
+  opacity: 0.55;
+  margin: 0 0.35em 0 0.15em;
+  letter-spacing: 0.02em;
+  vertical-align: 0.1em;
+  white-space: nowrap;
 }
 
 /* ================================================================

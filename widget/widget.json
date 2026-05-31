@@ -638,7 +638,7 @@
   },
   "kickChannel": {
     "type": "text",
-    "label": "Kick channel (slug)",
+    "label": "Kick channel (slug, or numeric chatroom id if slug fails)",
     "value": "",
     "group": "Multistream"
   },
@@ -682,7 +682,7 @@
   },
   "widgetVersion": {
     "type": "hidden",
-    "value": "0.5.0"
+    "value": "0.6.0"
   },
   "widgetUpdateUrl": {
     "type": "hidden",

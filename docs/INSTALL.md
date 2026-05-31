@@ -16,7 +16,7 @@ The editor has four tabs. Paste each repo file into the matching tab:
 | **JS** | [`widget/widget.js`](../widget/widget.js) |
 | **FIELDS** | [`widget/widget.json`](../widget/widget.json) |
 
-Click **Done**. The settings panel (right side) now shows **12 grouped sections**.
+Click **Done**. The settings panel (right side) now shows **14 grouped sections**.
 
 ## 3. Connect platforms
 - **Twitch**: works once the overlay runs on your Twitch-connected SE account.
@@ -25,10 +25,21 @@ Click **Done**. The settings panel (right side) now shows **12 grouped sections*
 - **Kick**: set **Multistream → Relay WebSocket URL** + **Kick channel** (needs the Railway
   relay from Phase 6; until then leave blank — Twitch/YouTube still work).
 
-## 4. Configure (Fields panel)
-Groups: **Test tools, Layout, Typography, Username & Colors, Badges & Platform,
-Roles & Highlights, Animations, Messages, Alerts, Effects, Sound, Multistream**.
-Start with Layout (horizontal/fullscreen, align, max messages) and Typography.
+## 4. Configure (Fields panel) — simple first
+Start at the top **Style** group:
+- **Style preset**: `Liquid Glass` (default) · `Minimal Flat` · `Solid` · `Neon / Gamer`.
+  Pick one and you have a polished look instantly.
+- **Accent color**: leave empty to use the preset's accent, or set one to recolor
+  roles/alerts/keywords/dots at once.
+
+Then tweak only what you want. Groups: **Style, Test tools, Layout, Typography,
+Username & Colors, Badges & Platform, Roles & Highlights, Messages, Animations,
+Alerts, Sound, Effects, Advanced glass, Multistream**.
+- **Advanced glass** group overrides the preset's glass values only when
+  *Override preset glass values = Yes*.
+- **Effects → Advanced glass refraction**: real SVG liquid-glass refraction. Works in
+  Chromium / OBS; on unsupported renderers it auto-falls back to plain glassmorphism.
+  GPU-heavy — keep **Max messages** modest if you enable it.
 
 ## 5. Test
 - Use **Test tools → Test chat message / Test alert / Test Kick message** buttons.

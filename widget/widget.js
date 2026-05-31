@@ -346,30 +346,47 @@
   function applyTheme(f) {
     const r = document.documentElement.style;
     const set = (k, v) => r.setProperty(k, v);
+    // setIf: only write a token when the override field is non-empty / not "auto".
+    // This is the heart of "preset gives great defaults, you override only what you touch".
+    const setIf = (k, v) => { if (v != null && v !== '' && v !== 'auto') set(k, v); };
 
+    // ---- Typography (always applied) ----
     set('--font-name', "'" + (f.fontName || 'Inter') + "'");
     set('--font-size', num(f.fontSize, 22) + 'px');
     set('--font-weight', str(f.fontWeight, '500'));
-    set('--font-color', f.fontColor || 'rgba(255,255,255,1)');
-    set('--text-shadow', f.textShadow || 'rgba(0,0,0,0.6) 0 2px 4px');
+    set('--font-color', f.fontColor || 'rgba(255,255,255,0.96)');
+    setIf('--text-shadow', f.textShadow);
     set('--emote-size', num(f.emoteSize, 28) + 'px');
     set('--badge-size', Math.round(num(f.fontSize, 22) * 0.92) + 'px');
 
-    set('--row-bg', f.rowBackground || 'rgba(20,20,28,0.55)');
-    set('--overlay-bg', f.overlayBackground || 'rgba(0,0,0,0)');
-    set('--row-gap', num(f.rowGap, 8) + 'px');
+    // ---- Layout footprint (always applied) ----
+    set('--row-gap', num(f.rowGap, 9) + 'px');
     set('--row-maxwidth', num(f.rowMaxWidth, 460) + 'px');
     set('--row-width', num(f.rowWidth, 100) + '%');
 
+    // ---- Glass: accent + overlay are simple-first (apply if set) ----
+    setIf('--accent', f.accent);
+    set('--overlay-bg', f.overlayBackground || 'rgba(0,0,0,0)');
+
+    // ---- Advanced glass overrides (only when the gate is on) ----
+    if (yes(f.glassOverride)) {
+      setIf('--glass-tint', f.glassTint);
+      if (f.glassBlur != null && f.glassBlur !== '') set('--glass-blur', num(f.glassBlur, 20) + 'px');
+      if (f.glassRadius != null && f.glassRadius !== '') set('--glass-radius', num(f.glassRadius, 18) + 'px');
+      if (f.glassBorder != null && f.glassBorder !== '') set('--glass-border', 'rgba(255,255,255,' + (num(f.glassBorder, 16) / 100) + ')');
+      if (f.glassShadow != null && f.glassShadow !== '') set('--glass-shadow', String(num(f.glassShadow, 32) / 100));
+    }
+
+    // ---- Username / highlight / dots / roles / alert ----
     set('--custom-nick-color', f.customNickColor || 'rgba(120,170,255,1)');
     set('--keyword-color', f.keywordColor || 'rgba(255,221,87,1)');
-    set('--keyword-bg', f.keywordBackground || 'rgba(255,221,87,0.14)');
+    set('--keyword-bg', f.keywordBackground || 'rgba(255,221,87,0.16)');
 
     set('--dot-twitch', f.dotTwitch || '#9146ff');
     set('--dot-youtube', f.dotYouTube || '#ff0000');
     set('--dot-kick', f.dotKick || '#53fc18');
 
-    set('--role-broadcaster', f.colorBroadcaster || '#ff4d4d');
+    set('--role-broadcaster', f.colorBroadcaster || '#ff5a5a');
     set('--role-mod', f.colorMod || '#3fb950');
     set('--role-vip', f.colorVip || '#ff7ad9');
     set('--role-sub', f.colorSub || '#6aa0ff');
@@ -379,9 +396,11 @@
     set('--perspective', num(f.perspective, 0) + 'deg');
 
     if (!rootEl) return;
+    rootEl.dataset.preset = str(f.stylePreset, 'liquid');
     rootEl.dataset.layout = str(f.layoutMode, 'horizontal');
     rootEl.dataset.halign = str(f.hAlign, 'left');
     rootEl.dataset.valign = str(f.vAlign, 'bottom');
+    rootEl.dataset.density = str(f.density, 'comfortable');
     rootEl.dataset.mask = str(f.maskFade, 'none');
 
     toggle('no-bubble', str(f.bubble, 'bubble') === 'plain');

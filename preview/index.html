@@ -24,8 +24,31 @@
       background-size: 28px 28px;
       background-position: 0 0, 0 14px, 14px -14px, -14px 0;
     }
-    #stage.scene {
-      background-image: radial-gradient(120% 90% at 70% 10%, #2b3a67 0%, #131520 60%, #05060a 100%);
+    /* Rich scenes — glass needs a busy/colored backdrop to read properly */
+    #stage[class*="scene-"] { background-size: cover; background-position: center; background-repeat: no-repeat; }
+    #stage.scene-aurora {
+      background-image:
+        radial-gradient(60% 80% at 20% 15%, #1b6f8c 0%, transparent 60%),
+        radial-gradient(70% 90% at 85% 25%, #7b2ff7 0%, transparent 55%),
+        radial-gradient(90% 90% at 60% 95%, #1f8a5b 0%, transparent 60%),
+        linear-gradient(160deg, #0b1020 0%, #0a0a12 100%);
+    }
+    #stage.scene-sunset {
+      background-image:
+        radial-gradient(80% 70% at 30% 90%, #ff7e5f 0%, transparent 55%),
+        radial-gradient(70% 70% at 80% 20%, #feb47b 0%, transparent 50%),
+        linear-gradient(160deg, #2b1055 0%, #7597de 100%);
+    }
+    #stage.scene-game {
+      background-image:
+        repeating-linear-gradient(115deg, #0e1630 0 22px, #142046 22px 44px),
+        radial-gradient(100% 80% at 70% 20%, #2dd4bf55 0%, transparent 60%);
+    }
+    #stage.scene-light {
+      background-image:
+        radial-gradient(70% 70% at 25% 20%, #ffffff 0%, transparent 55%),
+        radial-gradient(80% 80% at 80% 80%, #cfe0ff 0%, transparent 60%),
+        linear-gradient(160deg, #eef2f9 0%, #dfe6f2 100%);
     }
 
     #panel {
@@ -91,9 +114,17 @@
       <button data-act="clear">Clear</button>
     </div>
 
+    <h2>Style</h2>
+    <label class="ctl">Preset
+      <select data-set="stylePreset"><option value="liquid">Liquid Glass</option><option value="minimal">Minimal Flat</option><option value="solid">Solid</option><option value="neon">Neon / Gamer</option></select></label>
+    <label class="ctl">Accent
+      <input type="color" data-color="accent" value="#7aa2ff"></label>
+
     <h2>Layout</h2>
     <label class="ctl">Layout
       <select data-set="layoutMode"><option value="horizontal">horizontal</option><option value="fullscreen">fullscreen</option></select></label>
+    <label class="ctl">Density
+      <select data-set="density"><option value="comfortable">comfortable</option><option value="compact">compact</option></select></label>
     <label class="ctl">H-align
       <select data-set="hAlign"><option value="left">left</option><option value="right">right</option></select></label>
     <label class="ctl">V-region
@@ -119,8 +150,15 @@
     <label class="ctl">Merge messages <input type="checkbox" data-toggle="mergeMessages"></label>
     <label class="ctl">Disable animations <input type="checkbox" data-toggle="disableAllAnimations"></label>
 
-    <h2>Scene</h2>
-    <div class="row"><button data-act="bg">Toggle background</button></div>
+    <h2>Scene (preview background)</h2>
+    <label class="ctl">Background
+      <select data-scene>
+        <option value="">Checker (transparent)</option>
+        <option value="scene-aurora">Aurora</option>
+        <option value="scene-sunset">Sunset</option>
+        <option value="scene-game">Game grid</option>
+        <option value="scene-light">Light</option>
+      </select></label>
   </aside>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>

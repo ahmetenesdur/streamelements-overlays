@@ -1,41 +1,68 @@
 /* ================================================================
    StreamElements · Multistream Chat Overlay — styles
-   All tunable values are CSS custom properties set from widget.js
-   (applyTheme). Layout is switched via data-* attributes on .se-chat.
+   ----------------------------------------------------------------
+   DESIGN SYSTEM: "Liquid Glass" (Apple-inspired).
+   - A single glass material recipe (see .msg__bubble) drives every
+     surface: chat bubble, alert card, icon medallion, keyword pill.
+   - All tunable values are CSS custom properties (tokens). A PRESET
+     (data-preset on .se-chat) supplies a full token bundle; the
+     widget.js applyTheme() only writes OVERRIDES on top, so the
+     panel is "simple first" (pick a preset → done).
+   - Safe glassmorphism (backdrop-filter blur+saturate) is always on
+     and works everywhere (incl. OBS/Chromium). The premium SVG
+     refraction is opt-in and layered later (.fx-advanced-glass).
    ================================================================ */
 @import url('https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css');
 
+/* ================================================================
+   TOKENS — defaults = "Liquid Glass" preset
+   ================================================================ */
 :root {
   /* Typography */
   --font-name: 'Inter';
   --font-size: 22px;
   --font-weight: 500;
-  --font-color: rgba(255, 255, 255, 1);
-  --text-shadow: rgba(0, 0, 0, 0.6) 0 2px 4px;
+  --font-color: rgba(255, 255, 255, 0.96);
+  --name-weight: 700;
+  --text-shadow: rgba(0, 0, 0, 0.55) 0 1px 3px;
   --emote-size: 28px;
+  --badge-size: 20px;
 
-  /* Rows / layout */
-  --row-bg: rgba(20, 20, 28, 0.55);
-  --overlay-bg: rgba(0, 0, 0, 0);
-  --row-gap: 8px;
-  --row-padding: 8px 12px;
-  --row-radius: 12px;
+  /* Layout footprint */
+  --row-gap: 9px;
+  --row-padding: 9px 13px;
   --row-maxwidth: 460px;   /* horizontal (corner) mode */
   --row-width: 100%;       /* fullscreen mode width factor */
+
+  /* ---- GLASS MATERIAL (the heart of the look) ---- */
+  --glass-tint: rgba(20, 22, 30, 0.45);   /* translucent surface fill   */
+  --glass-blur: 20px;                      /* backdrop blur radius        */
+  --glass-saturate: 1.7;                   /* backdrop saturation boost   */
+  --glass-border: rgba(255, 255, 255, 0.16);
+  --glass-radius: 18px;
+  --glass-shadow: 0.32;                    /* outer depth shadow alpha    */
+  --glass-highlight: 0.22;                 /* inner top specular line     */
+  --glass-sheen: 0.10;                     /* top sheen gradient strength */
+  --glass-glow: 0deg;                      /* accent ring (neon preset)   */
+
+  /* Accent — single source for role/alert/keyword/dot tints */
+  --accent: #7aa2ff;
+
+  /* Overlay backdrop (usually transparent for OBS) */
+  --overlay-bg: rgba(0, 0, 0, 0);
 
   /* Username / highlight */
   --custom-nick-color: rgba(120, 170, 255, 1);
   --keyword-color: rgba(255, 221, 87, 1);
-  --keyword-bg: rgba(255, 221, 87, 0.14);
+  --keyword-bg: rgba(255, 221, 87, 0.16);
 
-  /* Badges & platform */
-  --badge-size: 20px;
+  /* Platform dots */
   --dot-twitch: #9146ff;
   --dot-youtube: #ff0000;
   --dot-kick: #53fc18;
 
   /* Roles */
-  --role-broadcaster: #ff4d4d;
+  --role-broadcaster: #ff5a5a;
   --role-mod: #3fb950;
   --role-vip: #ff7ad9;
   --role-sub: #6aa0ff;
@@ -48,6 +75,52 @@
   --perspective: 0deg;
 }
 
+/* ================================================================
+   PRESETS — each supplies a full glass token bundle
+   ================================================================ */
+
+/* Minimal Flat — text only, no glass surface (max readability) */
+.se-chat[data-preset="minimal"] {
+  --glass-tint: rgba(0, 0, 0, 0);
+  --glass-blur: 0px;
+  --glass-saturate: 1;
+  --glass-border: rgba(255, 255, 255, 0);
+  --glass-radius: 10px;
+  --glass-shadow: 0;
+  --glass-highlight: 0;
+  --glass-sheen: 0;
+  --row-padding: 3px 4px;
+  --text-shadow: rgba(0, 0, 0, 0.9) 0 2px 5px;
+}
+
+/* Solid — opaque classic bubble (no transparency) */
+.se-chat[data-preset="solid"] {
+  --glass-tint: rgba(17, 18, 26, 0.95);
+  --glass-blur: 0px;
+  --glass-saturate: 1;
+  --glass-border: rgba(255, 255, 255, 0.06);
+  --glass-radius: 14px;
+  --glass-shadow: 0.45;
+  --glass-highlight: 0.06;
+  --glass-sheen: 0.04;
+}
+
+/* Neon / Gamer — dark glass + glowing accent edge */
+.se-chat[data-preset="neon"] {
+  --glass-tint: rgba(12, 10, 24, 0.5);
+  --glass-blur: 16px;
+  --glass-saturate: 1.9;
+  --glass-border: color-mix(in srgb, var(--accent) 70%, transparent);
+  --glass-radius: 16px;
+  --glass-shadow: 0.4;
+  --glass-highlight: 0.18;
+  --glass-sheen: 0.12;
+  --accent: #19e3ff;
+}
+
+/* ================================================================
+   RESET / ROOT
+   ================================================================ */
 * { box-sizing: border-box; }
 
 html, body {
@@ -59,18 +132,18 @@ html, body {
 
 .animate__animated { animation-duration: var(--anim-duration); }
 
-/* ---- Root container ------------------------------------------- */
 .se-chat {
   position: absolute;
   inset: 0;
   display: flex;
-  padding: 12px;
+  padding: 14px;
   background: var(--overlay-bg);
-  font-family: var(--font-name), 'Segoe UI', system-ui, sans-serif;
+  font-family: var(--font-name), -apple-system, 'Segoe UI', system-ui, sans-serif;
   font-size: var(--font-size);
   font-weight: var(--font-weight);
   color: var(--font-color);
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 .se-chat__list {
@@ -83,7 +156,7 @@ html, body {
   transform-style: preserve-3d;
 }
 
-/* Vertical anchoring: newest at bottom (chat grows upward) vs top */
+/* Vertical anchoring: newest at bottom (grows up) vs top */
 .se-chat[data-valign="bottom"] { align-items: stretch; }
 .se-chat[data-valign="bottom"] .se-chat__list { justify-content: flex-end; }
 .se-chat[data-valign="top"]    .se-chat__list { justify-content: flex-start; }
@@ -95,50 +168,95 @@ html, body {
 /* Layout footprint: horizontal (corner box) vs fullscreen (wide) */
 .se-chat[data-layout="horizontal"] .msg { max-width: var(--row-maxwidth); width: auto; }
 .se-chat[data-layout="fullscreen"] .msg { width: var(--row-width); max-width: none; }
-.se-chat[data-layout="fullscreen"] .se-chat__list { gap: calc(var(--row-gap) * 1.4); }
+.se-chat[data-layout="fullscreen"] .se-chat__list { gap: calc(var(--row-gap) * 1.35); }
 
-/* ---- Message row ---------------------------------------------- */
+/* Density */
+.se-chat[data-density="compact"] { --row-padding: 5px 9px; --row-gap: 5px; }
+
+/* ================================================================
+   MESSAGE ROW
+   ================================================================ */
 .msg {
   flex: 0 0 auto;
   display: flex;
   gap: 10px;
   align-items: flex-start;
-  line-height: 1.35;
-  text-shadow: var(--text-shadow);
+  line-height: 1.38;
   word-break: break-word;
 }
 .se-chat[data-halign="right"] .msg { flex-direction: row-reverse; }
 
-/* Bubble wrapper (optional speech-bubble skin) */
+/* ---- GLASS BUBBLE (the material recipe) ----------------------- */
 .msg__bubble {
   position: relative;
   display: flex;
-  gap: 8px;
+  gap: 9px;
   align-items: flex-start;
-  background: var(--row-bg);
   padding: var(--row-padding);
-  border-radius: var(--row-radius);
+  border-radius: var(--glass-radius);
+  background: var(--glass-tint);
+  border: 1px solid var(--glass-border);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  box-shadow:
+    0 8px 30px rgba(0, 0, 0, var(--glass-shadow)),
+    inset 0 1px 0 rgba(255, 255, 255, var(--glass-highlight));
+  text-shadow: var(--text-shadow);
+  isolation: isolate;
 }
-.se-chat.no-bubble .msg__bubble { background: transparent; padding: 2px 0; border-radius: 0; }
+
+/* Top sheen — a soft specular gradient (cheap, static) */
+.msg__bubble::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, var(--glass-sheen)) 0%,
+    rgba(255, 255, 255, calc(var(--glass-sheen) * 0.25)) 18%,
+    rgba(255, 255, 255, 0) 46%);
+}
+
+/* Neon preset: accent glow ring around the glass */
+.se-chat[data-preset="neon"] .msg__bubble {
+  box-shadow:
+    0 8px 30px rgba(0, 0, 0, var(--glass-shadow)),
+    inset 0 1px 0 rgba(255, 255, 255, var(--glass-highlight)),
+    0 0 16px -3px color-mix(in srgb, var(--accent) 60%, transparent);
+}
+
+/* Plain skin (no bubble) — strip glass, keep text */
+.se-chat.no-bubble .msg__bubble {
+  background: transparent;
+  border-color: transparent;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  box-shadow: none;
+  padding: 2px 0;
+  border-radius: 0;
+}
+.se-chat.no-bubble .msg__bubble::before { display: none; }
 
 /* Speech-bubble arrow / tail */
 .msg__arrow {
   position: absolute;
-  bottom: 10px;
+  bottom: 11px;
   left: -7px;
   width: 0; height: 0;
   border: 7px solid transparent;
-  border-right-color: var(--row-bg);
+  border-right-color: var(--glass-border);
   border-left: 0;
   display: none;
 }
 .se-chat.show-arrow .msg__arrow { display: block; }
 .se-chat.show-arrow[data-halign="right"] .msg__arrow {
   left: auto; right: -7px;
-  border-right: 0; border-left-color: var(--row-bg); border-left-width: 7px;
+  border-right: 0; border-left-color: var(--glass-border); border-left-width: 7px;
 }
 
-/* Icon bubble (avatar or platform logo in a circle) */
+/* ---- Icon medallion (glass circle: avatar or platform logo) --- */
 .msg__icon {
   position: relative;
   flex: 0 0 auto;
@@ -148,11 +266,13 @@ html, body {
   overflow: visible;
   display: none;
   background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 .se-chat.show-icon .msg__icon { display: block; }
 .msg__avatar { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: block; }
 
-/* Platform dot indicator (small colored dot) */
+/* Platform dot indicator */
 .msg__dot {
   position: absolute;
   right: -1px; bottom: -1px;
@@ -171,11 +291,12 @@ html, body {
 
 /* Inline platform logo next to the name */
 .msg__platform-logo {
-  height: var(--font-size);
-  width: var(--font-size);
+  height: calc(var(--font-size) * 0.95);
+  width: calc(var(--font-size) * 0.95);
   vertical-align: -0.15em;
   margin-right: 5px;
   display: none;
+  border-radius: 5px;
 }
 .se-chat.show-logo .msg__platform-logo { display: inline-block; }
 
@@ -191,8 +312,8 @@ html, body {
 .se-chat.no-badges .msg__badges { display: none; }
 
 /* Username */
-.msg__name { font-weight: 700; }
-.msg__colon { margin: 0 6px 0 2px; opacity: 0.7; }
+.msg__name { font-weight: var(--name-weight); }
+.msg__colon { margin: 0 6px 0 2px; opacity: 0.55; }
 .se-chat.no-name .msg__name,
 .se-chat.no-name .msg__colon { display: none; }
 
@@ -206,40 +327,85 @@ html, body {
 }
 .emote--zerowidth { position: absolute; margin-left: calc(var(--emote-size) * -1); }
 
-/* ---- Roles ---------------------------------------------------- */
-.se-chat.role-highlight .msg--role-broadcaster .msg__bubble { box-shadow: inset 3px 0 0 var(--role-broadcaster); }
-.se-chat.role-highlight .msg--role-moderator   .msg__bubble { box-shadow: inset 3px 0 0 var(--role-mod); }
-.se-chat.role-highlight .msg--role-vip         .msg__bubble { box-shadow: inset 3px 0 0 var(--role-vip); }
-.se-chat.role-highlight .msg--role-subscriber  .msg__bubble { box-shadow: inset 3px 0 0 var(--role-sub); }
-.se-chat[data-halign="right"].role-highlight .msg__bubble { box-shadow: none; }
-.se-chat[data-halign="right"].role-highlight .msg--role-broadcaster .msg__bubble { box-shadow: inset -3px 0 0 var(--role-broadcaster); }
-.se-chat[data-halign="right"].role-highlight .msg--role-moderator   .msg__bubble { box-shadow: inset -3px 0 0 var(--role-mod); }
-.se-chat[data-halign="right"].role-highlight .msg--role-vip         .msg__bubble { box-shadow: inset -3px 0 0 var(--role-vip); }
-.se-chat[data-halign="right"].role-highlight .msg--role-subscriber  .msg__bubble { box-shadow: inset -3px 0 0 var(--role-sub); }
+/* ================================================================
+   ROLES — accent glow + inner edge (glass language)
+   ================================================================ */
+.se-chat.role-highlight .msg--role-broadcaster { --role-color: var(--role-broadcaster); }
+.se-chat.role-highlight .msg--role-moderator   { --role-color: var(--role-mod); }
+.se-chat.role-highlight .msg--role-vip         { --role-color: var(--role-vip); }
+.se-chat.role-highlight .msg--role-subscriber  { --role-color: var(--role-sub); }
 
-/* Highlighted keywords */
+.se-chat.role-highlight [class*="msg--role-"] .msg__bubble {
+  border-color: color-mix(in srgb, var(--role-color) 55%, var(--glass-border));
+  box-shadow:
+    0 8px 30px rgba(0, 0, 0, var(--glass-shadow)),
+    inset 0 1px 0 rgba(255, 255, 255, var(--glass-highlight)),
+    inset 3px 0 0 var(--role-color),
+    0 0 14px -4px color-mix(in srgb, var(--role-color) 55%, transparent);
+}
+.se-chat[data-halign="right"].role-highlight [class*="msg--role-"] .msg__bubble {
+  box-shadow:
+    0 8px 30px rgba(0, 0, 0, var(--glass-shadow)),
+    inset 0 1px 0 rgba(255, 255, 255, var(--glass-highlight)),
+    inset -3px 0 0 var(--role-color),
+    0 0 14px -4px color-mix(in srgb, var(--role-color) 55%, transparent);
+}
+
+/* Minimal preset stays truly flat — role is conveyed by name color + badges,
+   not a floating bordered box (no glass surface to anchor it). */
+.se-chat[data-preset="minimal"].role-highlight [class*="msg--role-"] .msg__bubble {
+  border-color: transparent;
+  box-shadow: none;
+}
+
+/* Highlighted keywords — glass pill */
 .kw {
   color: var(--keyword-color);
   background: var(--keyword-bg);
-  padding: 0 4px;
-  border-radius: 4px;
+  padding: 0 6px;
+  border-radius: 6px;
   font-weight: 600;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--keyword-color) 30%, transparent);
 }
 
-/* ---- Inline alerts -------------------------------------------- */
+/* ================================================================
+   INLINE ALERTS — premium glass card
+   ================================================================ */
 .msg--alert .msg__bubble {
-  background: linear-gradient(90deg, color-mix(in srgb, var(--alert-accent) 22%, var(--row-bg)), var(--row-bg));
-  box-shadow: inset 3px 0 0 var(--alert-accent);
+  background:
+    linear-gradient(120deg,
+      color-mix(in srgb, var(--alert-accent) 26%, var(--glass-tint)),
+      var(--glass-tint) 70%);
+  border-color: color-mix(in srgb, var(--alert-accent) 50%, var(--glass-border));
+  box-shadow:
+    0 8px 30px rgba(0, 0, 0, var(--glass-shadow)),
+    inset 0 1px 0 rgba(255, 255, 255, var(--glass-highlight)),
+    inset 3px 0 0 var(--alert-accent),
+    0 0 18px -3px color-mix(in srgb, var(--alert-accent) 55%, transparent);
 }
-.msg--alert .msg__icon { display: block; background: var(--alert-accent); }
+.msg--alert .msg__icon {
+  display: block;
+  background: radial-gradient(circle at 35% 30%,
+    color-mix(in srgb, var(--alert-accent) 92%, white),
+    var(--alert-accent));
+  border-color: color-mix(in srgb, var(--alert-accent) 70%, white);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.45),
+    0 0 14px -2px color-mix(in srgb, var(--alert-accent) 70%, transparent);
+}
 .alert__glyph {
   display: flex; align-items: center; justify-content: center;
-  width: 100%; height: 100%; font-size: calc(var(--font-size) * 0.9);
+  width: 100%; height: 100%;
+  font-size: calc(var(--font-size) * 0.95);
+  color: rgba(0, 0, 0, 0.78);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.35);
 }
-.alert__label { font-weight: 600; }
-.alert__sub { opacity: 0.85; }
+.alert__label { font-weight: 700; }
+.alert__sub { opacity: 0.85; margin-top: 2px; }
 
-/* ---- Effects -------------------------------------------------- */
+/* ================================================================
+   EFFECTS
+   ================================================================ */
 /* Perspective tilt */
 .se-chat.fx-perspective { perspective: 900px; }
 .se-chat.fx-perspective .se-chat__list {
@@ -252,13 +418,17 @@ html, body {
 .se-chat[data-mask="bottom"] .se-chat__list { -webkit-mask-image: linear-gradient(to top, transparent 0%, #000 12%);    mask-image: linear-gradient(to top, transparent 0%, #000 12%); }
 .se-chat[data-mask="both"]   .se-chat__list { -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 12%, #000 88%, transparent 100%); mask-image: linear-gradient(to bottom, transparent 0, #000 12%, #000 88%, transparent 100%); }
 
-/* Crayon / hand-drawn texture (SVG turbulence filter, defined in widget.html-less way via filter id fallback to subtle roughen) */
+/* Crayon / hand-drawn texture (SVG turbulence filter injected by widget.js) */
 .se-chat.fx-crayon .msg__text,
 .se-chat.fx-crayon .msg__name { filter: url(#crayon); }
 .se-chat.fx-crayon .msg__bubble {
-  border: 2px solid rgba(0, 0, 0, 0.25);
-  border-radius: 14px 10px 16px 8px / 8px 16px 10px 14px;
+  border-radius: 18px 12px 20px 10px / 10px 20px 12px 18px;
 }
 
 /* Disable all animations */
 .se-chat.no-anim .msg { animation: none !important; }
+
+/* Respect OS-level reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .se-chat:not(.force-anim) .msg { animation: none !important; }
+}

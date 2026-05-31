@@ -281,10 +281,18 @@
       const glyph = { follow: '♥', sub: '★', tip: '$', cheer: '◆', raid: '⚑', host: '⚑' }[u.alert.type] || '★';
       return '<div class="msg__icon"><span class="alert__glyph">' + glyph + '</span></div>';
     }
-    const avatar = u.avatar
-      ? '<img class="msg__avatar" alt="" src="' + encodeURI(u.avatar) + '">'
-      : '<img class="msg__avatar" alt="" src="' + platformLogo(u.platform) + '">';
-    return '<div class="msg__icon">' + avatar + '<span class="msg__dot"></span></div>';
+    const style = str(F.iconStyle, 'avatar');
+    let inner;
+    if (style === 'platform') {
+      inner = '<img class="msg__avatar" alt="" src="' + platformLogo(u.platform) + '">';
+    } else if (style !== 'avatar') {
+      // A chosen glyph icon (emoji) — shown for every message.
+      inner = '<span class="msg__glyphicon">' + htmlEncode(style) + '</span>';
+    } else {
+      inner = '<img class="msg__avatar" alt="" src="' +
+        encodeURI(u.avatar || platformLogo(u.platform)) + '">';
+    }
+    return '<div class="msg__icon">' + inner + '<span class="msg__dot"></span></div>';
   }
 
   // Map the highest-priority role to its CSS color variable.

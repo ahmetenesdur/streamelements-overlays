@@ -8,8 +8,9 @@
    - One restrained accent. Color is rare and meaningful.
    - PRESET (data-preset on .se-chat) supplies a token bundle;
      widget.js applyTheme() writes overrides on top.
+   - Self-contained: no external CSS/JS dependencies (no animate.css,
+     no md5). Entrance/exit animations are defined below.
    ================================================================ */
-@import url('https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css');
 
 /* ================================================================
    TOKENS — defaults = "Editorial" (no surface, pure type on video)
@@ -114,7 +115,7 @@ html, body {
   overflow: hidden;
 }
 
-.animate__animated { animation-duration: var(--anim-duration); }
+.animate__animated { animation-duration: var(--anim-duration); animation-fill-mode: both; }
 
 .se-chat {
   position: absolute;
@@ -189,32 +190,6 @@ html, body {
     0 12px 36px -14px rgba(0, 0, 0, var(--surface-shadow)),
     inset 0 1px 0 rgba(255, 255, 255, var(--surface-highlight));
   text-shadow: var(--text-shadow);
-}
-
-/* Plain skin — force editorial (strip any surface) regardless of preset. */
-.se-chat.no-bubble .msg__bubble {
-  background: transparent;
-  -webkit-backdrop-filter: none;
-  backdrop-filter: none;
-  box-shadow: none;
-  padding: 0;
-}
-
-/* Speech-bubble arrow — only meaningful on a surface; hairline, no border look */
-.msg__arrow {
-  position: absolute;
-  bottom: 12px;
-  left: -6px;
-  width: 0; height: 0;
-  border: 6px solid transparent;
-  border-right-color: var(--surface);
-  border-left: 0;
-  display: none;
-}
-.se-chat.show-arrow .msg__arrow { display: block; }
-.se-chat.show-arrow[data-halign="right"] .msg__arrow {
-  left: auto; right: -6px;
-  border-right: 0; border-left-color: var(--surface); border-left-width: 6px;
 }
 
 /* ---- Icon (avatar) — clean disc, hairline ring only ----------- */
@@ -361,21 +336,24 @@ html, body {
   0%   { opacity: 1; transform: translateY(0); }
   100% { opacity: 0; transform: translateY(-6px); }
 }
-.animate__liquidIn  { animation-name: liquidIn;  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1); }
-.animate__liquidOut { animation-name: liquidOut; animation-timing-function: ease-in; }
+@keyframes fadeIn  { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+@keyframes slideInUp   { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes slideOutDown{ from { opacity: 1; transform: translateY(0); }    to { opacity: 0; transform: translateY(14px); } }
 
-/* Alerts share the same calm entrance (no spring). */
+.animate__liquidIn    { animation-name: liquidIn;    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1); }
+.animate__liquidOut   { animation-name: liquidOut;   animation-timing-function: ease-in; }
+.animate__fadeIn      { animation-name: fadeIn; }
+.animate__fadeOut     { animation-name: fadeOut; }
+.animate__slideInUp   { animation-name: slideInUp;   animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1); }
+.animate__slideOutDown{ animation-name: slideOutDown; animation-timing-function: ease-in; }
+
+/* Alerts share the same calm entrance. */
 .msg--alert.animate__animated { animation-name: liquidIn !important; }
 
 /* ================================================================
    EFFECTS (kept, restrained)
    ================================================================ */
-.se-chat.fx-perspective { perspective: 1100px; }
-.se-chat.fx-perspective .se-chat__list {
-  transform: rotateX(var(--perspective));
-  transform-origin: bottom center;
-}
-
 .se-chat[data-mask="top"]    .se-chat__list { -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 12%); mask-image: linear-gradient(to bottom, transparent 0%, #000 12%); }
 .se-chat[data-mask="bottom"] .se-chat__list { -webkit-mask-image: linear-gradient(to top, transparent 0%, #000 12%);    mask-image: linear-gradient(to top, transparent 0%, #000 12%); }
 .se-chat[data-mask="both"]   .se-chat__list { -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 12%, #000 88%, transparent 100%); mask-image: linear-gradient(to bottom, transparent 0, #000 12%, #000 88%, transparent 100%); }

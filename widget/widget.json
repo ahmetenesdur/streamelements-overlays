@@ -138,12 +138,6 @@
     "value": "rgba(255,255,255,0.96)",
     "group": "Typography"
   },
-  "textShadow": {
-    "type": "text",
-    "label": "Text shadow (CSS, leave empty = preset)",
-    "value": "",
-    "group": "Typography"
-  },
   "emoteSize": {
     "type": "number",
     "label": "Emote size (px)",
@@ -166,16 +160,6 @@
     "type": "colorpicker",
     "label": "Custom username color",
     "value": "rgba(120,170,255,1)",
-    "group": "Username & Colors"
-  },
-  "bubble": {
-    "type": "dropdown",
-    "label": "Message skin",
-    "value": "bubble",
-    "options": {
-      "bubble": "Bubble (glass)",
-      "plain": "Plain (no background)"
-    },
     "group": "Username & Colors"
   },
   "displayBadges": {
@@ -211,16 +195,6 @@
   "showAvatar": {
     "type": "dropdown",
     "label": "Show avatar / icon bubble",
-    "value": "no",
-    "options": {
-      "yes": "Yes",
-      "no": "No"
-    },
-    "group": "Badges & Platform"
-  },
-  "showArrow": {
-    "type": "dropdown",
-    "label": "Show speech-bubble arrow",
     "value": "no",
     "options": {
       "yes": "Yes",
@@ -331,20 +305,8 @@
     "options": {
       "none": "None",
       "liquidIn": "Liquid (signature)",
-      "fadeIn": "fadeIn",
-      "fadeInUp": "fadeInUp",
-      "fadeInDown": "fadeInDown",
-      "fadeInLeft": "fadeInLeft",
-      "fadeInRight": "fadeInRight",
-      "bounceIn": "bounceIn",
-      "bounceInUp": "bounceInUp",
-      "slideInUp": "slideInUp",
-      "slideInLeft": "slideInLeft",
-      "slideInRight": "slideInRight",
-      "zoomIn": "zoomIn",
-      "flipInX": "flipInX",
-      "lightSpeedInRight": "lightSpeedInRight",
-      "backInUp": "backInUp"
+      "fadeIn": "Fade",
+      "slideInUp": "Slide up"
     },
     "group": "Animations"
   },
@@ -355,21 +317,15 @@
     "options": {
       "none": "None",
       "liquidOut": "Liquid (signature)",
-      "fadeOut": "fadeOut",
-      "fadeOutDown": "fadeOutDown",
-      "fadeOutLeft": "fadeOutLeft",
-      "fadeOutRight": "fadeOutRight",
-      "bounceOut": "bounceOut",
-      "zoomOut": "zoomOut",
-      "slideOutDown": "slideOutDown",
-      "backOutDown": "backOutDown"
+      "fadeOut": "Fade",
+      "slideOutDown": "Slide down"
     },
     "group": "Animations"
   },
   "animationSpeed": {
     "type": "slider",
     "label": "Animation duration (ms)",
-    "value": 500,
+    "value": 460,
     "min": 100,
     "max": 1500,
     "step": 50,
@@ -524,15 +480,6 @@
     "value": "",
     "group": "Sound"
   },
-  "perspective": {
-    "type": "slider",
-    "label": "Perspective tilt (deg)",
-    "value": 0,
-    "min": -25,
-    "max": 25,
-    "step": 1,
-    "group": "Effects"
-  },
   "maskFade": {
     "type": "dropdown",
     "label": "Edge fade mask",
@@ -542,16 +489,6 @@
       "top": "Top",
       "bottom": "Bottom",
       "both": "Both"
-    },
-    "group": "Effects"
-  },
-  "crayonTexture": {
-    "type": "dropdown",
-    "label": "Crayon texture",
-    "value": "no",
-    "options": {
-      "yes": "Yes",
-      "no": "No"
     },
     "group": "Effects"
   },
@@ -669,7 +606,7 @@
   },
   "widgetVersion": {
     "type": "hidden",
-    "value": "0.7.0"
+    "value": "0.8.0"
   },
   "widgetUpdateUrl": {
     "type": "hidden",

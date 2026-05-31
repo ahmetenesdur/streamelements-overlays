@@ -33,7 +33,6 @@
     rootEl = document.getElementById('seChat');
     listEl = document.getElementById('chatList');
 
-    injectCrayonFilter();
     injectLiquidGlassFilter();
     injectFont(F.fontName);
     applyTheme(F);
@@ -243,7 +242,6 @@
       '<div class="msg__bubble">' +
         icon +
         '<div class="msg__body">' + head + body + '</div>' +
-        '<span class="msg__arrow"></span>' +
       '</div>';
 
     listEl.appendChild(row);
@@ -285,7 +283,7 @@
     if (mode === 'custom') return ' style="color:var(--custom-nick-color)"';
     if (mode === 'message') return '';
     if (mode === 'remove') return '';
-    // user / platform color, with md5 fallback for stable per-user color
+    // user / platform color, with a stable per-user fallback color
     const c = u.color || stableColor(u.displayName);
     return ' style="color:' + c + '"';
   }
@@ -393,8 +391,7 @@
     set('--role-vip', f.colorVip || '#ff8fdc');
     set('--role-sub', f.colorSub || '#82b1ff');
 
-    set('--anim-duration', num(f.animationSpeed, 500) + 'ms');
-    set('--perspective', num(f.perspective, 0) + 'deg');
+    set('--anim-duration', num(f.animationSpeed, 460) + 'ms');
 
     if (!rootEl) return;
     rootEl.dataset.preset = str(f.stylePreset, 'editorial');
@@ -404,16 +401,12 @@
     rootEl.dataset.density = str(f.density, 'comfortable');
     rootEl.dataset.mask = str(f.maskFade, 'none');
 
-    toggle('no-bubble', str(f.bubble, 'bubble') === 'plain');
-    toggle('show-arrow', yes(f.showArrow));
     toggle('show-icon', yes(f.showAvatar));
     toggle('show-dot', yes(f.showPlatformDot));
     toggle('show-logo', yes(f.showPlatformLogo));
     toggle('no-badges', !yes(f.displayBadges));
     toggle('no-name', str(f.nickColor, 'user') === 'remove');
     toggle('role-highlight', yes(f.roleHighlight));
-    toggle('fx-perspective', num(f.perspective, 0) !== 0);
-    toggle('fx-crayon', yes(f.crayonTexture));
     // Real SVG refraction — opt-in AND only where the renderer can composite
     // it (Chromium / OBS). Otherwise stay on safe glassmorphism (no class).
     toggle('fx-advanced-glass', yes(f.glassAdvanced) && advancedGlassSupported());
@@ -634,21 +627,12 @@
     } catch (_) { return false; }
   }
 
-  function injectCrayonFilter() {
-    if (document.getElementById('se-crayon-svg')) return;
-    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    svg.id = 'se-crayon-svg';
-    svg.setAttribute('width', '0'); svg.setAttribute('height', '0');
-    svg.style.position = 'absolute';
-    svg.innerHTML = "<filter id='crayon'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' result='n'/><feDisplacementMap in='SourceGraphic' in2='n' scale='1.4'/></filter>";
-    document.body.appendChild(svg);
-  }
-
+  // Stable per-user fallback color (self-contained hash; no md5 dependency).
   function stableColor(name) {
-    const palette = ['#ff7a7a', '#ffb86b', '#ffe66b', '#7affa1', '#6be7ff', '#8a9bff', '#d18bff', '#ff8ad0'];
+    const palette = ['#ff8f8f', '#ffc27a', '#ffe28a', '#8ce8a6', '#7fd8e6', '#9db4ff', '#d7a0ff', '#ff9ed6'];
     let hash = 0;
-    if (typeof md5 === 'function') { const h = md5(name || 'x'); hash = parseInt(h.slice(0, 6), 16); }
-    else { for (let i = 0; i < (name || '').length; i++) hash = (hash * 31 + name.charCodeAt(i)) >>> 0; }
+    const s = name || 'x';
+    for (let i = 0; i < s.length; i++) hash = (hash * 31 + s.charCodeAt(i)) >>> 0;
     return palette[hash % palette.length];
   }
 

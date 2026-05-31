@@ -167,8 +167,6 @@
       MockSE.set(cb.dataset.toggle, cb.checked ? 'yes' : 'no')));
     document.querySelectorAll('[data-color]').forEach(inp => inp.addEventListener('input', () =>
       MockSE.set(inp.dataset.color, inp.value)));
-    const pers = document.querySelector('[data-pers]');
-    if (pers) pers.addEventListener('change', () => MockSE.set('perspective', pers.checked ? 12 : 0));
     const scene = document.querySelector('[data-scene]');
     if (scene) scene.addEventListener('change', () => {
       const stage = document.getElementById('stage');

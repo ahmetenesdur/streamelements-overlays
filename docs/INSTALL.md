@@ -27,7 +27,7 @@ Click **Done**. The settings panel (right side) now shows **14 grouped sections*
 
 ## 4. Configure (Fields panel) — simple first
 Start at the top **Style** group:
-- **Style preset**: `Liquid Glass` (default) · `Minimal Flat` · `Solid` · `Neon / Gamer`.
+- **Style preset**: `Editorial` (default, text on video) · `Frosted` (clean glass panel) · `Slate` (solid chip).
   Pick one and you have a polished look instantly.
 - **Accent color**: leave empty to use the preset's accent, or set one to recolor
   roles/alerts/keywords/dots at once.

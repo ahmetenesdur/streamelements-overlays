@@ -1,0 +1,14 @@
+{
+  "name": "streamelements-multistream-chat",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Customizable multistream (Twitch/YouTube/Kick) chat overlay for StreamElements: inline alerts, custom emotes (7TV/BTTV/FFZ), sound, visual effects and GitHub auto-update.",
+  "scripts": {
+    "preview": "node scripts/serve.mjs",
+    "build": "node scripts/build.mjs",
+    "validate": "node scripts/build.mjs --check"
+  },
+  "author": "ahmetenesdur",
+  "license": "MIT"
+}

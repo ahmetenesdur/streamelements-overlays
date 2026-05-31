@@ -253,8 +253,37 @@
       '</div>';
 
     listEl.appendChild(row);
+    if (str(F.layoutMode, 'horizontal') === 'floating') floatingPlace(row);
     enforceLimit();
     scheduleRemoval(row, u);
+  }
+
+  // ---- Horizontal floating: lane placement (avoid overlap) + lifetime ----
+  let floatLanes = [];
+  function floatingPlace(row) {
+    const h = (rootEl && rootEl.clientHeight) || 400;
+    const laneH = Math.round(num(F.fontSize, 21) * 2.7);
+    const n = Math.max(1, Math.floor((h - 20) / laneH));
+    const now = Date.now();
+    const life = num(F.floatLifetime, 12) * 1000;
+    if (floatLanes.length !== n) floatLanes = new Array(n).fill(0);
+
+    let lane;
+    if (str(F.floatingAvoidOverlap, 'yes') !== 'no') {
+      lane = 0; let soonest = Infinity;
+      for (let i = 0; i < n; i++) {
+        if (floatLanes[i] <= now) { lane = i; break; }
+        if (floatLanes[i] < soonest) { soonest = floatLanes[i]; lane = i; }
+      }
+      floatLanes[lane] = now + life * 0.55;   // reserve the lane for a while
+    } else {
+      lane = Math.floor(Math.random() * n);
+    }
+
+    row.style.position = 'absolute';
+    row.style.top = (10 + lane * laneH) + 'px';
+    row.style[rootEl.dataset.halign === 'right' ? 'right' : 'left'] = '10px';
+    setTimeout(() => { if (!row.parentNode) return; animateOut(row); }, life);
   }
 
   function headMarkup(u) {
@@ -441,6 +470,7 @@
     set('--persp-x', px + 'deg');
     set('--persp-y', py + 'deg');
     set('--persp-z', pz + 'deg');
+    set('--float-life', num(f.floatLifetime, 12) + 's');
 
     if (!rootEl) return;
     rootEl.dataset.preset = str(f.stylePreset, 'editorial');
@@ -456,6 +486,8 @@
     toggle('no-badges', !yes(f.displayBadges));
     toggle('no-name', str(f.nickColor, 'user') === 'remove');
     toggle('role-highlight', yes(f.roleHighlight));
+    toggle('fl-float', str(f.floatingFloat, 'yes') !== 'no');
+    toggle('fl-opacity', str(f.floatingOpacity, 'yes') !== 'no');
     toggle('fx-perspective', px !== 0 || py !== 0 || pz !== 0);
     toggle('fx-crayon', yes(f.crayonTexture));
     // Real SVG refraction — opt-in AND only where the renderer can composite

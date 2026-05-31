@@ -160,6 +160,21 @@ html, body {
 .se-chat[data-layout="fullscreen"] .msg { width: var(--row-width); max-width: none; }
 .se-chat[data-layout="fullscreen"] .se-chat__list { gap: calc(var(--row-gap) * 1.25); }
 
+/* Horizontal floating: messages are placed in vertical lanes (by widget.js),
+   gently bob (floating animation), and fade with age (dynamic opacity). */
+.se-chat[data-layout="floating"] .se-chat__list {
+  position: relative; display: block; height: 100%; gap: 0; overflow: hidden;
+}
+.se-chat[data-layout="floating"] .msg { position: absolute; max-width: min(70%, var(--row-maxwidth)); }
+@keyframes floatBob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+@keyframes floatDim { 0%, 65% { opacity: 1; } 100% { opacity: 0.22; } }
+.se-chat[data-layout="floating"].fl-float .msg__bubble { animation: floatBob 3.4s ease-in-out infinite; }
+.se-chat[data-layout="floating"].fl-opacity .msg__bubble { animation: floatDim var(--float-life, 12s) linear forwards; }
+.se-chat[data-layout="floating"].fl-float.fl-opacity .msg__bubble {
+  animation: floatBob 3.4s ease-in-out infinite, floatDim var(--float-life, 12s) linear forwards;
+}
+.se-chat[data-layout="floating"].no-anim .msg__bubble { animation: none; }
+
 /* Density */
 .se-chat[data-density="compact"] { --row-gap: 6px; }
 .se-chat[data-density="compact"][data-preset="frosted"],

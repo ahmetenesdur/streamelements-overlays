@@ -115,6 +115,23 @@
     long() { dispatch('message', twitchRaw('this is a really long message to test wrapping and how the bubble grows across multiple lines without breaking the layout at all Kappa')); },
     emote() { dispatch('message', twitchRaw('Kappa Kappa LUL PogChamp Kappa LUL')); },
 
+    // Fetch the SAME global 7TV set the widget loads, then send a message
+    // using real emote names so they resolve through the widget's customEmotes.
+    seventv() {
+      fetch('https://7tv.io/v3/emote-sets/global')
+        .then(r => r.json())
+        .then(j => {
+          const names = (j.emotes || []).map(e => e.name);
+          const some = names.sort(() => Math.random() - 0.5).slice(0, 4).join(' ');
+          dispatch('message', twitchRaw('7TV: ' + (some || 'no emotes returned')));
+        })
+        .catch(() => dispatch('message', twitchRaw('7TV fetch failed (offline?)')));
+    },
+    keywords() {
+      MockSE.set('highlightKeywords', 'gg, win, hype, pog, clutch');
+      dispatch('message', twitchRaw('gg! that was a clutch win — total hype, (pog) moment'));
+    },
+
     alert(type) {
       const e = {
         follow: ['follower-latest', { name: 'NewFollower' + uid() }],

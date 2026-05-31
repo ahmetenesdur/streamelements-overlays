@@ -299,8 +299,10 @@
         return '<img class="emote" alt="' + htmlEncode(tok) + '" src="' + encodeURI(all[tok]) + '">';
       }
       const enc = htmlEncode(tok);
-      if (keywords.length && keywords.indexOf(tok.toLowerCase()) !== -1) {
-        return '<span class="kw">' + enc + '</span>';
+      if (keywords.length) {
+        // Strip surrounding punctuation so "gg!" / "(win)" still match "gg" / "win".
+        const bare = tok.replace(/^[^0-9A-Za-z_]+|[^0-9A-Za-z_]+$/g, '').toLowerCase();
+        if (bare && keywords.indexOf(bare) !== -1) return '<span class="kw">' + enc + '</span>';
       }
       return enc;
     }).join('');

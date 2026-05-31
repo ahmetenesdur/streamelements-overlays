@@ -271,12 +271,10 @@ html, body {
 .emote--zerowidth { position: absolute; margin-left: calc(var(--emote-size) * -1); }
 
 /* ================================================================
-   ROLES — username tint only (no boxes, no glow)
+   ROLES — username tint only (no boxes, no glow).
+   The tint color is applied inline by widget.js (nameColorStyle) so it
+   wins over the platform/user color; no CSS rule needed here.
    ================================================================ */
-.se-chat.role-highlight .msg--role-broadcaster .msg__name { color: var(--role-broadcaster); }
-.se-chat.role-highlight .msg--role-moderator   .msg__name { color: var(--role-mod); }
-.se-chat.role-highlight .msg--role-vip         .msg__name { color: var(--role-vip); }
-.se-chat.role-highlight .msg--role-subscriber  .msg__name { color: var(--role-sub); }
 
 /* Highlighted keywords — accent weight, no pill/box */
 .kw {
@@ -354,6 +352,17 @@ html, body {
 /* ================================================================
    EFFECTS (kept, restrained)
    ================================================================ */
+/* Perspective tilt (X/Y/Z) — opt-in, off by default (all angles 0). */
+.se-chat.fx-perspective { perspective: 1000px; }
+.se-chat.fx-perspective .se-chat__list {
+  transform: rotateX(var(--persp-x, 0deg)) rotateY(var(--persp-y, 0deg)) rotateZ(var(--persp-z, 0deg));
+  transform-origin: center center;
+}
+
+/* Crayon / hand-drawn texture (SVG turbulence filter injected by widget.js) */
+.se-chat.fx-crayon .msg__text,
+.se-chat.fx-crayon .msg__name { filter: url(#crayon); }
+
 .se-chat[data-mask="top"]    .se-chat__list { -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 12%); mask-image: linear-gradient(to bottom, transparent 0%, #000 12%); }
 .se-chat[data-mask="bottom"] .se-chat__list { -webkit-mask-image: linear-gradient(to top, transparent 0%, #000 12%);    mask-image: linear-gradient(to top, transparent 0%, #000 12%); }
 .se-chat[data-mask="both"]   .se-chat__list { -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 12%, #000 88%, transparent 100%); mask-image: linear-gradient(to bottom, transparent 0, #000 12%, #000 88%, transparent 100%); }

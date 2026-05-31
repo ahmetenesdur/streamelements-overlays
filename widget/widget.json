@@ -502,6 +502,43 @@
     },
     "group": "Effects"
   },
+  "perspectiveX": {
+    "type": "slider",
+    "label": "Perspective tilt · X (deg)",
+    "value": 0,
+    "min": -45,
+    "max": 45,
+    "step": 1,
+    "group": "Effects"
+  },
+  "perspectiveY": {
+    "type": "slider",
+    "label": "Perspective tilt · Y (deg)",
+    "value": 0,
+    "min": -45,
+    "max": 45,
+    "step": 1,
+    "group": "Effects"
+  },
+  "perspectiveZ": {
+    "type": "slider",
+    "label": "Perspective tilt · Z (deg)",
+    "value": 0,
+    "min": -25,
+    "max": 25,
+    "step": 1,
+    "group": "Effects"
+  },
+  "crayonTexture": {
+    "type": "dropdown",
+    "label": "Crayon texture (hand-drawn wobble)",
+    "value": "no",
+    "options": {
+      "yes": "Yes",
+      "no": "No"
+    },
+    "group": "Effects"
+  },
   "glassOverride": {
     "type": "dropdown",
     "label": "Override preset surface values",
@@ -553,6 +590,36 @@
     "max": 100,
     "step": 1,
     "group": "Advanced glass"
+  },
+  "showTwitch": {
+    "type": "dropdown",
+    "label": "Show Twitch chat",
+    "value": "yes",
+    "options": {
+      "yes": "Yes",
+      "no": "No"
+    },
+    "group": "Multistream"
+  },
+  "showYouTube": {
+    "type": "dropdown",
+    "label": "Show YouTube chat",
+    "value": "yes",
+    "options": {
+      "yes": "Yes",
+      "no": "No"
+    },
+    "group": "Multistream"
+  },
+  "showKick": {
+    "type": "dropdown",
+    "label": "Show Kick chat",
+    "value": "yes",
+    "options": {
+      "yes": "Yes",
+      "no": "No"
+    },
+    "group": "Multistream"
   },
   "relayUrl": {
     "type": "text",
@@ -606,7 +673,7 @@
   },
   "widgetVersion": {
     "type": "hidden",
-    "value": "0.8.0"
+    "value": "0.9.0"
   },
   "widgetUpdateUrl": {
     "type": "hidden",

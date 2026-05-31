@@ -34,6 +34,7 @@
     listEl = document.getElementById('chatList');
 
     injectLiquidGlassFilter();
+    injectCrayonFilter();
     injectFont(F.fontName);
     applyTheme(F);
 
@@ -189,6 +190,7 @@
   // ================================================================
   function handleChat(u) {
     if (!u.text && u.kind === 'chat') return;
+    if (!platformEnabled(u.platform)) return;     // single-platform / combine filter
     if (str(F.hideCommands, 'yes') === 'yes' && u.text.trim().startsWith('!')) return;
     if (isIgnored(u.displayName)) return;
 
@@ -278,11 +280,30 @@
     return '<div class="msg__icon">' + avatar + '<span class="msg__dot"></span></div>';
   }
 
+  // Map the highest-priority role to its CSS color variable.
+  const ROLE_VAR = {
+    broadcaster: '--role-broadcaster', moderator: '--role-mod',
+    vip: '--role-vip', subscriber: '--role-sub', artist: '--role-artist',
+    leadmod: '--role-leadmod', regular: '--role-regular'
+  };
+  function roleColorVar(u) {
+    for (const r of ROLE_PRIORITY) {
+      if (u.roles.indexOf(r) !== -1 && ROLE_VAR[r]) return ROLE_VAR[r];
+    }
+    return null;
+  }
+
   function nameColorStyle(u) {
     const mode = str(F.nickColor, 'user');
+    if (mode === 'remove') return '';
+    // Role color wins when role highlighting is on (so it isn't masked by the
+    // inline platform/user color). This is the visible cue for roles.
+    if (yes(F.roleHighlight)) {
+      const rv = roleColorVar(u);
+      if (rv) return ' style="color:var(' + rv + ')"';
+    }
     if (mode === 'custom') return ' style="color:var(--custom-nick-color)"';
     if (mode === 'message') return '';
-    if (mode === 'remove') return '';
     // user / platform color, with a stable per-user fallback color
     const c = u.color || stableColor(u.displayName);
     return ' style="color:' + c + '"';
@@ -393,6 +414,12 @@
 
     set('--anim-duration', num(f.animationSpeed, 460) + 'ms');
 
+    // Perspective tilt (X/Y/Z)
+    const px = num(f.perspectiveX, 0), py = num(f.perspectiveY, 0), pz = num(f.perspectiveZ, 0);
+    set('--persp-x', px + 'deg');
+    set('--persp-y', py + 'deg');
+    set('--persp-z', pz + 'deg');
+
     if (!rootEl) return;
     rootEl.dataset.preset = str(f.stylePreset, 'editorial');
     rootEl.dataset.layout = str(f.layoutMode, 'horizontal');
@@ -407,6 +434,8 @@
     toggle('no-badges', !yes(f.displayBadges));
     toggle('no-name', str(f.nickColor, 'user') === 'remove');
     toggle('role-highlight', yes(f.roleHighlight));
+    toggle('fx-perspective', px !== 0 || py !== 0 || pz !== 0);
+    toggle('fx-crayon', yes(f.crayonTexture));
     // Real SVG refraction — opt-in AND only where the renderer can composite
     // it (Chromium / OBS). Otherwise stay on safe glassmorphism (no class).
     toggle('fx-advanced-glass', yes(f.glassAdvanced) && advancedGlassSupported());
@@ -569,6 +598,13 @@
     return yes(map[type] != null ? map[type] : 'yes');
   }
 
+  // Per-platform show/hide → pick one platform or combine any subset.
+  function platformEnabled(p) {
+    const map = { twitch: F.showTwitch, youtube: F.showYouTube, kick: F.showKick };
+    const v = map[p];
+    return v == null ? true : yes(v);
+  }
+
   function isIgnored(name) {
     const list = (F.ignoredUsers || '').toLowerCase().split(',').map(s => s.trim()).filter(Boolean);
     return list.indexOf((name || '').toLowerCase()) !== -1;
@@ -613,6 +649,17 @@
         "<feGaussianBlur in='noise' stdDeviation='1.4' result='soft'/>" +
         "<feDisplacementMap in='SourceGraphic' in2='soft' scale='16' xChannelSelector='R' yChannelSelector='G'/>" +
       "</filter>";
+    document.body.appendChild(svg);
+  }
+
+  // Hand-drawn "crayon" wobble (opt-in). Injected once, applied via .fx-crayon.
+  function injectCrayonFilter() {
+    if (document.getElementById('se-crayon-svg')) return;
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.id = 'se-crayon-svg';
+    svg.setAttribute('width', '0'); svg.setAttribute('height', '0');
+    svg.style.position = 'absolute';
+    svg.innerHTML = "<filter id='crayon'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' result='n'/><feDisplacementMap in='SourceGraphic' in2='n' scale='1.4'/></filter>";
     document.body.appendChild(svg);
   }
 

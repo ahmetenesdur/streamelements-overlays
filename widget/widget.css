@@ -403,6 +403,18 @@ html, body {
 .alert__label { font-weight: 700; }
 .alert__sub { opacity: 0.85; margin-top: 2px; }
 
+/* Premium spring entrance for alerts — overrides the generic animate.css
+   keyframe while keeping its duration. Respects no-anim / reduced-motion
+   (those use higher-specificity `animation: none`). */
+@keyframes alertIn {
+  0%   { opacity: 0; transform: translateY(10px) scale(0.92); }
+  60%  { opacity: 1; transform: translateY(0)    scale(1.03); }
+  100% { opacity: 1; transform: translateY(0)    scale(1); }
+}
+.msg--alert.animate__animated { animation-name: alertIn !important; }
+/* The icon medallion gets a tiny delayed pop so it reads as the focal point. */
+.msg--alert.animate__animated .msg__icon { animation: alertIn var(--anim-duration) both; }
+
 /* ================================================================
    EFFECTS
    ================================================================ */

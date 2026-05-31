@@ -437,6 +437,29 @@ html, body {
   border-radius: 18px 12px 20px 10px / 10px 20px 12px 18px;
 }
 
+/* Advanced glass: real SVG refraction layered into the backdrop filter.
+   Gated by JS (opt-in + Chromium/OBS capability probe). When unsupported the
+   class is never added, so bubbles stay on the safe glassmorphism above. */
+.se-chat.fx-advanced-glass .msg__bubble {
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate)) url(#liquid-glass);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate)) url(#liquid-glass);
+}
+
+/* ---- Signature "liquid" entrance / exit (custom keyframes) ----
+   Wired into the existing animate.css mechanism: widget.js adds
+   `animate__<name>`, so defining these names plugs straight in. */
+@keyframes liquidIn {
+  0%   { opacity: 0; transform: translateY(14px) scale(0.96); filter: blur(6px); }
+  55%  { opacity: 1; filter: blur(0); }
+  100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+}
+@keyframes liquidOut {
+  0%   { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+  100% { opacity: 0; transform: translateY(-8px) scale(0.97); filter: blur(5px); }
+}
+.animate__liquidIn  { animation-name: liquidIn; }
+.animate__liquidOut { animation-name: liquidOut; }
+
 /* Disable all animations */
 .se-chat.no-anim .msg { animation: none !important; }
 

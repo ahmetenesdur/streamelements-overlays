@@ -334,9 +334,10 @@
   "animationIn": {
     "type": "dropdown",
     "label": "Animation In",
-    "value": "fadeInUp",
+    "value": "liquidIn",
     "options": {
       "none": "None",
+      "liquidIn": "Liquid (signature)",
       "fadeIn": "fadeIn",
       "fadeInUp": "fadeInUp",
       "fadeInDown": "fadeInDown",
@@ -357,9 +358,10 @@
   "animationOut": {
     "type": "dropdown",
     "label": "Animation Out",
-    "value": "fadeOut",
+    "value": "liquidOut",
     "options": {
       "none": "None",
+      "liquidOut": "Liquid (signature)",
       "fadeOut": "fadeOut",
       "fadeOutDown": "fadeOutDown",
       "fadeOutLeft": "fadeOutLeft",
@@ -566,6 +568,16 @@
     },
     "group": "Effects"
   },
+  "glassAdvanced": {
+    "type": "dropdown",
+    "label": "Advanced glass refraction (Chromium/OBS only, GPU-heavy)",
+    "value": "no",
+    "options": {
+      "yes": "Yes",
+      "no": "No"
+    },
+    "group": "Effects"
+  },
   "glassOverride": {
     "type": "dropdown",
     "label": "Override preset glass values",
@@ -670,7 +682,7 @@
   },
   "widgetVersion": {
     "type": "hidden",
-    "value": "0.4.0"
+    "value": "0.5.0"
   },
   "widgetUpdateUrl": {
     "type": "hidden",

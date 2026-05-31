@@ -34,6 +34,7 @@
     listEl = document.getElementById('chatList');
 
     injectCrayonFilter();
+    injectLiquidGlassFilter();
     injectFont(F.fontName);
     applyTheme(F);
 
@@ -415,6 +416,9 @@
     toggle('role-highlight', yes(f.roleHighlight));
     toggle('fx-perspective', num(f.perspective, 0) !== 0);
     toggle('fx-crayon', yes(f.crayonTexture));
+    // Real SVG refraction — opt-in AND only where the renderer can composite
+    // it (Chromium / OBS). Otherwise stay on safe glassmorphism (no class).
+    toggle('fx-advanced-glass', yes(f.glassAdvanced) && advancedGlassSupported());
     toggle('no-anim', yes(f.disableAllAnimations));
   }
 
@@ -601,6 +605,35 @@
     l.id = id; l.rel = 'stylesheet';
     l.href = 'https://fonts.googleapis.com/css?family=' + fam + ':300,400,500,700,900&display=swap';
     document.head.appendChild(l);
+  }
+
+  // Liquid Glass refraction: a procedural (size-independent) noise displacement
+  // of the backdrop. feTurbulence avoids per-element bezel maps, so it stays
+  // cheap across many small bubbles. The specular sheen is done in CSS.
+  function injectLiquidGlassFilter() {
+    if (document.getElementById('se-liquid-glass-svg')) return;
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.id = 'se-liquid-glass-svg';
+    svg.setAttribute('width', '0'); svg.setAttribute('height', '0');
+    svg.style.position = 'absolute';
+    svg.innerHTML =
+      "<filter id='liquid-glass' x='-15%' y='-15%' width='130%' height='130%' color-interpolation-filters='sRGB'>" +
+        "<feTurbulence type='fractalNoise' baseFrequency='0.008 0.012' numOctaves='2' seed='7' result='noise'/>" +
+        "<feGaussianBlur in='noise' stdDeviation='1.4' result='soft'/>" +
+        "<feDisplacementMap in='SourceGraphic' in2='soft' scale='16' xChannelSelector='R' yChannelSelector='G'/>" +
+      "</filter>";
+    document.body.appendChild(svg);
+  }
+
+  // Can this renderer composite an SVG filter inside backdrop-filter?
+  // (Chromium/OBS yes; Firefox/Safari no → we fall back to glassmorphism.)
+  function advancedGlassSupported() {
+    try {
+      const bf = (window.CSS && (CSS.supports('backdrop-filter', 'blur(2px)') ||
+        CSS.supports('-webkit-backdrop-filter', 'blur(2px)')));
+      const chromium = !!window.chrome || /\b(Chrome|Chromium|Edg)\//.test(navigator.userAgent || '');
+      return !!bf && chromium;
+    } catch (_) { return false; }
   }
 
   function injectCrayonFilter() {

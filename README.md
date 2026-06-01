@@ -80,9 +80,11 @@ only sees that. Styling is driven by **CSS custom properties** set from `widget.
 ```
 widget/    widget.html · widget.css · widget.json (Fields) · widget.js  ← deploy to SE
 preview/   index.html + mock-se.js   ← local SE event simulator
-relay/     Railway Node.js service (Kick ingest)
+relay/     Railway Node.js service (Kick ingest) — see relay/README.md
+test/      widget.test.cjs + harness.cjs (pure-Node unit tests)
 scripts/   serve.mjs (preview server) · build.mjs (validate + version stamp)
 docs/      INSTALL.md
+.github/   CI (Node 18/20/22) + tag-triggered GitHub Releases
 ```
 
 ## Local development
@@ -91,40 +93,47 @@ docs/      INSTALL.md
 npm run preview     # http://localhost:5173/preview/index.html  (widen the window!)
 npm run validate    # validate widget.json + required files
 npm run build       # stamp widgetVersion from package.json (for auto-update)
+npm test            # validate + relay tests + 72 widget unit tests
 ```
 
 The preview page sends Twitch/YouTube/Kick messages, fires alerts, tests 7TV emotes
-and keywords, live-toggles every Fields setting, and previews against flat test scenes
-(light / mid-gray / deep-teal / transparency checker) — no StreamElements account needed.
+and keywords, live-toggles every Fields setting (138 fields in 14 groups), and
+previews against flat test scenes (light / mid-gray / deep-teal / transparency checker).
+**Feature demos** buttons exercise message grouping, shared chat + participants panel,
+age fade, fullscreen float, and per-role colors — no StreamElements account needed.
 
 ## Deploy
 
 - **Widget**: paste `widget.{html,css,js,json}` into the matching tabs of a SE Custom
-  Widget. Configure from the **Fields** panel (14 grouped sections; start at *Style → preset*).
+  Widget. Configure from the **Fields** panel (14 grouped sections; start at *Style → Style preset*).
   Full steps in [docs/INSTALL.md](docs/INSTALL.md).
-- **Kick relay**: deploy `relay/` to Railway, then set the Relay URL + Kick channel in
-  the Multistream group. See [relay/README.md](relay/README.md).
+- **Kick relay**: deploy `relay/` to Railway, then set **Relay WebSocket URL (Railway, wss://...)** +
+  **Kick channel (slug, or numeric chatroom id if slug fails)** in the Multistream group.
+  See [relay/README.md](relay/README.md).
 
 ## Auto-update
 
 Hidden `widgetVersion` + `widgetUpdateUrl` let SE offer an "update available" prompt
-when the GitHub copy is newer. Release: edit → `npm run build` (stamps the version) →
-push to `main`.
+when the GitHub copy is newer. To cut a release: bump `package.json` version →
+`npm run build` (stamps `widgetVersion`) → commit → push to `main`.
+Optionally push a `v*` tag — the **Release** workflow (`.github/workflows/release.yml`)
+validates, tests, and attaches the four widget files to a GitHub Release.
 
 ## Status
 
-**Current: v1.2.0** · 72 widget unit tests + 11 relay parser/lifecycle assertions green · verified live in the preview.
+**Current: v1.2.0** · 138 fields · 14 setting groups · 72 widget tests + 11 relay assertions · CI on push/PR (Node 18/20/22)
 
-- ✅ Phases 0–6 — scaffold, core render, design system, inline alerts, effects, Kick relay (code; deploy when needed)
-- ✅ Layout system rebuilt — real **vertical / horizontal ticker / fullscreen** (pure flexbox, no pile-ups)
-- ✅ Feature parity — per-platform show/hide, expanded roles, pronouns, 53-glyph icon library, shared chat
-- ✅ Settings audit + best-practice defaults reconciled across json/css/js (v1.0.1)
-- ✅ Pastel-premium palette + minimal shadows + gradient-free preview scenes (v1.0.2)
-- ✅ Zero-width emote overlays, error boundaries, exponential backoff, relay rate limiting, OBS GPU optimizations (v1.1.0)
-- ✅ Phase 8 competitive parity — second-message stack grouping, dynamic age opacity, shared-chat origin labels, username color placement, per-role icon overrides, YouTube Super Chat/member alerts, perspective zoom/FOV
-- ✅ Competitor gap close — channel-point/Store reward alerts, full per-role visual matrix, fullscreen float (overlap avoidance), per-platform dot toggles, auto-colored shared-chat labels
-- ✅ Shared Chat **participants panel** (v1.2.0) — opt-in corner roster (host + guests) with live count
-- ⬜ Public publish + live OBS test · TikTok + Ko-fi (future, intentionally deferred)
+Shipped and verified in the local preview:
+
+- ✅ **Multistream** — Twitch + YouTube (native SE) + Kick (Railway relay); per-platform show/hide
+- ✅ **Layout & style** — vertical / horizontal ticker / fullscreen; Editorial · Frosted · Slate presets; fullscreen float with overlap avoidance
+- ✅ **Identity** — roles, pronouns, 53-glyph icon library, per-role icon overrides, 7TV/BTTV/FFZ emotes (incl. zero-width overlays)
+- ✅ **Messages** — second-message stack grouping, dynamic age opacity, shared-chat origin labels + participants panel
+- ✅ **Roles & alerts** — per-role visual matrix, YouTube Super Chat/member alerts, channel-point rewards, inline alert suite
+- ✅ **Effects** — edge fade, perspective tilt (zoom + FOV), crayon texture, liquid-glass refraction (Chromium/OBS)
+- ✅ **Reliability** — error boundaries, exponential backoff, relay rate limiting, OBS GPU optimizations
+
+**Roadmap:** public StreamElements library listing · TikTok + Ko-fi ingestion (separate integration phase, intentionally deferred)
 
 ## Contributing
 

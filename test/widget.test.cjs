@@ -207,3 +207,39 @@ test('delete-message + delete-messages remove rows', () => {
   const { fire } = loadWidget({});
   assert.doesNotThrow(() => { fire('delete-message', { msgId: 'm1' }); fire('delete-messages', { userId: 'u1' }); });
 });
+
+// ---- auto-hide timing (regression: hideAfter:0 must keep messages forever) ---
+test('hideAfter:0 schedules NO auto-hide timer (chat persists)', () => {
+  const { fire, timers } = loadWidget({ hideAfter: 0 });
+  fire('message', { data: tw({ text: 'stay forever' }) });
+  // no removal timer should have been scheduled for a normal message
+  assert.strictEqual(timers.length, 0, 'hideAfter:0 must not schedule removal');
+});
+
+test('hideAfter:0 keeps ALERTS too (alertMinDuration is a floor, not a cap)', () => {
+  const { fire, timers } = loadWidget({ hideAfter: 0, showAlerts: 'yes', alertSub: 'yes', alertMinDuration: 8 });
+  fire('subscriber-latest', { name: 'A', amount: 1 });
+  assert.strictEqual(timers.length, 0, 'alert must persist when hideAfter:0 — regression of forced 8s removal');
+});
+
+test('hideAfter:N schedules removal at N seconds (alert floored to alertMinDuration)', () => {
+  const a = loadWidget({ hideAfter: 20, showAlerts: 'yes', alertSub: 'yes', alertMinDuration: 8 });
+  a.fire('message', { data: tw({ text: 'bye later' }) });
+  assert.strictEqual(a.timers.at(-1).ms, 20000, 'message hides at hideAfter=20s');
+  a.fire('subscriber-latest', { name: 'A', amount: 1 });
+  assert.strictEqual(a.timers.at(-1).ms, 20000, 'alert uses max(min=8, hideAfter=20)=20s');
+
+  const b = loadWidget({ hideAfter: 3, showAlerts: 'yes', alertSub: 'yes', alertMinDuration: 8 });
+  b.fire('subscriber-latest', { name: 'B', amount: 1 });
+  assert.strictEqual(b.timers.at(-1).ms, 8000, 'alert floored to alertMinDuration=8s when hideAfter=3');
+});
+
+test('floating layout: rows positioned with bottom offset, no overlap by measure', () => {
+  const { fire, list } = loadWidget({ layoutMode: 'floating', floatingAvoidOverlap: 'yes', floatLifetime: 60 });
+  for (let i = 0; i < 4; i++) fire('message', { data: tw({ userId: 'f' + i, text: 'row ' + i, tags: { 'room-id': '1', 'user-id': 'f' + i, id: 'fl' + i } }) });
+  const rows = list.children;
+  assert.strictEqual(rows.length, 4);
+  // every floating row must be absolutely positioned with a bottom offset set
+  assert.ok([...rows].every(r => r.style.bottom && r.style.position === 'absolute'),
+    'floating rows must stack via bottom offsets');
+});

@@ -74,12 +74,16 @@ function loadWidget(fields) {
   };
 
   const listeners = {};
+  // Record scheduled timers (delay in ms + whether it fired) so tests can assert
+  // auto-hide timing without real waiting. fn is NOT auto-run.
+  const timers = [];
   const window = {
     document,
     addEventListener: (type, cb) => { (listeners[type] = listeners[type] || []).push(cb); },
     dispatchEvent: (ev) => { (listeners[ev.type] || []).forEach(cb => cb(ev)); return true; },
-    setTimeout: () => 0,           // no-op timers in tests
+    setTimeout: (fn, ms) => { timers.push({ fn, ms }); return timers.length; },
     clearTimeout: () => {},
+    requestAnimationFrame: (fn) => { if (typeof fn === 'function') fn(); return 1; },
     fetch: () => Promise.reject(new Error('no network in tests')),
     CSS: { supports: () => false },
     navigator: { userAgent: 'node-test' },
@@ -94,7 +98,8 @@ function loadWidget(fields) {
 
   const sandbox = {
     window, document, console,
-    setTimeout: () => 0, clearTimeout: () => {},
+    setTimeout: window.setTimeout, clearTimeout: window.clearTimeout,
+    requestAnimationFrame: window.requestAnimationFrame,
     fetch: window.fetch, CSS: window.CSS, navigator: window.navigator,
     Audio: window.Audio, WebSocket: window.WebSocket,
     Promise, Date, Math, JSON, parseFloat, parseInt, isNaN, encodeURI, encodeURIComponent, String, Object, Array
@@ -108,7 +113,7 @@ function loadWidget(fields) {
 
   const api = window.__seChat;
   const fire = (listener, event) => window.dispatchEvent({ type: 'onEventReceived', detail: { listener, event } });
-  return { api, root, list, fire, window };
+  return { api, root, list, fire, window, timers };
 }
 
 module.exports = { loadWidget, makeEl };

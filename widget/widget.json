@@ -1197,6 +1197,24 @@
     "step": 1,
     "group": "Advanced glass"
   },
+  "glassSaturate": {
+    "type": "slider",
+    "label": "Backdrop saturation (%)",
+    "value": 112,
+    "min": 100,
+    "max": 200,
+    "step": 1,
+    "group": "Advanced glass"
+  },
+  "glassEdge": {
+    "type": "slider",
+    "label": "Accent leading edge (px, 0 = none)",
+    "value": 0,
+    "min": 0,
+    "max": 4,
+    "step": 1,
+    "group": "Advanced glass"
+  },
   "glassHighlight": {
     "type": "slider",
     "label": "Top highlight strength (%)",

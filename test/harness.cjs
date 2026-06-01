@@ -127,9 +127,10 @@ function loadWidget(fields, options) {
 
   const api = window.__seChat;
   const fire = (listener, event) => window.dispatchEvent({ type: 'onEventReceived', detail: { listener, event } });
-  // rootStyle exposes the CSS custom properties applyTheme() writes to
-  // document.documentElement (e.g. --persp-zoom), for theme-token assertions.
-  const rootStyle = document.documentElement.style;
+  // rootStyle exposes the CSS custom properties applyTheme() writes — now on the
+  // .se-chat root element (so overrides beat the [data-preset] stylesheet), for
+  // theme-token assertions.
+  const rootStyle = root.style;
   return { api, root, list, fire, window, timers, rootStyle };
 }
 

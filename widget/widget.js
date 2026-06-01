@@ -901,7 +901,11 @@
   //  Theme application (CSS vars + classes + data-attrs)
   // ================================================================
   function applyTheme(f) {
-    const r = document.documentElement.style;
+    // Write tokens as inline style on the .se-chat root (not :root) so they beat
+    // the [data-preset] stylesheet defaults — inline > stylesheet on the same
+    // element — which is what lets EVERY override win on EVERY preset (surface
+    // included), and keeps the pre-JS :root paint as the no-JS fallback.
+    const r = (rootEl || document.documentElement).style;
     const set = (k, v) => r.setProperty(k, v);
     const clear = k => r.removeProperty(k);
     const hasOverride = v => v != null && String(v).trim() !== '' && String(v).trim() !== 'auto';
@@ -942,11 +946,13 @@
     if (yes(f.glassOverride)) {
       setIf('--surface', f.glassTint);
       hasOverride(f.glassBlur) ? set('--surface-blur', num(f.glassBlur, 22) + 'px') : clear('--surface-blur');
+      hasOverride(f.glassSaturate) ? set('--surface-saturate', String(num(f.glassSaturate, 112) / 100)) : clear('--surface-saturate');
       hasOverride(f.glassRadius) ? set('--surface-radius', num(f.glassRadius, 16) + 'px') : clear('--surface-radius');
       hasOverride(f.glassShadow) ? set('--shadow', '0 2px 10px -6px rgba(0,0,0,' + (num(f.glassShadow, 30) / 100) + ')') : clear('--shadow');
       hasOverride(f.glassHighlight) ? set('--sheen', 'inset 0 1px 0 rgba(255,255,255,' + (num(f.glassHighlight, 10) / 100) + ')') : clear('--sheen');
+      num(f.glassEdge, 0) > 0 ? set('--edge', 'inset ' + num(f.glassEdge, 0) + 'px 0 0 var(--accent)') : clear('--edge');
     } else {
-      ['--surface', '--surface-blur', '--surface-radius', '--shadow', '--sheen'].forEach(clear);
+      ['--surface', '--surface-blur', '--surface-saturate', '--surface-radius', '--shadow', '--sheen', '--edge'].forEach(clear);
     }
 
     // ---- Username / highlight / dots / roles ----

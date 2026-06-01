@@ -759,8 +759,8 @@ test('colon toggle: show-colon class applied when showColon=yes', () => {
 });
 
 test('textShadow field sets --text-shadow CSS var', () => {
-  const { window } = loadWidget({ textShadow: '0 2px 4px black' });
-  const val = window.document.documentElement.style.getPropertyValue('--text-shadow');
+  const { rootStyle } = loadWidget({ textShadow: '0 2px 4px black' });
+  const val = rootStyle.getPropertyValue('--text-shadow');
   assert.strictEqual(val, '0 2px 4px black', 'textShadow field maps to --text-shadow CSS var');
 });
 
@@ -791,38 +791,40 @@ test('empty override fields clear stale preset CSS variables', () => {
   assert.strictEqual(rootStyle.getPropertyValue('--role-regular'), '');
 });
 
-test('disabling glass override clears stale surface CSS variables', () => {
+test('glass override beats the active preset and clears cleanly when disabled', () => {
   const defaults = jsonDefaults();
+  // Override ON over a non-editorial preset (frosted) — proves overrides write to
+  // the .se-chat element and beat the [data-preset] stylesheet on every preset.
   const { window, rootStyle } = loadWidget(Object.assign({}, defaults, {
+    stylePreset: 'frosted',
     glassOverride: 'yes',
     glassTint: 'rgba(10,20,30,0.4)',
     glassBlur: 30,
+    glassSaturate: 140,
     glassRadius: 24,
     glassShadow: 70,
-    glassHighlight: 35
+    glassHighlight: 35,
+    glassEdge: 3
   }));
   assert.strictEqual(rootStyle.getPropertyValue('--surface'), 'rgba(10,20,30,0.4)');
   assert.strictEqual(rootStyle.getPropertyValue('--surface-blur'), '30px');
+  assert.strictEqual(rootStyle.getPropertyValue('--surface-saturate'), '1.4');
   assert.strictEqual(rootStyle.getPropertyValue('--surface-radius'), '24px');
   assert.strictEqual(rootStyle.getPropertyValue('--shadow'), '0 2px 10px -6px rgba(0,0,0,0.7)');
   assert.strictEqual(rootStyle.getPropertyValue('--sheen'), 'inset 0 1px 0 rgba(255,255,255,0.35)');
+  assert.strictEqual(rootStyle.getPropertyValue('--edge'), 'inset 3px 0 0 var(--accent)');
 
   window.dispatchEvent({
     type: 'onWidgetLoad',
     detail: { fieldData: Object.assign({}, defaults, {
+      stylePreset: 'frosted',
       glassOverride: 'no',
-      glassTint: '',
-      glassBlur: '',
-      glassRadius: '',
-      glassShadow: '',
-      glassHighlight: ''
+      glassTint: '', glassBlur: '', glassSaturate: '', glassRadius: '',
+      glassShadow: '', glassHighlight: '', glassEdge: 0
     }), channel: {}, session: { data: {} } }
   });
-  assert.strictEqual(rootStyle.getPropertyValue('--surface'), '');
-  assert.strictEqual(rootStyle.getPropertyValue('--surface-blur'), '');
-  assert.strictEqual(rootStyle.getPropertyValue('--surface-radius'), '');
-  assert.strictEqual(rootStyle.getPropertyValue('--shadow'), '');
-  assert.strictEqual(rootStyle.getPropertyValue('--sheen'), '');
+  ['--surface', '--surface-blur', '--surface-saturate', '--surface-radius', '--shadow', '--sheen', '--edge']
+    .forEach(k => assert.strictEqual(rootStyle.getPropertyValue(k), '', k + ' cleared → falls back to the preset'));
 });
 
 // ---- premium presets (Phase A) ------------------------------------

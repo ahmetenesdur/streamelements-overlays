@@ -6,3 +6,6 @@ dist/
 .env.*
 relay/.env
 .cache/
+
+# Local competitor reference material — keep out of the repo
+competitor-analysis/

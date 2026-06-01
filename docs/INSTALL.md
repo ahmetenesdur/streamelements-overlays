@@ -42,7 +42,7 @@ Alerts, Sound, Effects, Advanced glass, Multistream**.
   Chromium / OBS; on unsupported renderers it auto-falls back to plain glassmorphism.
   GPU-heavy — keep **Max messages** modest if you enable it.
 
-### Competitive-parity options (Phase 8)
+### Advanced options
 - **Messages → Consecutive message grouping**: `Off`, `Inline merge (legacy)`, or
   `Second message stack` (drops the repeated header for a follow-up from the same sender).
   The legacy **Merge messages** toggle still works and maps to `Inline merge`.

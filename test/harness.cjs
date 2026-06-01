@@ -22,7 +22,12 @@ function makeEl(tag) {
     tagName: (tag || 'div').toUpperCase(),
     children: [],
     parentNode: null,
-    style: { _p: {}, setProperty(k, v) { this._p[k] = v; }, getPropertyValue(k) { return this._p[k] || ''; } },
+    style: {
+      _p: {},
+      setProperty(k, v) { this._p[k] = v; },
+      getPropertyValue(k) { return this._p[k] || ''; },
+      removeProperty(k) { const v = this._p[k] || ''; delete this._p[k]; return v; }
+    },
     dataset: {},
     _attrs: {},
     _cls: new Set(),

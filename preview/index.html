@@ -14,6 +14,7 @@
       /* Preview-chrome tokens are namespaced (--pv-*) so they can NEVER bleed
          into the widget's own CSS custom properties (e.g. --accent). The widget
          must render with its real default accent, not the panel's blue. */
+      color-scheme: dark;
       --pw: 340px;            /* panel width */
       --ink: #e9eaf0; --mut: #8b8f9c; --line: rgba(255,255,255,.08);
       --field-bg: #16181f; --field-bd: rgba(255,255,255,.10);
@@ -49,7 +50,7 @@
       overflow-y: auto; font-size: 13px;
     }
     #panel header { padding: 16px 16px 10px; position: sticky; top: 0; background: #0c0d11; z-index: 2; border-bottom: 1px solid var(--line); }
-    #panel h1 { font-size: 15px; margin: 0; letter-spacing: -.01em; font-weight: 650; }
+    #panel h1 { font-size: 15px; margin: 0; letter-spacing: -.01em; font-weight: 650; text-wrap: balance; }
     #panel .sub { font-size: 11px; color: var(--mut); margin: 3px 0 0; }
 
     .grp { border-bottom: 1px solid var(--line); }
@@ -87,6 +88,7 @@
     button.sim {
       flex: 1 1 auto; background: var(--field-bg); color: var(--ink); border: 1px solid var(--field-bd);
       min-height: 40px; border-radius: 7px; padding: 8px 10px; font-size: 12px; cursor: pointer; font-family: inherit;
+      touch-action: manipulation;
       transition-property: transform, background-color, box-shadow, border-color;
       transition-duration: 140ms;
       transition-timing-function: ease-out;
@@ -177,7 +179,7 @@
           <button type="button" class="sim" data-act="reset" title="Restore all settings to defaults + clear (recover from a demo)">Reset</button>
         </div>
         <div class="field"><label for="previewScene">Preview scene</label>
-          <select class="ctl" id="previewScene" data-scene>
+          <select class="ctl" id="previewScene" name="previewScene" data-scene>
             <option value="">Plain dark</option>
             <option value="scene-light">Light</option>
             <option value="scene-mid">Mid gray</option>

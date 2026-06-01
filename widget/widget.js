@@ -391,13 +391,18 @@
       // leaving it on would permanently override the inline opacity that
       // dynamic-opacity (age fade) writes. Guard against a row that is already
       // exiting (animateOut swaps in the out-animation classes).
-      row.addEventListener('animationend', function handler() {
+      let entranceCleaned = false;
+      const cleanupEntrance = function () {
+        if (entranceCleaned) return;
+        entranceCleaned = true;
         row.style.willChange = 'auto';
         if (row.classList.contains('animate__' + animIn)) {
           row.classList.remove('animate__animated', 'animate__' + animIn);
         }
-        row.removeEventListener('animationend', handler);
-      }, { once: true });
+        row.removeEventListener('animationend', cleanupEntrance);
+      };
+      row.addEventListener('animationend', cleanupEntrance, { once: true });
+      setTimeout(cleanupEntrance, num(F.animationSpeed, 460) + 120);
     }
 
     const icon = iconMarkup(u);
@@ -766,9 +771,12 @@
   function applyTheme(f) {
     const r = document.documentElement.style;
     const set = (k, v) => r.setProperty(k, v);
-    // setIf: only write a token when the override field is non-empty / not "auto".
+    const clear = k => r.removeProperty(k);
+    const hasOverride = v => v != null && String(v).trim() !== '' && String(v).trim() !== 'auto';
+    // setIf: write override tokens when present; clear stale inline tokens when
+    // the user returns a field to empty / preset-driven.
     // This is the heart of "preset gives great defaults, you override only what you touch".
-    const setIf = (k, v) => { if (v != null && v !== '' && v !== 'auto') set(k, v); };
+    const setIf = (k, v) => { hasOverride(v) ? set(k, v) : clear(k); };
 
     // ---- Typography (always applied) ----
     injectFont(f.fontName);   // ensure the chosen webfont is loaded (idempotent)
@@ -792,10 +800,12 @@
     // ---- Surface overrides (only when the gate is on) ----
     if (yes(f.glassOverride)) {
       setIf('--surface', f.glassTint);
-      if (f.glassBlur != null && f.glassBlur !== '') set('--surface-blur', num(f.glassBlur, 22) + 'px');
-      if (f.glassRadius != null && f.glassRadius !== '') set('--surface-radius', num(f.glassRadius, 16) + 'px');
-      if (f.glassShadow != null && f.glassShadow !== '') set('--surface-shadow', String(num(f.glassShadow, 30) / 100));
-      if (f.glassHighlight != null && f.glassHighlight !== '') set('--surface-highlight', String(num(f.glassHighlight, 10) / 100));
+      hasOverride(f.glassBlur) ? set('--surface-blur', num(f.glassBlur, 22) + 'px') : clear('--surface-blur');
+      hasOverride(f.glassRadius) ? set('--surface-radius', num(f.glassRadius, 16) + 'px') : clear('--surface-radius');
+      hasOverride(f.glassShadow) ? set('--surface-shadow', String(num(f.glassShadow, 30) / 100)) : clear('--surface-shadow');
+      hasOverride(f.glassHighlight) ? set('--surface-highlight', String(num(f.glassHighlight, 10) / 100)) : clear('--surface-highlight');
+    } else {
+      ['--surface', '--surface-blur', '--surface-radius', '--surface-shadow', '--surface-highlight'].forEach(clear);
     }
 
     // ---- Username / highlight / dots / roles ----

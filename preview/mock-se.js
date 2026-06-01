@@ -113,6 +113,7 @@
       this.fieldData = Object.assign({}, this.defaults || {}, overrides || {});
       this.load();
       this.clear();
+      syncControlPanel();
     },
 
     twitch() { dispatch('message', twitchRaw(pick(LINES))); },
@@ -278,8 +279,9 @@
   function controlFor(key, f) {
     const cur = MockSE.fieldData[key];
     const id = 'field-' + key;
+    const label = f.label || key;
     if (f.type === 'dropdown') {
-      const s = el('select', { class: 'ctl', id });
+      const s = el('select', { class: 'ctl', id, name: key });
       Object.keys(f.options || {}).forEach(v => {
         const o = el('option', { value: v }, f.options[v]);
         if (String(cur) === v) o.selected = true;
@@ -289,13 +291,14 @@
       return s;
     }
     if (f.type === 'number') {
-      const i = el('input', { type: 'number', class: 'ctl', id, autocomplete: 'off' }); i.value = cur != null ? cur : '';
+      const i = el('input', { type: 'number', class: 'ctl', id, name: key, autocomplete: 'off', inputmode: 'decimal' }); i.value = cur != null ? cur : '';
+      i.addEventListener('input', () => MockSE.set(key, i.value));
       i.addEventListener('change', () => MockSE.set(key, i.value));
       return i;
     }
     if (f.type === 'slider') {
       const wrap = el('div', { class: 'rangewrap' });
-      const i = el('input', { type: 'range', id });
+      const i = el('input', { type: 'range', id, name: key });
       i.min = f.min != null ? f.min : 0; i.max = f.max != null ? f.max : 100;
       i.step = f.step != null ? f.step : 1; i.value = cur != null ? cur : 0;
       const val = el('span', { class: 'val' }, i.value);
@@ -305,19 +308,48 @@
     }
     if (f.type === 'colorpicker') {
       const wrap = el('div', { class: 'colorwrap' });
-      const hex = el('input', { type: 'color', id }); hex.value = rgbaToHex(cur) || '#000000';
-      const txt = el('input', { type: 'text', autocomplete: 'off', spellcheck: 'false' }); txt.value = cur || ''; txt.placeholder = 'empty';
+      const hex = el('input', { type: 'color', id, name: key, 'aria-label': label + ' color picker' }); hex.value = rgbaToHex(cur) || '#000000';
+      const txt = el('input', {
+        type: 'text',
+        class: 'color-text',
+        id: id + '-text',
+        name: key + 'Text',
+        autocomplete: 'off',
+        spellcheck: 'false',
+        'aria-label': label + ' CSS color value'
+      }); txt.value = cur || ''; txt.placeholder = 'empty';
       hex.addEventListener('input', () => { txt.value = hex.value; MockSE.set(key, hex.value); });
+      txt.addEventListener('input', () => { MockSE.set(key, txt.value); const h = rgbaToHex(txt.value); if (h) hex.value = h; });
       txt.addEventListener('change', () => { MockSE.set(key, txt.value); const h = rgbaToHex(txt.value); if (h) hex.value = h; });
       wrap.appendChild(hex); wrap.appendChild(txt);
       return wrap;
     }
     // text / googleFont / sound-input
-    const i = el('input', { type: 'text', class: 'ctl', id, autocomplete: 'off', spellcheck: 'false' });
+    const i = el('input', { type: 'text', class: 'ctl', id, name: key, autocomplete: 'off', spellcheck: 'false' });
     i.value = cur != null ? cur : '';
     i.placeholder = f.type === 'sound-input' ? 'sound URL' : (f.type === 'googleFont' ? 'Google font name' : '');
+    i.addEventListener('input', () => MockSE.set(key, i.value));
     i.addEventListener('change', () => MockSE.set(key, i.value));
     return i;
+  }
+
+  function syncControlPanel() {
+    Object.keys(MockSE.fieldData || {}).forEach(key => {
+      const val = MockSE.fieldData[key];
+      const input = document.getElementById('field-' + key);
+      if (!input) return;
+      if (input.type === 'color') {
+        input.value = rgbaToHex(val) || '#000000';
+        const text = document.getElementById('field-' + key + '-text');
+        if (text) text.value = val || '';
+        return;
+      }
+      input.value = val != null ? val : '';
+      if (input.type === 'range') {
+        const out = input.parentElement && input.parentElement.querySelector('.val');
+        if (out) out.textContent = input.value;
+      }
+    });
   }
 
   function buildFields(json) {

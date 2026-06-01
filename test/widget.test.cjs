@@ -454,6 +454,18 @@ test('entrance animation classes are stripped on animationend (so inline opacity
   assert.ok(!row.classList.contains('animate__animated'), 'base animate class removed after animationend');
 });
 
+test('entrance animation classes are stripped by fallback if animationend is missed', () => {
+  const { list, fire, timers } = loadWidget({ animationIn: 'liquidIn', animationSpeed: 460, dynamicOpacity: 'yes', hideAfter: 0 });
+  fire('message', { data: tw({ text: 'one', userId: 'u1', tags: { 'room-id': '1', 'user-id': 'u1', id: 'm1' } }) });
+  const row = list.children[0];
+  assert.ok(row.classList.contains('animate__liquidIn'), 'entrance class applied on add');
+  const fallback = timers.find(t => t.ms === 580);
+  assert.ok(fallback, 'cleanup fallback timer scheduled after animation duration');
+  fallback.fn();
+  assert.ok(!row.classList.contains('animate__liquidIn'), 'entrance class removed by fallback');
+  assert.ok(!row.classList.contains('animate__animated'), 'base animate class removed by fallback');
+});
+
 test('delete-message + delete-messages remove rows', () => {
   // querySelector in the shim is a no-op, so we assert the handlers run without throwing.
   const { fire } = loadWidget({});
@@ -462,14 +474,14 @@ test('delete-message + delete-messages remove rows', () => {
 
 // ---- auto-hide timing (regression: hideAfter:0 must keep messages forever) ---
 test('hideAfter:0 schedules NO auto-hide timer (chat persists)', () => {
-  const { fire, timers } = loadWidget({ hideAfter: 0 });
+  const { fire, timers } = loadWidget({ hideAfter: 0, animationIn: 'none' });
   fire('message', { data: tw({ text: 'stay forever' }) });
   // no removal timer should have been scheduled for a normal message
   assert.strictEqual(timers.length, 0, 'hideAfter:0 must not schedule removal');
 });
 
 test('hideAfter:0 keeps ALERTS too (alertMinDuration is a floor, not a cap)', () => {
-  const { fire, timers } = loadWidget({ hideAfter: 0, showAlerts: 'yes', alertSub: 'yes', alertMinDuration: 8 });
+  const { fire, timers } = loadWidget({ hideAfter: 0, showAlerts: 'yes', alertSub: 'yes', alertMinDuration: 8, animationIn: 'none' });
   fire('subscriber-latest', { name: 'A', amount: 1 });
   assert.strictEqual(timers.length, 0, 'alert must persist when hideAfter:0 — regression of forced 8s removal');
 });
@@ -671,6 +683,65 @@ test('textShadow field sets --text-shadow CSS var', () => {
   const { window } = loadWidget({ textShadow: '0 2px 4px black' });
   const val = window.document.documentElement.style.getPropertyValue('--text-shadow');
   assert.strictEqual(val, '0 2px 4px black', 'textShadow field maps to --text-shadow CSS var');
+});
+
+test('empty override fields clear stale preset CSS variables', () => {
+  const defaults = jsonDefaults();
+  const { window, rootStyle } = loadWidget(Object.assign({}, defaults, {
+    accent: '#ff5577',
+    textShadow: '0 2px 4px black',
+    keywordColor: '#11ffee',
+    colorRegular: '#778899'
+  }));
+  assert.strictEqual(rootStyle.getPropertyValue('--accent'), '#ff5577');
+  assert.strictEqual(rootStyle.getPropertyValue('--text-shadow'), '0 2px 4px black');
+  assert.strictEqual(rootStyle.getPropertyValue('--keyword-color'), '#11ffee');
+  assert.strictEqual(rootStyle.getPropertyValue('--role-regular'), '#778899');
+
+  window.dispatchEvent({
+    type: 'onWidgetLoad',
+    detail: { fieldData: Object.assign({}, defaults, {
+      accent: '', textShadow: '', keywordColor: '', colorRegular: ''
+    }), channel: {}, session: { data: {} } }
+  });
+  assert.strictEqual(rootStyle.getPropertyValue('--accent'), '');
+  assert.strictEqual(rootStyle.getPropertyValue('--text-shadow'), '');
+  assert.strictEqual(rootStyle.getPropertyValue('--keyword-color'), '');
+  assert.strictEqual(rootStyle.getPropertyValue('--role-regular'), '');
+});
+
+test('disabling glass override clears stale surface CSS variables', () => {
+  const defaults = jsonDefaults();
+  const { window, rootStyle } = loadWidget(Object.assign({}, defaults, {
+    glassOverride: 'yes',
+    glassTint: 'rgba(10,20,30,0.4)',
+    glassBlur: 30,
+    glassRadius: 24,
+    glassShadow: 70,
+    glassHighlight: 35
+  }));
+  assert.strictEqual(rootStyle.getPropertyValue('--surface'), 'rgba(10,20,30,0.4)');
+  assert.strictEqual(rootStyle.getPropertyValue('--surface-blur'), '30px');
+  assert.strictEqual(rootStyle.getPropertyValue('--surface-radius'), '24px');
+  assert.strictEqual(rootStyle.getPropertyValue('--surface-shadow'), '0.7');
+  assert.strictEqual(rootStyle.getPropertyValue('--surface-highlight'), '0.35');
+
+  window.dispatchEvent({
+    type: 'onWidgetLoad',
+    detail: { fieldData: Object.assign({}, defaults, {
+      glassOverride: 'no',
+      glassTint: '',
+      glassBlur: '',
+      glassRadius: '',
+      glassShadow: '',
+      glassHighlight: ''
+    }), channel: {}, session: { data: {} } }
+  });
+  assert.strictEqual(rootStyle.getPropertyValue('--surface'), '');
+  assert.strictEqual(rootStyle.getPropertyValue('--surface-blur'), '');
+  assert.strictEqual(rootStyle.getPropertyValue('--surface-radius'), '');
+  assert.strictEqual(rootStyle.getPropertyValue('--surface-shadow'), '');
+  assert.strictEqual(rootStyle.getPropertyValue('--surface-highlight'), '');
 });
 
 // ---- fullscreen float / collision avoidance -----------------------

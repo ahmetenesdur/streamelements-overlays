@@ -106,6 +106,15 @@
     },
     set(key, val) { this.fieldData[key] = val; this.load(); },
 
+    // Restore every field to its widget.json default (+ optional overrides) and
+    // clear the chat — so each Feature demo is self-contained no matter what was
+    // clicked before (e.g. the Float demo's fullscreen layout no longer leaks).
+    resetFields(overrides) {
+      this.fieldData = Object.assign({}, this.defaults || {}, overrides || {});
+      this.load();
+      this.clear();
+    },
+
     twitch() { dispatch('message', twitchRaw(pick(LINES))); },
     youtube() { dispatch('message', youtubeRaw(pick(LINES))); },
     kick() { dispatch('widget-button', { field: 'testKick' }); },
@@ -171,7 +180,7 @@
     // ---- Feature demos --------------------------------------------
     // Two consecutive messages from the SAME sender → second-message stack.
     grouped() {
-      MockSE.set('messageGrouping', 'stack');
+      MockSE.resetFields({ messageGrouping: 'stack' });
       const mk = (text) => {
         const e = twitchRaw(text, { name: 'Nani', color: '#6be7ff', roles: ['subscriber'] });
         e.data.displayName = 'Nani'; e.data.userId = 'nani';
@@ -184,9 +193,7 @@
     // Twitch Shared Chat (Stream Together): two guest channels → origin labels
     // + the participants panel (host auto-named from the channel, guests mapped).
     shared() {
-      MockSE.set('sharedChatIndicator', 'yes');
-      MockSE.set('sharedChatPanel', 'yes');
-      MockSE.set('sharedChatLabels', '200:Ironmouse,300:Lirik');
+      MockSE.resetFields({ sharedChatIndicator: 'yes', sharedChatPanel: 'yes', sharedChatLabels: '200:Ironmouse,300:Lirik' });
       const mk = (name, room, text) => {
         const e = twitchRaw(text);
         e.data.displayName = name; e.data.userId = name.toLowerCase();
@@ -201,10 +208,7 @@
     },
     // Fullscreen float: scatter several messages with overlap avoidance.
     floatScene() {
-      MockSE.set('layoutMode', 'fullscreen');
-      MockSE.set('fullscreenFloat', 'yes');
-      MockSE.set('hideAfter', 0);
-      MockSE.clear();
+      MockSE.resetFields({ layoutMode: 'fullscreen', fullscreenFloat: 'yes', hideAfter: 0 });
       ['floating chat one', 'second message drifts in', 'a third one here',
        'number four floats', 'fifth and counting', 'sixth message', 'lucky seven', 'last one'
       ].forEach((text, i) => {
@@ -216,10 +220,7 @@
     },
     // Per-role visual matrix: each role gets its own tinted name + bubble.
     roleMatrix() {
-      MockSE.set('roleHighlight', 'yes');
-      MockSE.set('roleNameBg', 'yes');
-      MockSE.set('roleMsgBg', 'yes');
-      MockSE.clear();
+      MockSE.resetFields({ roleHighlight: 'yes', roleNameBg: 'yes', roleMsgBg: 'yes' });
       const roles = [
         ['broadcaster', 'TheStreamer', 'broadcaster line'],
         ['moderator', 'ModSquad', 'moderator line'],
@@ -233,8 +234,7 @@
     },
     // Four messages so older visible rows fade by age.
     ageFade() {
-      MockSE.set('dynamicOpacity', 'yes');
-      MockSE.set('oldestMessageOpacity', 35);
+      MockSE.resetFields({ dynamicOpacity: 'yes', oldestMessageOpacity: 35 });
       ['one', 'two', 'three', 'four'].forEach((text, index) => {
         const event = twitchRaw('age fade message ' + text);
         event.data.displayName = 'Viewer' + index; event.data.userId = 'age' + index;
@@ -249,6 +249,7 @@
       if (last) dispatch('delete-message', { msgId: last.dataset.msgid });
     },
     clear() { document.getElementById('chatList').innerHTML = ''; },
+    reset() { MockSE.resetFields(); },   // restore all default settings + clear chat
     rain(n) { let i = 0; const t = setInterval(() => { (Math.random() < 0.5 ? this.twitch() : this.youtube()); if (++i >= (n || 20)) clearInterval(t); }, 120); }
   };
   window.MockSE = MockSE;
@@ -375,6 +376,7 @@
       const fd = {};
       Object.keys(json).forEach(k => { fd[k] = json[k].value; });
       MockSE.fieldData = fd;
+      MockSE.defaults = JSON.parse(JSON.stringify(fd));   // pristine baseline for resetFields()
       wire();
       buildFields(json);
       MockSE.load();

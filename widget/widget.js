@@ -270,6 +270,7 @@
       '<div class="msg__bubble">' +
         icon +
         '<div class="msg__body">' + head + body + '</div>' +
+        '<span class="msg__arrow" aria-hidden="true"></span>' +
       '</div>';
 
     listEl.appendChild(row);
@@ -503,6 +504,7 @@
     rootEl.dataset.mask = str(f.maskFade, 'none');
 
     toggle('show-icon', yes(f.showAvatar));
+    toggle('show-arrow', yes(f.showArrow));
     toggle('show-dot', yes(f.showPlatformDot));
     toggle('show-logo', yes(f.showPlatformLogo));
     toggle('no-badges', !yes(f.displayBadges));

@@ -239,6 +239,16 @@
     },
     "group": "Badges & Platform"
   },
+  "showArrow": {
+    "type": "dropdown",
+    "label": "Show bubble arrow / tail (frosted & slate presets)",
+    "value": "no",
+    "options": {
+      "yes": "Yes",
+      "no": "No"
+    },
+    "group": "Badges & Platform"
+  },
   "iconStyle": {
     "type": "dropdown",
     "label": "Icon bubble content (when shown)",

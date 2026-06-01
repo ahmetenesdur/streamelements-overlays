@@ -211,6 +211,20 @@ html, body {
   text-shadow: var(--text-shadow);
 }
 
+/* Speech-bubble arrow / tail — opt-in; only meaningful on surface presets. */
+.msg__arrow { display: none; }
+.se-chat.show-arrow[data-preset="frosted"] .msg__arrow,
+.se-chat.show-arrow[data-preset="slate"] .msg__arrow {
+  display: block; position: absolute; bottom: 8px; left: -6px;
+  width: 0; height: 0; border: 7px solid transparent;
+  border-right-color: var(--surface); border-left: 0;
+}
+.se-chat.show-arrow[data-preset="frosted"][data-halign="right"] .msg__arrow,
+.se-chat.show-arrow[data-preset="slate"][data-halign="right"] .msg__arrow {
+  left: auto; right: -6px; border-right: 0;
+  border-left-color: var(--surface); border-left-width: 7px;
+}
+
 /* ---- Icon (avatar) — clean disc, hairline ring only ----------- */
 .msg__icon {
   position: relative;

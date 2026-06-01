@@ -168,7 +168,7 @@
       if (e) dispatch(e[0], e[1]);
     },
 
-    // ---- Phase 8 demos --------------------------------------------
+    // ---- Feature demos --------------------------------------------
     // Two consecutive messages from the SAME sender → second-message stack.
     grouped() {
       MockSE.set('messageGrouping', 'stack');

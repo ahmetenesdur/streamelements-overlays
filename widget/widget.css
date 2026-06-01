@@ -344,6 +344,15 @@ html, body {
 /* Message text + emotes */
 .msg__text { color: var(--font-color); text-wrap: pretty; }
 .msg__text.is-action { font-style: italic; opacity: 0.9; }
+.msg__text--continued {
+  display: block;
+  margin-top: 0.16em;
+}
+.se-chat[data-layout="horizontal"] .msg__text--continued {
+  display: inline;
+  margin-top: 0;
+  margin-left: 0.5em;
+}
 .emote {
   height: var(--emote-size);
   vertical-align: -0.32em;

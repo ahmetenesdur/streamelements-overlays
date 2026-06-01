@@ -173,6 +173,17 @@
     },
     "group": "Username & Colors"
   },
+  "nativeColorPlacement": {
+    "type": "dropdown",
+    "label": "Platform/native username color placement",
+    "value": "text",
+    "options": {
+      "text": "On username text",
+      "background": "On username background",
+      "off": "Disable native user colors"
+    },
+    "group": "Username & Colors"
+  },
   "customNickColor": {
     "type": "colorpicker",
     "label": "Custom username color",
@@ -412,6 +423,54 @@
     "value": "",
     "group": "Roles & Highlights"
   },
+  "iconBroadcaster": {
+    "type": "text",
+    "label": "Broadcaster icon override (glyph, 'platform', or 'avatar')",
+    "value": "",
+    "group": "Roles & Highlights"
+  },
+  "iconLeadMod": {
+    "type": "text",
+    "label": "Lead mod icon override (glyph, 'platform', or 'avatar')",
+    "value": "",
+    "group": "Roles & Highlights"
+  },
+  "iconMod": {
+    "type": "text",
+    "label": "Mod icon override (glyph, 'platform', or 'avatar')",
+    "value": "",
+    "group": "Roles & Highlights"
+  },
+  "iconVip": {
+    "type": "text",
+    "label": "VIP icon override (glyph, 'platform', or 'avatar')",
+    "value": "",
+    "group": "Roles & Highlights"
+  },
+  "iconSub": {
+    "type": "text",
+    "label": "Subscriber icon override (glyph, 'platform', or 'avatar')",
+    "value": "",
+    "group": "Roles & Highlights"
+  },
+  "iconArtist": {
+    "type": "text",
+    "label": "Artist icon override (glyph, 'platform', or 'avatar')",
+    "value": "",
+    "group": "Roles & Highlights"
+  },
+  "iconFav": {
+    "type": "text",
+    "label": "Favorite icon override (glyph, 'platform', or 'avatar')",
+    "value": "",
+    "group": "Roles & Highlights"
+  },
+  "iconRegular": {
+    "type": "text",
+    "label": "Regular icon override (glyph, 'platform', or 'avatar')",
+    "value": "",
+    "group": "Roles & Highlights"
+  },
   "hideAfter": {
     "type": "number",
     "label": "Hide message after (sec, 0 = never)",
@@ -435,6 +494,17 @@
     "options": {
       "yes": "Yes",
       "no": "No"
+    },
+    "group": "Messages"
+  },
+  "messageGrouping": {
+    "type": "dropdown",
+    "label": "Consecutive message grouping",
+    "value": "off",
+    "options": {
+      "off": "Off",
+      "inline": "Inline merge (legacy)",
+      "stack": "Second message stack"
     },
     "group": "Messages"
   },
@@ -527,6 +597,26 @@
     },
     "group": "Alerts"
   },
+  "alertSuperchat": {
+    "type": "dropdown",
+    "label": "Show YouTube Super Chat alerts",
+    "value": "yes",
+    "options": {
+      "yes": "Yes",
+      "no": "No"
+    },
+    "group": "Alerts"
+  },
+  "alertMember": {
+    "type": "dropdown",
+    "label": "Show YouTube member alerts",
+    "value": "yes",
+    "options": {
+      "yes": "Yes",
+      "no": "No"
+    },
+    "group": "Alerts"
+  },
   "alertCheer": {
     "type": "dropdown",
     "label": "Alert · Cheers",
@@ -583,6 +673,18 @@
     "type": "text",
     "label": "Label · Tip",
     "value": "{name} tipped {amount}",
+    "group": "Alerts"
+  },
+  "alertLabelSuperchat": {
+    "type": "text",
+    "label": "Super Chat label",
+    "value": "{name} sent a Super Chat {amount}",
+    "group": "Alerts"
+  },
+  "alertLabelMember": {
+    "type": "text",
+    "label": "Member label",
+    "value": "{name} became a member",
     "group": "Alerts"
   },
   "alertLabelCheer": {
@@ -682,6 +784,25 @@
     },
     "group": "Effects"
   },
+  "dynamicOpacity": {
+    "type": "dropdown",
+    "label": "Dynamic opacity for older messages",
+    "value": "no",
+    "options": {
+      "yes": "Yes",
+      "no": "No"
+    },
+    "group": "Effects"
+  },
+  "oldestMessageOpacity": {
+    "type": "number",
+    "label": "Oldest visible message opacity %",
+    "value": 38,
+    "min": 10,
+    "max": 100,
+    "step": 1,
+    "group": "Effects"
+  },
   "glassAdvanced": {
     "type": "dropdown",
     "label": "Advanced glass refraction (Chromium/OBS only, GPU-heavy — keep Max Messages low)",
@@ -717,6 +838,24 @@
     "min": -25,
     "max": 25,
     "step": 1,
+    "group": "Effects"
+  },
+  "perspectiveZoom": {
+    "type": "number",
+    "label": "Perspective zoom %",
+    "value": 100,
+    "min": 50,
+    "max": 160,
+    "step": 1,
+    "group": "Effects"
+  },
+  "perspectiveFov": {
+    "type": "number",
+    "label": "Perspective field of view",
+    "value": 1000,
+    "min": 350,
+    "max": 1800,
+    "step": 10,
     "group": "Effects"
   },
   "crayonTexture": {
@@ -815,6 +954,12 @@
       "yes": "Yes",
       "no": "No"
     },
+    "group": "Multistream"
+  },
+  "sharedChatLabels": {
+    "type": "text",
+    "label": "Shared chat labels (roomId:name, comma separated)",
+    "value": "",
     "group": "Multistream"
   },
   "showYouTube": {

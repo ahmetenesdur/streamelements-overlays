@@ -267,16 +267,17 @@
     if (isIgnored(u.displayName)) return;
     applyCustomRoles(u);                            // lead mod / fav / regular
 
-    if (str(F.mergeMessages, 'no') === 'yes') {
-      const key = u.platform + ':' + u.userId;
-      if (key === lastSenderKey) {
-        const last = listEl && listEl.lastElementChild &&
-          listEl.lastElementChild.querySelector('.msg__text');
-        if (last) {
-          const span = document.createElement('span');
-          span.innerHTML = ' ' + renderText(u.text, u.emotes);
-          last.appendChild(span);
+    const mode = groupingMode();
+    if (mode !== 'off') {
+      const key = senderKey(u);
+      const lastRow = listEl && listEl.lastElementChild;
+      if (key === lastSenderKey && lastRow && !lastRow.classList.contains('msg--alert')) {
+        const appended = mode === 'stack'
+          ? appendStackedMessage(lastRow, u)
+          : appendInlineMessage(lastRow, u);
+        if (appended) {
           playSound('message');
+          refreshDynamicOpacity();
           return;
         }
       }
@@ -287,6 +288,50 @@
 
     addMessage(u);
     playSound('message');
+  }
+
+  function groupingMode() {
+    const explicit = str(F.messageGrouping, '');
+    if (explicit) return explicit;
+    return str(F.mergeMessages, 'no') === 'yes' ? 'inline' : 'off';
+  }
+
+  function senderKey(u) {
+    return u.platform + ':' + (u.userId || u.login || u.displayName);
+  }
+
+  function appendInlineMessage(row, u) {
+    const html = ' ' + renderText(u.text, u.emotes);
+    const text = row && row.querySelector && row.querySelector('.msg__text');
+    if (text && typeof text.insertAdjacentHTML === 'function') {
+      text.insertAdjacentHTML('beforeend', html);
+    } else if (!appendBeforeBodyClose(row, html, true)) {
+      return false;
+    }
+    row.dataset.lastMsgid = u.msgId;
+    return true;
+  }
+
+  function appendStackedMessage(row, u) {
+    const html = '<span class="msg__text msg__text--continued' +
+      (u.isAction ? ' is-action' : '') + '">' + renderText(u.text, u.emotes) + '</span>';
+    const body = row && row.querySelector && row.querySelector('.msg__body');
+    if (body && typeof body.insertAdjacentHTML === 'function') {
+      body.insertAdjacentHTML('beforeend', html);
+    } else if (!appendBeforeBodyClose(row, html, false)) {
+      return false;
+    }
+    row.dataset.lastMsgid = u.msgId;
+    return true;
+  }
+
+  function appendBeforeBodyClose(row, html, insideText) {
+    if (!row || typeof row.innerHTML !== 'string') return false;
+    const marker = insideText ? '</span></div><span class="msg__arrow"' : '</div><span class="msg__arrow"';
+    const index = row.innerHTML.lastIndexOf(marker);
+    if (index === -1) return false;
+    row.innerHTML = row.innerHTML.slice(0, index) + html + row.innerHTML.slice(index);
+    return true;
   }
 
   // ================================================================
@@ -329,6 +374,7 @@
 
     listEl.appendChild(row);
     enforceLimit();
+    refreshDynamicOpacity();
     // In horizontal mode keep the newest message scrolled into view.
     if (str(F.layoutMode, 'vertical') === 'horizontal') {
       const toRight = str(F.hDirection, 'right') === 'right';
@@ -445,6 +491,22 @@
     }
   }
 
+  function refreshDynamicOpacity() {
+    if (!listEl) return;
+    const rows = Array.prototype.slice.call(listEl.children);
+    if (!yes(F.dynamicOpacity) || rows.length <= 1) {
+      rows.forEach(row => { row.style.opacity = ''; });
+      return;
+    }
+    const min = Math.max(0.1, Math.min(1, num(F.oldestMessageOpacity, 38) / 100));
+    const maxIndex = rows.length - 1;
+    rows.forEach(function (row, index) {
+      const t = maxIndex === 0 ? 1 : index / maxIndex;
+      const opacity = min + ((1 - min) * t);
+      row.style.opacity = String(Math.round(opacity * 100) / 100);
+    });
+  }
+
   function scheduleRemoval(row, u) {
     // hideAfter is the master "auto-hide" control. 0 = keep forever (only the
     // messagesLimit removes rows). Same behaviour in every layout.
@@ -458,20 +520,32 @@
   function animateOut(row) {
     if (!row || !row.parentNode) return;
     const out = str(F.animationOut, 'liquidOut');
-    if (str(F.disableAllAnimations, 'no') === 'yes' || out === 'none') { row.remove(); return; }
+    row.style.opacity = '';
+    if (str(F.disableAllAnimations, 'no') === 'yes' || out === 'none') {
+      row.remove();
+      refreshDynamicOpacity();
+      return;
+    }
     const animIn = str(F.animationIn, 'liquidIn');
     row.classList.remove('animate__' + animIn);
     row.classList.add('animate__animated', 'animate__' + out);
-    setTimeout(() => row.remove(), num(F.animationSpeed, 460) + 60);
+    setTimeout(() => {
+      row.remove();
+      refreshDynamicOpacity();
+    }, num(F.animationSpeed, 460) + 60);
   }
 
   function removeByMsgId(id) {
     const el = listEl && listEl.querySelector('[data-msgid="' + cssEsc(id) + '"]');
-    if (el) el.remove();
+    if (el) {
+      el.remove();
+      refreshDynamicOpacity();
+    }
   }
   function removeByUser(uid) {
     if (!listEl) return;
     listEl.querySelectorAll('[data-userid="' + cssEsc(uid) + '"]').forEach(e => e.remove());
+    refreshDynamicOpacity();
   }
 
   // ================================================================

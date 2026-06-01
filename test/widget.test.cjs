@@ -20,6 +20,19 @@ function jsonDefaults() {
   return fd;
 }
 
+test('phase 8 fields ship with conservative defaults', () => {
+  const fd = jsonDefaults();
+  assert.strictEqual(fd.messageGrouping, 'off');
+  assert.strictEqual(fd.dynamicOpacity, 'no');
+  assert.strictEqual(fd.oldestMessageOpacity, 38);
+  assert.strictEqual(fd.sharedChatLabels, '');
+  assert.strictEqual(fd.nativeColorPlacement, 'text');
+  assert.strictEqual(fd.perspectiveZoom, 100);
+  assert.strictEqual(fd.perspectiveFov, 1000);
+  assert.strictEqual(fd.alertSuperchat, 'yes');
+  assert.strictEqual(fd.alertMember, 'yes');
+});
+
 // Helper: a Twitch raw `message.data` with sensible defaults.
 function tw(over) {
   return Object.assign({
@@ -224,6 +237,42 @@ test('per-platform hide blocks that platform end-to-end', () => {
   const { list, fire } = loadWidget({ showTwitch: 'no' });
   fire('message', { data: tw({ text: 'should be hidden' }) });
   assert.strictEqual(list.children.length, 0);
+});
+
+test('messageGrouping:inline preserves legacy inline merge behavior', () => {
+  const { list, fire } = loadWidget({ messageGrouping: 'inline' });
+  fire('message', { data: tw({ userId: 'u1', displayName: 'Ada', text: 'first', tags: { 'room-id': '1', 'user-id': 'u1', id: 'm1' } }) });
+  fire('message', { data: tw({ userId: 'u1', displayName: 'Ada', text: 'second', tags: { 'room-id': '1', 'user-id': 'u1', id: 'm2' } }) });
+  assert.strictEqual(list.children.length, 1);
+  assert.match(list.children[0].innerHTML, /first/);
+  assert.match(list.children[0].innerHTML, /second/);
+});
+
+test('messageGrouping:stack appends second message without duplicate header', () => {
+  const { list, fire } = loadWidget({ messageGrouping: 'stack' });
+  fire('message', { data: tw({ userId: 'u1', displayName: 'Ada', text: 'first', tags: { 'room-id': '1', 'user-id': 'u1', id: 'm1' } }) });
+  fire('message', { data: tw({ userId: 'u1', displayName: 'Ada', text: 'second', tags: { 'room-id': '1', 'user-id': 'u1', id: 'm2' } }) });
+  const html = list.children[0].innerHTML;
+  assert.strictEqual(list.children.length, 1);
+  assert.strictEqual((html.match(/class="msg__text/g) || []).length, 2);
+  assert.strictEqual((html.match(/class="msg__head/g) || []).length, 1);
+  assert.match(html, /msg__text--continued/);
+});
+
+test('dynamic opacity assigns lower opacity to older visible messages', () => {
+  const { list, fire } = loadWidget({ dynamicOpacity: 'yes', oldestMessageOpacity: 40, messagesLimit: 3 });
+  for (let i = 0; i < 3; i++) {
+    fire('message', { data: tw({ userId: 'u' + i, text: 'm' + i, tags: { 'room-id': '1', 'user-id': 'u' + i, id: 'm' + i } }) });
+  }
+  assert.strictEqual(list.children[0].style.opacity, '0.4');
+  assert.strictEqual(list.children[1].style.opacity, '0.7');
+  assert.strictEqual(list.children[2].style.opacity, '1');
+});
+
+test('dynamic opacity disabled clears inline row opacity', () => {
+  const { list, fire } = loadWidget({ dynamicOpacity: 'no' });
+  fire('message', { data: tw({ text: 'visible' }) });
+  assert.strictEqual(list.children[0].style.opacity, '');
 });
 
 test('delete-message + delete-messages remove rows', () => {

@@ -279,32 +279,39 @@
     scheduleRemoval(row, u);
   }
 
-  // ---- Horizontal floating: lane placement (avoid overlap) + lifetime ----
-  let floatLanes = [];
+  // ---- Horizontal floating ----
+  // Messages stack from the bottom and are pushed upward by each new one, using
+  // their REAL measured height (so multi-line messages never overlap — the old
+  // fixed-lane math did). Each fades out after floatLifetime; the stack reflows.
+  const PAD = 12;            // matches .se-chat padding
   function floatingPlace(row) {
-    const h = (rootEl && rootEl.clientHeight) || 400;
-    const laneH = Math.round(num(F.fontSize, 21) * 2.7);
-    const n = Math.max(1, Math.floor((h - 20) / laneH));
-    const now = Date.now();
-    const life = num(F.floatLifetime, 12) * 1000;
-    if (floatLanes.length !== n) floatLanes = new Array(n).fill(0);
-
-    let lane;
-    if (str(F.floatingAvoidOverlap, 'yes') !== 'no') {
-      lane = 0; let soonest = Infinity;
-      for (let i = 0; i < n; i++) {
-        if (floatLanes[i] <= now) { lane = i; break; }
-        if (floatLanes[i] < soonest) { soonest = floatLanes[i]; lane = i; }
-      }
-      floatLanes[lane] = now + life * 0.55;   // reserve the lane for a while
-    } else {
-      lane = Math.floor(Math.random() * n);
-    }
-
+    const side = rootEl.dataset.halign === 'right' ? 'right' : 'left';
     row.style.position = 'absolute';
-    row.style.top = (10 + lane * laneH) + 'px';
-    row.style[rootEl.dataset.halign === 'right' ? 'right' : 'left'] = '10px';
-    setTimeout(() => { if (!row.parentNode) return; animateOut(row); }, life);
+    row.style[side] = PAD + 'px';
+    row.style.bottom = PAD + 'px';        // start at the bottom; reflow places it
+    row.style.top = 'auto';
+    reflowFloating();
+    if (str(F.floatingAvoidOverlap, 'yes') !== 'no') {
+      // measure once laid out, then keep stacking upward without overlap
+      requestAnimationFrame(reflowFloating);
+    }
+    const life = num(F.floatLifetime, 12) * 1000;
+    setTimeout(() => { if (row.parentNode) animateOut(row); }, life);
+  }
+
+  // Re-stack all floating rows from the bottom up using measured heights.
+  function reflowFloating() {
+    if (!listEl || str(F.layoutMode, 'horizontal') !== 'floating') return;
+    const rows = Array.from(listEl.children);
+    let y = PAD;
+    // newest is last in DOM; place from bottom (newest lowest) upward
+    for (let i = rows.length - 1; i >= 0; i--) {
+      const r = rows[i];
+      r.style.top = 'auto';
+      r.style.bottom = y + 'px';
+      const hh = r.offsetHeight || Math.round(num(F.fontSize, 21) * 2.4);
+      y += hh + num(F.rowGap, 9);
+    }
   }
 
   function headMarkup(u) {
@@ -401,26 +408,37 @@
   // ---- limit / lifetime -----------------------------------------
   function enforceLimit() {
     const limit = num(F.messagesLimit, 8);
+    let dropped = false;
     while (listEl.children.length > limit) {
       listEl.removeChild(listEl.firstElementChild);
+      dropped = true;
     }
+    // In floating mode a removed row leaves a gap — restack what remains.
+    if (dropped && str(F.layoutMode, 'horizontal') === 'floating') reflowFloating();
   }
 
   function scheduleRemoval(row, u) {
+    // hideAfter is the master "auto-hide" control. 0 = keep forever (only the
+    // messagesLimit / floating reflow removes rows). Floating always expires via
+    // floatLifetime regardless, so the lane stays clear.
     let ttl = num(F.hideAfter, 0);
+    if (str(F.layoutMode, 'horizontal') === 'floating') return; // handled by floatingPlace()
+    if (ttl <= 0) return;                                       // never auto-hide
+    // For alerts, ensure they stay at least alertMinDuration (a floor, not a cap).
     if (u.kind === 'alert') ttl = Math.max(num(F.alertMinDuration, 8), ttl);
-    if (ttl <= 0) return;
     setTimeout(() => animateOut(row), ttl * 1000);
   }
 
   function animateOut(row) {
     if (!row || !row.parentNode) return;
+    const floating = str(F.layoutMode, 'horizontal') === 'floating';
+    const finish = () => { row.remove(); if (floating) reflowFloating(); };
     const out = str(F.animationOut, 'liquidOut');
-    if (str(F.disableAllAnimations, 'no') === 'yes' || out === 'none') { row.remove(); return; }
+    if (str(F.disableAllAnimations, 'no') === 'yes' || out === 'none') { finish(); return; }
     const animIn = str(F.animationIn, 'liquidIn');
     row.classList.remove('animate__' + animIn);
     row.classList.add('animate__animated', 'animate__' + out);
-    setTimeout(() => row.remove(), num(F.animationSpeed, 460) + 60);
+    setTimeout(finish, num(F.animationSpeed, 460) + 60);
   }
 
   function removeByMsgId(id) {
@@ -443,6 +461,7 @@
     const setIf = (k, v) => { if (v != null && v !== '' && v !== 'auto') set(k, v); };
 
     // ---- Typography (always applied) ----
+    injectFont(f.fontName);   // ensure the chosen webfont is loaded (idempotent)
     set('--font-name', "'" + (f.fontName || 'Hanken Grotesk') + "'");
     set('--font-size', num(f.fontSize, 22) + 'px');
     set('--font-weight', str(f.fontWeight, '500'));
@@ -794,14 +813,25 @@
     return 'data:image/svg+xml;utf8,' + svg;
   }
 
+  // Load a Google font by name. Uses the modern css2 API with an *optional*
+  // weight axis (..400..900) so fonts that don't have every weight still load
+  // (the legacy css?family= API 404s on missing weights). Idempotent per family.
   function injectFont(name) {
-    if (!name) return;
-    const fam = String(name).trim().replace(/\s+/g, '+');
-    const id = 'se-font-' + fam;
+    const fam = String(name || '').trim();
+    if (!fam) return;
+    const id = 'se-font-' + fam.replace(/\s+/g, '-');
     if (document.getElementById(id)) return;
+    const param = fam.replace(/\s+/g, '+');
     const l = document.createElement('link');
     l.id = id; l.rel = 'stylesheet';
-    l.href = 'https://fonts.googleapis.com/css?family=' + fam + ':300,400,500,600,700,800,900&display=swap';
+    l.href = 'https://fonts.googleapis.com/css2?family=' + param + ':wght@300;400;500;600;700;800;900&display=swap';
+    // If the family lacks some weights, css2 returns 400; fall back to a
+    // weightless request which always resolves for any valid family.
+    l.onerror = function () {
+      if (l.dataset.fallback) return;
+      l.dataset.fallback = '1';
+      l.href = 'https://fonts.googleapis.com/css2?family=' + param + '&display=swap';
+    };
     document.head.appendChild(l);
   }
 

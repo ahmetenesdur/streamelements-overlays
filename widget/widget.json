@@ -45,9 +45,9 @@
     "label": "Layout",
     "value": "horizontal",
     "options": {
-      "horizontal": "Vertical (corner column)",
-      "fullscreen": "Fullscreen (wide)",
-      "floating": "Horizontal floating"
+      "horizontal": "Vertical column (stacked messages)",
+      "fullscreen": "Full screen (wide rows)",
+      "floating": "Floating (bottom-up, fades out)"
     },
     "group": "Layout"
   },

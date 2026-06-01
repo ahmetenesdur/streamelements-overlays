@@ -55,10 +55,19 @@ Alerts, Sound, Effects, Advanced glass, Multistream**.
   color on the username text, as a username-background chip, or disable it.
 - **Roles & Highlights → role icon overrides**: per-role glyph / `platform` / `avatar`
   override that wins over the global icon style (leave empty to inherit it).
-- **Alerts → Super Chat / Member**: YouTube Super Chat and membership alerts with their own
-  labels, shown when StreamElements provides the platform hints.
+- **Alerts → Super Chat / Member / Reward**: YouTube Super Chat and membership alerts, plus
+  channel-point / SE Store **reward** alerts (the `{reward}` token expands to the reward title),
+  shown when StreamElements provides the matching payload.
+- **Roles & Highlights → Per-role: message text / username chip / message background**: opt-in
+  toggles that paint each role's message text, username chip, and bubble in that role's own
+  color. **Per-role background tint strength %** controls how strong the wash is.
+- **Badges & Platform → Enable Twitch/YouTube/Kick dot**: switch a single platform's dot off
+  while keeping the others (the master **Show platform dot** must still be on).
 - **Effects → Perspective zoom % / field of view**: pair with the X/Y/Z tilt for a tuned
   3D look.
+- **Layout → Full screen: float & avoid overlapping**: in the `Full screen` layout, scatter
+  messages to non-overlapping positions instead of a column — pair with **Dynamic opacity**
+  for a live floating chat.
 - For the closest competitor-style grouped layout, set **Consecutive message grouping** to
   `Second message stack`, enable **Dynamic opacity**, and use the `Frosted` or `Slate`
   preset if you want visible bubbles.

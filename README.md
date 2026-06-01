@@ -31,23 +31,29 @@ The Kick relay supports an optional shared access token for public deployments.
 **Identity & roles**
 - Roles: broadcaster · lead mod · moderator · artist · vip · subscriber · fav list · regular,
   each with its own color (lead mod / fav are user-defined username lists).
+- **Per-role visual matrix** — each role can also color the message text and wear a tinted
+  username chip + message-background wash, all derived from that role's own color.
 - **Pronouns** (opt-in) via pronouns.alejo.io for Twitch users.
-- Platform logo and/or colored platform dot; badges; **53 icon-bubble glyphs** or user avatar,
-  with **per-role icon overrides** (broadcaster / lead mod / mod / VIP / sub / artist / fav / regular).
+- Platform logo and/or colored platform dot (per-platform enable + color); badges;
+  **53 icon-bubble glyphs** or user avatar, with **per-role icon overrides**
+  (broadcaster / lead mod / mod / VIP / sub / artist / fav / regular).
 - Username color modes (platform / text / custom / hidden); **native color placement** on the
   username text or as a username-background chip; highlighted keywords.
 - 7TV / BTTV / FFZ custom emotes (global + channel), fetched client-side — **zero-width emote overlays** supported.
 - **Shared Chat** (Twitch Stream Together) detection + origin marker, with optional
-  **`roomId:name` origin labels** so guest-channel messages name their source.
+  **`roomId:name` origin labels** (auto-colored per channel) so guest-channel messages name their source.
 
 **Alerts** — inline follow / sub / resub / gift / community-gift / tip / cheer / raid / host
 as refined accent lines: per-type enable, custom label format, minimum display time, sound per event.
 **YouTube-aware subtypes** — Super Chat and membership alerts get their own labels when
 StreamElements provides the platform hints (tolerant detection, falls back to tip/sub).
+**Channel-point / Store rewards** via the `redemption-latest` listener, with a `{reward}` label token.
 
 **Effects** — edge-fade mask, perspective tilt (X/Y/Z) with **zoom + field-of-view**, crayon
 texture, and an opt-in **Liquid Glass refraction** (real SVG, Chromium/OBS; auto-falls back to
 glassmorphism elsewhere). Signature liquid entrance + reduced-motion support.
+- **Full-screen float** — an opt-in fullscreen mode that scatters messages to non-overlapping
+  positions (collision avoidance), pairs with dynamic age-opacity for a live floating chat.
 
 > **Deferred:** TikTok and Ko-fi ingestion are intentionally out of scope for now — they
 > require separate platform/webhook integration beyond the native StreamElements widget event
@@ -105,7 +111,7 @@ push to `main`.
 
 ## Status
 
-**Current: v1.1.0** · 55 widget unit tests + 11 relay parser/lifecycle assertions green · verified live in the preview.
+**Current: v1.1.0** · 67 widget unit tests + 11 relay parser/lifecycle assertions green · verified live in the preview.
 
 - ✅ Phases 0–6 — scaffold, core render, design system, inline alerts, effects, Kick relay (code; deploy when needed)
 - ✅ Layout system rebuilt — real **vertical / horizontal ticker / fullscreen** (pure flexbox, no pile-ups)
@@ -114,6 +120,7 @@ push to `main`.
 - ✅ Pastel-premium palette + minimal shadows + gradient-free preview scenes (v1.0.2)
 - ✅ Zero-width emote overlays, error boundaries, exponential backoff, relay rate limiting, OBS GPU optimizations (v1.1.0)
 - ✅ Phase 8 competitive parity — second-message stack grouping, dynamic age opacity, shared-chat origin labels, username color placement, per-role icon overrides, YouTube Super Chat/member alerts, perspective zoom/FOV
+- ✅ Competitor gap close — channel-point/Store reward alerts, full per-role visual matrix, fullscreen float (overlap avoidance), per-platform dot toggles, auto-colored shared-chat labels
 - ⬜ Public publish + live OBS test · TikTok + Ko-fi (future)
 
 ## Contributing

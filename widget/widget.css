@@ -16,22 +16,24 @@
    TOKENS — defaults = "Editorial" (no surface, pure type on video)
    ================================================================ */
 :root {
-  /* Typography — distinctive grotesque, not Inter/Roboto/system. */
+  /* Typography — distinctive grotesque, not Inter/Roboto/system.
+     These :root values mirror the widget.json field defaults so the pre-JS
+     paint (and any no-JS fallback) matches what applyTheme() will set. */
   --font-name: 'Hanken Grotesk';
-  --font-size: 21px;
-  --font-weight: 450;
-  --font-color: rgba(255, 255, 255, 0.95);
+  --font-size: 22px;
+  --font-weight: 500;
+  --font-color: rgba(255, 255, 255, 0.96);
   --name-weight: 800;
-  --emote-size: 26px;
-  --badge-size: 19px;
+  --emote-size: 28px;
+  --badge-size: 20px;
 
   /* A whisper-soft halo keeps text readable on video — without a box. */
   --text-shadow: 0 1px 2px rgba(0,0,0,0.45), 0 1px 6px rgba(0,0,0,0.28);
 
   /* Layout footprint */
-  --row-gap: 11px;
+  --row-gap: 9px;
   --row-padding: 0px 0px;     /* editorial = no inner box padding */
-  --row-maxwidth: 470px;      /* horizontal (corner) mode */
+  --row-maxwidth: 460px;      /* horizontal (corner) mode */
   --row-width: 100%;          /* fullscreen mode width factor */
 
   /* ---- SURFACE (calm, borderless) ----
@@ -53,21 +55,21 @@
   --overlay-bg: rgba(0, 0, 0, 0);
 
   /* Username modes / highlight */
-  --custom-nick-color: #bcd0ff;
+  --custom-nick-color: #78aaff;
   --keyword-color: var(--accent);
 
-  /* Platform dots */
-  --dot-twitch: #a970ff;
-  --dot-youtube: #ff4e45;
+  /* Platform dots — brand marks, matched to the inline platform logos. */
+  --dot-twitch: #9146ff;
+  --dot-youtube: #ff0000;
   --dot-kick: #53fc18;
 
   /* Roles — username tint (no boxes) */
-  --role-broadcaster: #ff6a6a;
+  --role-broadcaster: #ff5a5a;
   --role-leadmod: #28c8a0;
-  --role-mod: #66d27a;
+  --role-mod: #3fb950;
   --role-artist: #ff9f4d;
-  --role-vip: #ff8fdc;
-  --role-sub: #82b1ff;
+  --role-vip: #ff7ad9;
+  --role-sub: #6aa0ff;
   --role-fav: #ffd166;
   --role-regular: ;
 

@@ -425,7 +425,7 @@
   "ignoredUsers": {
     "type": "text",
     "label": "Ignored users (comma separated)",
-    "value": "StreamElements,Nightbot,StreamLabs",
+    "value": "StreamElements, Nightbot, Moobot, StreamLabs, Soundalerts, Fossabot, Wizebot, Sery_Bot",
     "group": "Messages"
   },
   "animationIn": {
@@ -560,7 +560,7 @@
   "alertLabelSub": {
     "type": "text",
     "label": "Label · Sub",
-    "value": "{name} subscribed ({amount} months)",
+    "value": "{name} subscribed",
     "group": "Alerts"
   },
   "alertLabelTip": {
@@ -578,7 +578,7 @@
   "alertLabelRaid": {
     "type": "text",
     "label": "Label · Raid",
-    "value": "{name} raided with {amount}",
+    "value": "{name} raided with {amount} viewers",
     "group": "Alerts"
   },
   "alertLabelResub": {
@@ -602,7 +602,7 @@
   "alertLabelHost": {
     "type": "text",
     "label": "Label · Host",
-    "value": "{name} hosted with {amount}",
+    "value": "{name} hosted with {amount} viewers",
     "group": "Alerts"
   },
   "alertMinDuration": {
@@ -857,7 +857,7 @@
   },
   "widgetVersion": {
     "type": "hidden",
-    "value": "1.0.0"
+    "value": "1.0.1"
   },
   "widgetUpdateUrl": {
     "type": "hidden",

@@ -11,10 +11,13 @@
   <style>
     /* ---- preview-only chrome (NOT part of the widget) ---- */
     :root {
+      /* Preview-chrome tokens are namespaced (--pv-*) so they can NEVER bleed
+         into the widget's own CSS custom properties (e.g. --accent). The widget
+         must render with its real default accent, not the panel's blue. */
       --pw: 340px;            /* panel width */
       --ink: #e9eaf0; --mut: #8b8f9c; --line: rgba(255,255,255,.08);
       --field-bg: #16181f; --field-bd: rgba(255,255,255,.10);
-      --accent: #6ea8fe;
+      --pv-accent: #6ea8fe;
     }
     * { box-sizing: border-box; }
     html, body { height: 100%; }
@@ -95,7 +98,7 @@
       border: 1px solid var(--field-bd); border-radius: 7px; padding: 6px 8px; font-size: 12px; font-family: inherit;
     }
     .field.wide select, .field.wide input { width: 100%; }
-    input[type=range] { width: 150px; accent-color: var(--accent); }
+    input[type=range] { width: 150px; accent-color: var(--pv-accent); }
     input[type=color] { width: 34px; height: 26px; padding: 0; border: 1px solid var(--field-bd); border-radius: 6px; background: var(--field-bg); }
     .rangewrap { display: flex; align-items: center; gap: 8px; justify-content: flex-end; }
     .rangewrap .val { font-variant-numeric: tabular-nums; color: var(--mut); font-size: 11px; min-width: 30px; text-align: right; }

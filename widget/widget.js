@@ -188,8 +188,8 @@
       communitygift: F.alertLabelCommunityGift || '{sender} gifted {count} subs',
       tip: F.alertLabelTip || '{name} tipped {amount}',
       cheer: F.alertLabelCheer || '{name} cheered {amount} bits',
-      raid: F.alertLabelRaid || '{name} raided with {amount}',
-      host: F.alertLabelHost || '{name} hosted with {amount}'
+      raid: F.alertLabelRaid || '{name} raided with {amount} viewers',
+      host: F.alertLabelHost || '{name} hosted with {amount} viewers'
     }[type];
     const label = String(tmpl)
       .replace(/{name}/g, name)
@@ -450,17 +450,19 @@
     }
 
     // ---- Username / highlight / dots / roles ----
-    set('--custom-nick-color', f.customNickColor || '#bcd0ff');
+    // Fallbacks mirror the widget.json field defaults, so clearing a color
+    // field returns it to the documented default (not a stale legacy tone).
+    set('--custom-nick-color', f.customNickColor || '#78aaff');
     setIf('--keyword-color', f.keywordColor);   // empty → follows --accent
 
-    set('--dot-twitch', f.dotTwitch || '#a970ff');
-    set('--dot-youtube', f.dotYouTube || '#ff4e45');
+    set('--dot-twitch', f.dotTwitch || '#9146ff');
+    set('--dot-youtube', f.dotYouTube || '#ff0000');
     set('--dot-kick', f.dotKick || '#53fc18');
 
-    set('--role-broadcaster', f.colorBroadcaster || '#ff6a6a');
-    set('--role-mod', f.colorMod || '#66d27a');
-    set('--role-vip', f.colorVip || '#ff8fdc');
-    set('--role-sub', f.colorSub || '#82b1ff');
+    set('--role-broadcaster', f.colorBroadcaster || '#ff5a5a');
+    set('--role-mod', f.colorMod || '#3fb950');
+    set('--role-vip', f.colorVip || '#ff7ad9');
+    set('--role-sub', f.colorSub || '#6aa0ff');
     set('--role-leadmod', f.colorLeadMod || '#28c8a0');
     set('--role-artist', f.colorArtist || '#ff9f4d');
     set('--role-fav', f.colorFav || '#ffd166');
@@ -607,7 +609,7 @@
       sub: F.alertLabelSub || '{name} subscribed',
       gift: F.alertLabelGift || '{sender} gifted a sub to {name}',
       communitygift: F.alertLabelCommunityGift || '{sender} gifted {count} subs',
-      host: F.alertLabelHost || '{name} hosted with {amount}'
+      host: F.alertLabelHost || '{name} hosted with {amount} viewers'
     }[p.type] || '{name}';
     const label = String(tmpl)
       .replace(/{name}/g, name).replace(/{sender}/g, sender)

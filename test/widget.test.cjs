@@ -7,7 +7,18 @@
 'use strict';
 const { test } = require('node:test');
 const assert = require('node:assert');
+const fs = require('node:fs');
+const path = require('node:path');
 const { loadWidget } = require('./harness.cjs');
+
+// The SHIPPED field defaults (widget.json `value`s), so we can regression-test
+// the real out-of-the-box config — not just the JS fallback strings.
+function jsonDefaults() {
+  const j = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'widget', 'widget.json'), 'utf8'));
+  const fd = {};
+  Object.keys(j).forEach(k => { fd[k] = j[k].value; });
+  return fd;
+}
 
 // Helper: a Twitch raw `message.data` with sensible defaults.
 function tw(over) {
@@ -250,4 +261,46 @@ test('horizontal layout: messagesLimit clips old messages (never piles up)', () 
   const { fire, list } = loadWidget({ layoutMode: 'horizontal', messagesLimit: 5 });
   for (let i = 0; i < 30; i++) fire('message', { data: tw({ userId: 'h' + i, text: 'msg ' + i, tags: { 'room-id': '1', 'user-id': 'h' + i, id: 'h' + i } }) });
   assert.strictEqual(list.children.length, 5, 'rain of 30 → capped at messagesLimit, no pile-up');
+});
+
+// ---- shipped defaults: best-practice / no-nonsense guards ----------
+// (regression for the "{name} subscribed (1 months)" bug — tests the real
+//  widget.json default value, which is what users actually ship with.)
+test('shipped default: a NEW sub renders cleanly (no "(1 months)", no empty parens)', () => {
+  const { api } = loadWidget(jsonDefaults());
+  const newSub = api.fn.normalizeAlert('subscriber-latest', { name: 'Ada', amount: 1 });
+  assert.strictEqual(newSub.text, 'Ada subscribed', 'first-time sub must not tout a months count');
+  const noAmount = api.fn.normalizeAlert('subscriber-latest', { name: 'Bo' });
+  assert.strictEqual(noAmount.text, 'Bo subscribed', 'missing amount must not leave "( months)"');
+  const resub = api.fn.normalizeAlert('subscriber-latest', { name: 'Cy', amount: 7 });
+  assert.match(resub.text, /7 months/, 'resub still carries the months count');
+});
+
+test('shipped defaults: EVERY alert label resolves cleanly (no leftover {placeholders}/NaN/undefined)', () => {
+  const { api } = loadWidget(jsonDefaults());
+  const cases = [
+    ['follower-latest', { name: 'A' }],
+    ['subscriber-latest', { name: 'B', amount: 1 }],
+    ['subscriber-latest', { name: 'C', amount: 5 }],
+    ['subscriber-latest', { name: 'D', gifted: true, sender: 'E', amount: 1 }],
+    ['subscriber-latest', { name: 'F', bulkGifted: true, sender: 'G', count: 10 }],
+    ['tip-latest', { name: 'H', amount: '25 USD' }],
+    ['cheer-latest', { name: 'I', amount: 500 }],
+    ['raid-latest', { name: 'J', amount: 142 }],
+    ['host-latest', { name: 'K', amount: 88 }]
+  ];
+  for (const [listener, ev] of cases) {
+    const u = api.fn.normalizeAlert(listener, ev);
+    assert.ok(u, listener + ' should produce an alert with defaults');
+    assert.ok(!/[{}]/.test(u.text), 'no leftover placeholder token in: "' + u.text + '"');
+    assert.ok(!/undefined|NaN|\(\s*months\)/.test(u.text), 'no broken fragment in: "' + u.text + '"');
+  }
+});
+
+test('shipped defaults: common chat bots are ignored out of the box', () => {
+  const { api } = loadWidget(jsonDefaults());
+  for (const bot of ['Nightbot', 'StreamElements', 'Moobot', 'Fossabot', 'Sery_Bot']) {
+    assert.strictEqual(api.fn.isIgnored(bot), true, bot + ' should be ignored by default');
+  }
+  assert.strictEqual(api.fn.isIgnored('a_real_viewer'), false, 'real viewers are not ignored');
 });

@@ -335,21 +335,30 @@
     "type": "dropdown",
     "label": "Enable Twitch dot",
     "value": "yes",
-    "options": { "yes": "Yes", "no": "No" },
+    "options": {
+      "yes": "Yes",
+      "no": "No"
+    },
     "group": "Badges & Platform"
   },
   "dotYouTubeOn": {
     "type": "dropdown",
     "label": "Enable YouTube dot",
     "value": "yes",
-    "options": { "yes": "Yes", "no": "No" },
+    "options": {
+      "yes": "Yes",
+      "no": "No"
+    },
     "group": "Badges & Platform"
   },
   "dotKickOn": {
     "type": "dropdown",
     "label": "Enable Kick dot",
     "value": "yes",
-    "options": { "yes": "Yes", "no": "No" },
+    "options": {
+      "yes": "Yes",
+      "no": "No"
+    },
     "group": "Badges & Platform"
   },
   "dotTwitch": {
@@ -384,21 +393,30 @@
     "type": "dropdown",
     "label": "Per-role: color message text",
     "value": "no",
-    "options": { "yes": "Yes", "no": "No" },
+    "options": {
+      "yes": "Yes",
+      "no": "No"
+    },
     "group": "Roles & Highlights"
   },
   "roleNameBg": {
     "type": "dropdown",
     "label": "Per-role: username background chip",
     "value": "no",
-    "options": { "yes": "Yes", "no": "No" },
+    "options": {
+      "yes": "Yes",
+      "no": "No"
+    },
     "group": "Roles & Highlights"
   },
   "roleMsgBg": {
     "type": "dropdown",
     "label": "Per-role: message background wash",
     "value": "no",
-    "options": { "yes": "Yes", "no": "No" },
+    "options": {
+      "yes": "Yes",
+      "no": "No"
+    },
     "group": "Roles & Highlights"
   },
   "roleTintStrength": {
@@ -1239,6 +1257,28 @@
     "value": "",
     "group": "Multistream"
   },
+  "sharedChatPanel": {
+    "type": "dropdown",
+    "label": "Shared Chat: show participants panel",
+    "value": "no",
+    "options": {
+      "yes": "Yes",
+      "no": "No"
+    },
+    "group": "Multistream"
+  },
+  "sharedChatPanelPos": {
+    "type": "dropdown",
+    "label": "Participants panel position",
+    "value": "top-right",
+    "options": {
+      "top-right": "Top right",
+      "top-left": "Top left",
+      "bottom-right": "Bottom right",
+      "bottom-left": "Bottom left"
+    },
+    "group": "Multistream"
+  },
   "showYouTube": {
     "type": "dropdown",
     "label": "Show YouTube chat",
@@ -1317,7 +1357,7 @@
   },
   "widgetVersion": {
     "type": "hidden",
-    "value": "1.1.0"
+    "value": "1.2.0"
   },
   "widgetUpdateUrl": {
     "type": "hidden",

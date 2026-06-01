@@ -27,6 +27,7 @@
    * @property {string}  text
    * @property {boolean} isAction
    * @property {boolean} [shared]
+   * @property {string} [roomId]
    * @property {string} [sharedSourceRoomId]
    * @property {string} [sharedSourceLabel]
    * @property {'chat'|'alert'} kind
@@ -45,8 +46,11 @@
   let F = {};                       // fieldData (settings)
   let listEl = null;                // .se-chat__list
   let rootEl = null;                // .se-chat
+  let participantsEl = null;        // .se-chat__participants (lazy)
+  let channelName = '';             // host channel (from onWidgetLoad) — labels host in roster
   let total = 0;                    // running message counter (unique ids)
   let lastSenderKey = null;         // for mergeMessages
+  const sharedRooms = new Map();    // roomId -> {roomId,label,host} (Shared Chat participants)
   const customEmotes = new Map();   // name -> {url,zw} | url  (7TV / BTTV / FFZ)
   const channelEmoteIds = new Set();// Twitch room ids whose channel emotes should refresh with globals
   const channelEmotesLoaded = new Set();
@@ -71,6 +75,8 @@
   window.addEventListener('onWidgetLoad', function (obj) {
     const detail = obj.detail || {};
     F = detail.fieldData || {};
+    const ch = detail.channel || {};
+    channelName = ch.username || ch.name || ch.displayName || channelName;
     rootEl = document.getElementById('seChat');
     listEl = document.getElementById('chatList');
 
@@ -141,6 +147,7 @@
     const sharedSourceRoomId = shared ? String(srcRoom) : '';
     return {
       platform: 'twitch',
+      roomId: tags['room-id'] ? String(tags['room-id']) : '',
       shared: shared,
       sharedSourceRoomId: sharedSourceRoomId,
       sharedSourceLabel: sharedSourceRoomId ? sharedLabelForRoom(sharedSourceRoomId) : '',
@@ -295,6 +302,7 @@
     if (str(F.hideCommands, 'yes') === 'yes' && u.text.trim().startsWith('!')) return;
     if (isIgnored(u.displayName)) return;
     applyCustomRoles(u);                            // lead mod / fav / regular
+    recordSharedParticipants(u);                    // Shared Chat roster (no-op unless shared)
 
     const mode = groupingMode();
     if (mode !== 'off') {
@@ -497,6 +505,67 @@
       if (key === id && value) return value;
     }
     return '';
+  }
+
+  // ---- Shared Chat participants panel ----------------------------
+  // A live roster of the channels in a Twitch Stream Together session.
+  // Honest by construction: it only lists rooms we actually detect from
+  // `source-room-id` (+ the host room), named via the sharedChatLabels map
+  // (host auto-named from the onWidgetLoad channel). No avatars — guest
+  // channel images aren't reliably available — auto-colored name chips instead.
+  function recordSharedParticipants(u) {
+    if (!u || !u.shared) return;
+    let changed = false;
+    if (u.roomId && !sharedRooms.has(u.roomId)) {
+      const hostLabel = sharedLabelForRoom(u.roomId) || channelName || ('#' + u.roomId);
+      sharedRooms.set(u.roomId, { roomId: u.roomId, label: hostLabel, host: true });
+      changed = true;
+    }
+    const g = u.sharedSourceRoomId;
+    if (g && !sharedRooms.has(g)) {
+      sharedRooms.set(g, { roomId: g, label: u.sharedSourceLabel || ('#' + g), host: false });
+      changed = true;
+    }
+    if (changed) renderParticipants();
+  }
+
+  // Host first, then guests in arrival order.
+  function sharedRosterEntries() {
+    const all = Array.from(sharedRooms.values());
+    return all.filter(e => e.host).concat(all.filter(e => !e.host));
+  }
+
+  function ensureParticipantsEl() {
+    if (participantsEl || !rootEl) return participantsEl;
+    participantsEl = document.createElement('div');
+    participantsEl.className = 'se-chat__participants';
+    rootEl.appendChild(participantsEl);
+    return participantsEl;
+  }
+
+  function renderParticipants() {
+    if (!rootEl) return;
+    const entries = sharedRosterEntries();
+    if (!yes(F.sharedChatPanel) || entries.length === 0) {
+      if (participantsEl) {
+        participantsEl.innerHTML = '';
+        participantsEl.classList.remove('is-visible');
+      }
+      return;
+    }
+    ensureParticipantsEl();
+    participantsEl.dataset.pos = str(F.sharedChatPanelPos, 'top-right');
+    participantsEl.classList.add('is-visible');
+    const items = entries.map(function (e) {
+      return '<li class="se-chat__participant' + (e.host ? ' is-host' : '') + '">' +
+        '<span class="se-chat__participant-dot" style="background:' + stableColor(e.label) + '"></span>' +
+        '<span class="se-chat__participant-name">' + htmlEncode(e.label) + '</span>' +
+        (e.host ? '<span class="se-chat__participant-host">host</span>' : '') +
+        '</li>';
+    }).join('');
+    participantsEl.innerHTML =
+      '<div class="se-chat__participants-head">Shared chat · ' + entries.length + '</div>' +
+      '<ul class="se-chat__participants-list">' + items + '</ul>';
   }
 
   // Map the highest-priority role to its CSS color variable.
@@ -797,6 +866,8 @@
     toggle('fx-advanced-glass', yes(f.glassAdvanced) && advancedGlassSupported());
     toggle('no-anim', yes(f.disableAllAnimations));
     toggle('show-colon', yes(f.showColon));
+
+    renderParticipants();   // reflect live panel toggle / position changes
   }
 
   // ================================================================

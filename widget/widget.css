@@ -386,6 +386,66 @@ html, body {
   letter-spacing: 0.04em;
 }
 
+/* Shared Chat participants panel — opt-in roster overlay, any corner.
+   Frosted backing + one inset top sheen (no heavy shadow, no gradient). */
+.se-chat__participants {
+  position: absolute;
+  z-index: 5;
+  display: none;
+  max-width: 42%;
+  padding: 8px 11px 9px;
+  border-radius: 12px;
+  background: rgba(12, 14, 18, 0.42);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+  backdrop-filter: blur(14px) saturate(1.2);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  font-size: calc(var(--font-size) * 0.62);
+  line-height: 1.25;
+  pointer-events: none;
+}
+.se-chat__participants.is-visible { display: block; }
+.se-chat__participants[data-pos="top-right"]    { top: 14px; right: 14px; }
+.se-chat__participants[data-pos="top-left"]      { top: 14px; left: 14px; }
+.se-chat__participants[data-pos="bottom-right"]  { bottom: 14px; right: 14px; }
+.se-chat__participants[data-pos="bottom-left"]   { bottom: 14px; left: 14px; }
+.se-chat__participants-head {
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  opacity: 0.6;
+  margin-bottom: 5px;
+  font-size: 0.82em;
+}
+.se-chat__participants-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.se-chat__participant {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+.se-chat__participant-dot {
+  width: 0.62em;
+  height: 0.62em;
+  border-radius: 50%;
+  flex: none;
+}
+.se-chat__participant-name { font-weight: 600; }
+.se-chat__participant.is-host .se-chat__participant-name { font-weight: 800; }
+.se-chat__participant-host {
+  font-size: 0.7em;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.6;
+  font-weight: 800;
+}
+
 /* Badges */
 .msg__badges { display: inline; }
 .badge {

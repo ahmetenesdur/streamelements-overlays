@@ -85,6 +85,58 @@ test('shared chat label gets a stable per-name color', () => {
   assert.match(list.children[0].innerHTML, /msg__shared-label" style="color:#[0-9a-f]{6}"/);
 });
 
+test('participants panel fields ship disabled by default', () => {
+  const fd = jsonDefaults();
+  assert.strictEqual(fd.sharedChatPanel, 'no');
+  assert.strictEqual(fd.sharedChatPanelPos, 'top-right');
+});
+
+test('normalizeTwitch carries the host room id (for the roster)', () => {
+  const { api } = loadWidget({});
+  const u = api.fn.normalizeTwitch(tw({
+    tags: { 'room-id': '100', 'source-room-id': '200', 'user-id': 'u', id: 'm', badges: '' }
+  }));
+  assert.strictEqual(u.roomId, '100');
+});
+
+test('participants panel lists host + guest channels with a live count', () => {
+  const { root, fire } = loadWidget({
+    sharedChatPanel: 'yes',
+    sharedChatLabels: '100:HostChan,200:Ironmouse,300:Lirik'
+  });
+  fire('message', { data: tw({ displayName: 'GuestA', text: 'a',
+    tags: { 'room-id': '100', 'source-room-id': '200', 'user-id': 'a', id: 'm1', badges: '' } }) });
+  fire('message', { data: tw({ displayName: 'GuestB', text: 'b',
+    tags: { 'room-id': '100', 'source-room-id': '300', 'user-id': 'b', id: 'm2', badges: '' } }) });
+  const panel = root.children.find(c => c.classList.contains('se-chat__participants'));
+  assert.ok(panel, 'participants panel element exists');
+  assert.ok(panel.classList.contains('is-visible'));
+  assert.match(panel.innerHTML, /HostChan/);
+  assert.match(panel.innerHTML, /Ironmouse/);
+  assert.match(panel.innerHTML, /Lirik/);
+  assert.match(panel.innerHTML, /is-host/);
+  assert.match(panel.innerHTML, /Shared chat · 3/);
+});
+
+test('participants panel stays hidden when disabled', () => {
+  const { root, fire } = loadWidget({ sharedChatPanel: 'no', sharedChatLabels: '200:Ironmouse' });
+  fire('message', { data: tw({ text: 'a',
+    tags: { 'room-id': '100', 'source-room-id': '200', 'user-id': 'a', id: 'm1', badges: '' } }) });
+  const panel = root.children.find(c => c.classList.contains('se-chat__participants'));
+  assert.ok(!panel || (!panel.classList.contains('is-visible') && panel.innerHTML === ''),
+    'no visible panel when sharedChatPanel=no');
+});
+
+test('participants panel position comes from sharedChatPanelPos', () => {
+  const { root, fire } = loadWidget({
+    sharedChatPanel: 'yes', sharedChatPanelPos: 'bottom-left', sharedChatLabels: '200:Ironmouse'
+  });
+  fire('message', { data: tw({ text: 'a',
+    tags: { 'room-id': '100', 'source-room-id': '200', 'user-id': 'a', id: 'm1', badges: '' } }) });
+  const panel = root.children.find(c => c.classList.contains('se-chat__participants'));
+  assert.strictEqual(panel.dataset.pos, 'bottom-left');
+});
+
 test('per-platform dot opt-out toggles root class (master dot stays on)', () => {
   const { root } = loadWidget({ showPlatformDot: 'yes', dotTwitchOn: 'no', dotKickOn: 'yes' });
   assert.ok(root.classList.contains('show-dot'), 'master dot still on');

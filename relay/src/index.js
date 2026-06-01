@@ -211,61 +211,69 @@ function broadcast(chatroomId, msg) {
   }
 }
 
-const server = http.createServer((req, res) => {
-  if (req.url === '/health' || req.url === '/') {
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ ok: true, rooms: rooms.size, uptime: process.uptime() }));
-    return;
-  }
-  res.writeHead(404);
-  res.end();
-});
+// All server setup lives inside startServer() so that `require`-ing this file
+// (e.g. from relay/test.cjs) creates NO sockets, timers, or open handles — the
+// process can exit cleanly. Only running it directly starts the server.
+function startServer() {
+  const server = http.createServer((req, res) => {
+    if (req.url === '/health' || req.url === '/') {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ ok: true, rooms: rooms.size, uptime: process.uptime() }));
+      return;
+    }
+    res.writeHead(404);
+    res.end();
+  });
 
-const wss = new WebSocketServer({ server });
+  const wss = new WebSocketServer({ server });
 
-wss.on('connection', (client) => {
-  client._rooms = new Set();
-  client.isAlive = true;
-  client.on('pong', () => { client.isAlive = true; });
+  wss.on('connection', (client) => {
+    client._rooms = new Set();
+    client.isAlive = true;
+    client.on('pong', () => { client.isAlive = true; });
 
-  client.on('message', async (buf) => {
-    let msg;
-    try { msg = JSON.parse(buf.toString()); } catch { return; }
-    if (msg && msg.type === 'subscribe' && msg.platform === 'kick') {
-      const chatroomId = await resolveChatroomId(msg.channel);
-      if (!chatroomId) {
-        client.send(JSON.stringify({ type: 'error', error: 'kick_channel_unresolved', channel: msg.channel }));
-        return;
+    client.on('message', async (buf) => {
+      let msg;
+      try { msg = JSON.parse(buf.toString()); } catch { return; }
+      if (msg && msg.type === 'subscribe' && msg.platform === 'kick') {
+        const chatroomId = await resolveChatroomId(msg.channel);
+        if (!chatroomId) {
+          client.send(JSON.stringify({ type: 'error', error: 'kick_channel_unresolved', channel: msg.channel }));
+          return;
+        }
+        const room = ensureRoom(chatroomId, String(msg.channel));
+        room.subscribers.add(client);
+        client._rooms.add(chatroomId);
+        client.send(JSON.stringify({ type: 'subscribed', platform: 'kick', chatroomId }));
       }
-      const room = ensureRoom(chatroomId, String(msg.channel));
-      room.subscribers.add(client);
-      client._rooms.add(chatroomId);
-      client.send(JSON.stringify({ type: 'subscribed', platform: 'kick', chatroomId }));
-    }
+    });
+
+    client.on('close', () => {
+      for (const id of client._rooms) {
+        const room = rooms.get(id);
+        if (room) room.subscribers.delete(client);
+      }
+    });
   });
 
-  client.on('close', () => {
-    for (const id of client._rooms) {
-      const room = rooms.get(id);
-      if (room) room.subscribers.delete(client);
+  // Drop dead widget sockets (Railway/proxies can leave zombies).
+  const heartbeat = setInterval(() => {
+    for (const client of wss.clients) {
+      if (client.isAlive === false) { client.terminate(); continue; }
+      client.isAlive = false;
+      try { client.ping(); } catch {}
     }
-  });
-});
+  }, 30000);
+  wss.on('close', () => clearInterval(heartbeat));
 
-// Drop dead widget sockets (Railway/proxies can leave zombies).
-const heartbeat = setInterval(() => {
-  for (const client of wss.clients) {
-    if (client.isAlive === false) { client.terminate(); continue; }
-    client.isAlive = false;
-    try { client.ping(); } catch {}
-  }
-}, 30000);
-wss.on('close', () => clearInterval(heartbeat));
-
-// Only listen when run directly; exporting the pure parsers lets us unit-test
-// them (see relay/test.cjs) without opening a socket.
-if (require.main === module) {
   server.listen(PORT, () => console.log(`[relay] listening on :${PORT}`));
+  return server;
 }
 
-module.exports = { parseKickContent, toUnifiedKick, toUnifiedKickAlert };
+// Only start when run directly; exporting the pure parsers lets us unit-test
+// them (see relay/test.cjs) without opening a socket or leaking timers.
+if (require.main === module) {
+  startServer();
+}
+
+module.exports = { parseKickContent, toUnifiedKick, toUnifiedKickAlert, startServer };

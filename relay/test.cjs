@@ -81,3 +81,19 @@ const ok = (label) => { n++; console.log('  ✓ ' + label); };
 }
 
 console.log(`\n${n} assertions passed.`);
+
+// Guard against regressions of the "test hangs" bug: requiring index.js must
+// not leave open handles (servers/timers). If anything keeps the loop alive,
+// fail loudly instead of hanging.
+const handles = (process._getActiveHandles && process._getActiveHandles()) || [];
+const reqs = (process._getActiveRequests && process._getActiveRequests()) || [];
+// stdout/stdin/tty handles are expected; anything socket/timer-like is not.
+const leaked = handles.filter(h => {
+  const t = h && h.constructor && h.constructor.name;
+  return t && !/WriteStream|ReadStream|TTY|Socket$/.test(t) === false ? false : /Server|Timer|Timeout/i.test(t || '');
+});
+if (leaked.length || reqs.length) {
+  console.error(`✗ open handles after tests: ${leaked.map(h => h.constructor.name).join(', ')} (require should open none)`);
+  process.exit(1);
+}
+console.log('No open handles — process exits cleanly.');

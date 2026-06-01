@@ -53,8 +53,8 @@ Alerts, Sound, Effects, Advanced glass, Multistream**.
   source room show that name; unmapped rooms still show the shared-chat marker.
 - **Username & Colors → Platform/native username color placement**: render the native
   color on the username text, as a username-background chip, or disable it.
-- **Roles & Highlights → role icon overrides**: per-role glyph / `platform` / `avatar`
-  override that wins over the global icon style (leave empty to inherit it).
+- **Roles & Highlights → per-role icons**: pick each role's icon from a dropdown — a glyph,
+  the platform logo, or the user avatar. Leave it on **Inherit** to use the global icon style.
 - **Alerts → Super Chat / Member / Reward**: YouTube Super Chat and membership alerts, plus
   channel-point / SE Store **reward** alerts (the `{reward}` token expands to the reward title),
   shown when StreamElements provides the matching payload.

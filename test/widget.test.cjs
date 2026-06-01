@@ -256,14 +256,14 @@ test('per-role visual matrix: all toggles off → no role hook, no matrix classe
 });
 
 test('role icon override wins over global iconStyle', () => {
-  const { list, fire } = loadWidget({ showAvatar: 'yes', iconStyle: 'avatar', iconMod: '★' });
+  const { list, fire } = loadWidget({ showAvatar: 'yes', iconStyle: 'avatar', iconMod: '👑' });
   fire('message', { data: tw({
     displayName: 'ModUser',
     badges: [{ type: 'moderator' }],
     tags: { 'room-id': '1', 'user-id': 'u', id: 'm', mod: '1', badges: 'moderator/1' }
   }) });
   assert.match(list.children[0].innerHTML, /msg__glyphicon/);
-  assert.match(list.children[0].innerHTML, /★/);
+  assert.match(list.children[0].innerHTML, /👑/);
 });
 
 test('role icon override falls back to global iconStyle when unset', () => {

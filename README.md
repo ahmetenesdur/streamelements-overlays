@@ -2,8 +2,9 @@
 
 A fully customizable, **professional multistream chat overlay** for StreamElements —
 shows **Twitch + YouTube + Kick** chat in one unified feed with a clean, modern
-"broadcast editorial" look (no AI-slop boxes/gradients), inline alerts, custom
-emotes, pronouns, roles, sounds, effects, and GitHub auto-update.
+"broadcast editorial" look — soft pastel palette, minimal shadows, no boxes or
+gradients — plus inline alerts, custom emotes, pronouns, roles, sounds, effects,
+and GitHub auto-update.
 
 ## Features
 
@@ -13,8 +14,10 @@ bundled Railway relay). Per-platform show/hide: use one platform or combine any 
 **Look & layout**
 - 3 style presets: **Editorial** (text on video), **Frosted** (clean glass panel),
   **Slate** (solid chip) — plus full token overrides.
-- 3 layouts: **Vertical** (corner column), **Fullscreen** (wide), **Horizontal floating**
-  (lane-based floating chips with bob + dynamic opacity + overlap avoidance).
+- 3 layouts: **Vertical** (column), **Horizontal** (side-by-side ticker — newest enters
+  from the right/left, older clipped, never piles up), **Fullscreen** (wide column).
+- **Soft pastel palette** (harmonious role tints + champagne accent) and **minimal shadows**
+  by default — depth comes from a hairline top sheen, not heavy drop shadows.
 - Left/right align, top/bottom origin, comfortable/compact density, max messages,
   hide-after, message width/gap.
 - Distinctive default font (Hanken Grotesk) or any Google font; full color/size control.
@@ -24,13 +27,13 @@ bundled Railway relay). Per-platform show/hide: use one platform or combine any 
 - Roles: broadcaster · lead mod · moderator · artist · vip · subscriber · fav list · regular,
   each with its own color (lead mod / fav are user-defined username lists).
 - **Pronouns** (opt-in) via pronouns.alejo.io for Twitch users.
-- Platform logo and/or colored platform dot; badges; **50 icon-bubble glyphs** or user avatar.
+- Platform logo and/or colored platform dot; badges; **53 icon-bubble glyphs** or user avatar.
 - Username color modes (platform / text / custom / hidden); highlighted keywords.
 - 7TV / BTTV / FFZ custom emotes (global + channel), fetched client-side.
 - **Shared Chat** (Twitch Stream Together) detection + origin marker.
 
-**Alerts** — inline follow/sub/tip/cheer/raid as refined accent lines, per-type
-enable, custom label format, minimum display time, sound per event.
+**Alerts** — inline follow / sub / resub / gift / community-gift / tip / cheer / raid / host
+as refined accent lines: per-type enable, custom label format, minimum display time, sound per event.
 
 **Effects** — edge-fade mask, perspective tilt (X/Y/Z), crayon texture, and an
 opt-in **Liquid Glass refraction** (real SVG, Chromium/OBS; auto-falls back to
@@ -69,7 +72,8 @@ npm run build       # stamp widgetVersion from package.json (for auto-update)
 ```
 
 The preview page sends Twitch/YouTube/Kick messages, fires alerts, tests 7TV emotes
-and keywords, and live-toggles preset/layout/effects — no StreamElements account needed.
+and keywords, live-toggles every Fields setting, and previews against flat test scenes
+(light / mid-gray / deep-teal / transparency checker) — no StreamElements account needed.
 
 ## Deploy
 
@@ -87,8 +91,11 @@ push to `main`.
 
 ## Status
 
-- ✅ Phases 0–5 — scaffold, core render, design system, alerts, effects
-- ✅ Phase 6 — Kick relay (code; deploy when needed)
-- ✅ Feature parity pass — per-platform, expanded roles, pronouns, icon library,
-  horizontal floating, shared chat, full settings audit
-- ⬜ TikTok + Ko-fi (future), public publish + live OBS test
+**Current: v1.0.2** · 31 unit tests + relay parser tests green · verified live in the preview.
+
+- ✅ Phases 0–6 — scaffold, core render, design system, inline alerts, effects, Kick relay (code; deploy when needed)
+- ✅ Layout system rebuilt — real **vertical / horizontal ticker / fullscreen** (pure flexbox, no pile-ups)
+- ✅ Feature parity — per-platform show/hide, expanded roles, pronouns, 53-glyph icon library, shared chat
+- ✅ Settings audit + best-practice defaults reconciled across json/css/js (v1.0.1)
+- ✅ Pastel-premium palette + minimal shadows + gradient-free preview scenes (v1.0.2)
+- ⬜ Public publish + live OBS test · TikTok + Ko-fi (future)

@@ -170,7 +170,7 @@
   "customNickColor": {
     "type": "colorpicker",
     "label": "Custom username color",
-    "value": "rgba(120,170,255,1)",
+    "value": "rgba(171,194,242,1)",
     "group": "Username & Colors"
   },
   "displayBadges": {
@@ -289,19 +289,19 @@
   "dotTwitch": {
     "type": "colorpicker",
     "label": "Dot · Twitch",
-    "value": "rgba(145,70,255,1)",
+    "value": "rgba(169,139,232,1)",
     "group": "Badges & Platform"
   },
   "dotYouTube": {
     "type": "colorpicker",
     "label": "Dot · YouTube",
-    "value": "rgba(255,0,0,1)",
+    "value": "rgba(239,116,121,1)",
     "group": "Badges & Platform"
   },
   "dotKick": {
     "type": "colorpicker",
     "label": "Dot · Kick",
-    "value": "rgba(83,252,24,1)",
+    "value": "rgba(111,221,84,1)",
     "group": "Badges & Platform"
   },
   "roleHighlight": {
@@ -317,43 +317,43 @@
   "colorBroadcaster": {
     "type": "colorpicker",
     "label": "Role · Broadcaster",
-    "value": "rgba(255,90,90,1)",
+    "value": "rgba(242,150,157,1)",
     "group": "Roles & Highlights"
   },
   "colorMod": {
     "type": "colorpicker",
     "label": "Role · Moderator",
-    "value": "rgba(63,185,80,1)",
+    "value": "rgba(144,217,164,1)",
     "group": "Roles & Highlights"
   },
   "colorVip": {
     "type": "colorpicker",
     "label": "Role · VIP",
-    "value": "rgba(255,122,217,1)",
+    "value": "rgba(239,168,214,1)",
     "group": "Roles & Highlights"
   },
   "colorSub": {
     "type": "colorpicker",
     "label": "Role · Subscriber",
-    "value": "rgba(106,160,255,1)",
+    "value": "rgba(167,190,242,1)",
     "group": "Roles & Highlights"
   },
   "colorLeadMod": {
     "type": "colorpicker",
     "label": "Role · Lead mod",
-    "value": "rgba(40,200,160,1)",
+    "value": "rgba(132,210,194,1)",
     "group": "Roles & Highlights"
   },
   "colorArtist": {
     "type": "colorpicker",
     "label": "Role · Artist",
-    "value": "rgba(255,159,77,1)",
+    "value": "rgba(244,176,131,1)",
     "group": "Roles & Highlights"
   },
   "colorFav": {
     "type": "colorpicker",
     "label": "Role · Fav list",
-    "value": "rgba(255,209,102,1)",
+    "value": "rgba(241,211,150,1)",
     "group": "Roles & Highlights"
   },
   "colorRegular": {
@@ -759,7 +759,7 @@
   "glassShadow": {
     "type": "slider",
     "label": "Shadow depth (%)",
-    "value": 30,
+    "value": 12,
     "min": 0,
     "max": 100,
     "step": 1,
@@ -857,7 +857,7 @@
   },
   "widgetVersion": {
     "type": "hidden",
-    "value": "1.0.1"
+    "value": "1.0.2"
   },
   "widgetUpdateUrl": {
     "type": "hidden",

@@ -452,20 +452,20 @@
     // ---- Username / highlight / dots / roles ----
     // Fallbacks mirror the widget.json field defaults, so clearing a color
     // field returns it to the documented default (not a stale legacy tone).
-    set('--custom-nick-color', f.customNickColor || '#78aaff');
+    set('--custom-nick-color', f.customNickColor || '#abc2f2');
     setIf('--keyword-color', f.keywordColor);   // empty → follows --accent
 
-    set('--dot-twitch', f.dotTwitch || '#9146ff');
-    set('--dot-youtube', f.dotYouTube || '#ff0000');
-    set('--dot-kick', f.dotKick || '#53fc18');
+    set('--dot-twitch', f.dotTwitch || '#a98be8');
+    set('--dot-youtube', f.dotYouTube || '#ef7479');
+    set('--dot-kick', f.dotKick || '#6fdd54');
 
-    set('--role-broadcaster', f.colorBroadcaster || '#ff5a5a');
-    set('--role-mod', f.colorMod || '#3fb950');
-    set('--role-vip', f.colorVip || '#ff7ad9');
-    set('--role-sub', f.colorSub || '#6aa0ff');
-    set('--role-leadmod', f.colorLeadMod || '#28c8a0');
-    set('--role-artist', f.colorArtist || '#ff9f4d');
-    set('--role-fav', f.colorFav || '#ffd166');
+    set('--role-broadcaster', f.colorBroadcaster || '#f2969d');
+    set('--role-mod', f.colorMod || '#90d9a4');
+    set('--role-vip', f.colorVip || '#efa8d6');
+    set('--role-sub', f.colorSub || '#a7bef2');
+    set('--role-leadmod', f.colorLeadMod || '#84d2c2');
+    set('--role-artist', f.colorArtist || '#f4b083');
+    set('--role-fav', f.colorFav || '#f1d396');
     setIf('--role-regular', f.colorRegular);   // empty → regulars keep their own color
 
     set('--anim-duration', num(f.animationSpeed, 460) + 'ms');
@@ -767,9 +767,9 @@
 
   function platformLogo(p) {
     const svg = {
-      twitch: "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><rect width='24' height='24' rx='5' fill='%239146ff'/><path d='M6 4l-1 4v9h3v3h2l3-3h3l4-4V4z' fill='%23fff'/><rect x='14' y='8' width='1.6' height='4' fill='%239146ff'/><rect x='10' y='8' width='1.6' height='4' fill='%239146ff'/></svg>",
-      youtube: "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><rect width='24' height='24' rx='6' fill='%23ff0000'/><path d='M10 8l6 4-6 4z' fill='%23fff'/></svg>",
-      kick: "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><rect width='24' height='24' rx='5' fill='%2353fc18'/><path d='M7 5h4v4h2V7h2V5h3v5h-2v2h2v5h-3v-2h-2v-2h-2v4H7z' fill='%23111'/></svg>"
+      twitch: "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><rect width='24' height='24' rx='5' fill='%23a98be8'/><path d='M6 4l-1 4v9h3v3h2l3-3h3l4-4V4z' fill='%23fff'/><rect x='14' y='8' width='1.6' height='4' fill='%23a98be8'/><rect x='10' y='8' width='1.6' height='4' fill='%23a98be8'/></svg>",
+      youtube: "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><rect width='24' height='24' rx='6' fill='%23ef7479'/><path d='M10 8l6 4-6 4z' fill='%23fff'/></svg>",
+      kick: "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><rect width='24' height='24' rx='5' fill='%236fdd54'/><path d='M7 5h4v4h2V7h2V5h3v5h-2v2h2v5h-3v-2h-2v-2h-2v4H7z' fill='%23111'/></svg>"
     }[p] || "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><rect width='24' height='24' rx='6' fill='%23888'/></svg>";
     return 'data:image/svg+xml;utf8,' + svg;
   }

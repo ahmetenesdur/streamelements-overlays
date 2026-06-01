@@ -274,44 +274,13 @@
       '</div>';
 
     listEl.appendChild(row);
-    if (str(F.layoutMode, 'horizontal') === 'floating') floatingPlace(row);
     enforceLimit();
+    // In horizontal mode keep the newest message scrolled into view.
+    if (str(F.layoutMode, 'vertical') === 'horizontal') {
+      const toRight = str(F.hDirection, 'right') === 'right';
+      listEl.scrollLeft = toRight ? listEl.scrollWidth : 0;
+    }
     scheduleRemoval(row, u);
-  }
-
-  // ---- Horizontal floating ----
-  // Messages stack from the bottom and are pushed upward by each new one, using
-  // their REAL measured height (so multi-line messages never overlap — the old
-  // fixed-lane math did). Each fades out after floatLifetime; the stack reflows.
-  const PAD = 12;            // matches .se-chat padding
-  function floatingPlace(row) {
-    const side = rootEl.dataset.halign === 'right' ? 'right' : 'left';
-    row.style.position = 'absolute';
-    row.style[side] = PAD + 'px';
-    row.style.bottom = PAD + 'px';        // start at the bottom; reflow places it
-    row.style.top = 'auto';
-    reflowFloating();
-    if (str(F.floatingAvoidOverlap, 'yes') !== 'no') {
-      // measure once laid out, then keep stacking upward without overlap
-      requestAnimationFrame(reflowFloating);
-    }
-    const life = num(F.floatLifetime, 12) * 1000;
-    setTimeout(() => { if (row.parentNode) animateOut(row); }, life);
-  }
-
-  // Re-stack all floating rows from the bottom up using measured heights.
-  function reflowFloating() {
-    if (!listEl || str(F.layoutMode, 'horizontal') !== 'floating') return;
-    const rows = Array.from(listEl.children);
-    let y = PAD;
-    // newest is last in DOM; place from bottom (newest lowest) upward
-    for (let i = rows.length - 1; i >= 0; i--) {
-      const r = rows[i];
-      r.style.top = 'auto';
-      r.style.bottom = y + 'px';
-      const hh = r.offsetHeight || Math.round(num(F.fontSize, 21) * 2.4);
-      y += hh + num(F.rowGap, 9);
-    }
   }
 
   function headMarkup(u) {
@@ -408,21 +377,15 @@
   // ---- limit / lifetime -----------------------------------------
   function enforceLimit() {
     const limit = num(F.messagesLimit, 8);
-    let dropped = false;
     while (listEl.children.length > limit) {
       listEl.removeChild(listEl.firstElementChild);
-      dropped = true;
     }
-    // In floating mode a removed row leaves a gap — restack what remains.
-    if (dropped && str(F.layoutMode, 'horizontal') === 'floating') reflowFloating();
   }
 
   function scheduleRemoval(row, u) {
     // hideAfter is the master "auto-hide" control. 0 = keep forever (only the
-    // messagesLimit / floating reflow removes rows). Floating always expires via
-    // floatLifetime regardless, so the lane stays clear.
+    // messagesLimit removes rows). Same behaviour in every layout.
     let ttl = num(F.hideAfter, 0);
-    if (str(F.layoutMode, 'horizontal') === 'floating') return; // handled by floatingPlace()
     if (ttl <= 0) return;                                       // never auto-hide
     // For alerts, ensure they stay at least alertMinDuration (a floor, not a cap).
     if (u.kind === 'alert') ttl = Math.max(num(F.alertMinDuration, 8), ttl);
@@ -431,14 +394,12 @@
 
   function animateOut(row) {
     if (!row || !row.parentNode) return;
-    const floating = str(F.layoutMode, 'horizontal') === 'floating';
-    const finish = () => { row.remove(); if (floating) reflowFloating(); };
     const out = str(F.animationOut, 'liquidOut');
-    if (str(F.disableAllAnimations, 'no') === 'yes' || out === 'none') { finish(); return; }
+    if (str(F.disableAllAnimations, 'no') === 'yes' || out === 'none') { row.remove(); return; }
     const animIn = str(F.animationIn, 'liquidIn');
     row.classList.remove('animate__' + animIn);
     row.classList.add('animate__animated', 'animate__' + out);
-    setTimeout(finish, num(F.animationSpeed, 460) + 60);
+    setTimeout(() => row.remove(), num(F.animationSpeed, 460) + 60);
   }
 
   function removeByMsgId(id) {
@@ -512,13 +473,13 @@
     set('--persp-x', px + 'deg');
     set('--persp-y', py + 'deg');
     set('--persp-z', pz + 'deg');
-    set('--float-life', num(f.floatLifetime, 12) + 's');
 
     if (!rootEl) return;
     rootEl.dataset.preset = str(f.stylePreset, 'editorial');
-    rootEl.dataset.layout = str(f.layoutMode, 'horizontal');
+    rootEl.dataset.layout = str(f.layoutMode, 'vertical');
     rootEl.dataset.halign = str(f.hAlign, 'left');
     rootEl.dataset.valign = str(f.vAlign, 'bottom');
+    rootEl.dataset.hdir = str(f.hDirection, 'right');
     rootEl.dataset.density = str(f.density, 'comfortable');
     rootEl.dataset.mask = str(f.maskFade, 'none');
 
@@ -529,8 +490,6 @@
     toggle('no-badges', !yes(f.displayBadges));
     toggle('no-name', str(f.nickColor, 'user') === 'remove');
     toggle('role-highlight', yes(f.roleHighlight));
-    toggle('fl-float', str(f.floatingFloat, 'yes') !== 'no');
-    toggle('fl-opacity', str(f.floatingOpacity, 'yes') !== 'no');
     toggle('fx-perspective', px !== 0 || py !== 0 || pz !== 0);
     toggle('fx-crayon', yes(f.crayonTexture));
     // Real SVG refraction — opt-in AND only where the renderer can composite

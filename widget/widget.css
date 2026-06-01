@@ -139,47 +139,59 @@ html, body {
 
 .se-chat__list {
   display: flex;
-  flex-direction: column;
   gap: var(--row-gap);
   width: 100%;
-  max-height: 100%;
+  height: 100%;
   overflow: hidden;
   transform-style: preserve-3d;
 }
 
-/* Vertical anchoring */
-.se-chat[data-valign="bottom"] { align-items: stretch; }
-.se-chat[data-valign="bottom"] .se-chat__list { justify-content: flex-end; }
-.se-chat[data-valign="top"]    .se-chat__list { justify-content: flex-start; }
+/* ================================================================
+   LAYOUTS — three distinct, pure-flexbox modes (no absolute positioning).
+   ================================================================ */
 
-/* Horizontal alignment */
-.se-chat[data-halign="left"]  .se-chat__list { align-items: flex-start; text-align: left; }
-.se-chat[data-halign="right"] .se-chat__list { align-items: flex-end;  text-align: right; }
+/* ---- VERTICAL (default): a column. Newest at bottom or top. ---- */
+.se-chat[data-layout="vertical"] .se-chat__list,
+.se-chat[data-layout="fullscreen"] .se-chat__list {
+  flex-direction: column;
+}
+.se-chat[data-layout="vertical"][data-valign="bottom"] .se-chat__list,
+.se-chat[data-layout="fullscreen"][data-valign="bottom"] .se-chat__list { justify-content: flex-end; }
+.se-chat[data-layout="vertical"][data-valign="top"] .se-chat__list,
+.se-chat[data-layout="fullscreen"][data-valign="top"] .se-chat__list { justify-content: flex-start; }
+.se-chat[data-layout="vertical"][data-halign="left"] .se-chat__list,
+.se-chat[data-layout="fullscreen"][data-halign="left"] .se-chat__list { align-items: flex-start; text-align: left; }
+.se-chat[data-layout="vertical"][data-halign="right"] .se-chat__list,
+.se-chat[data-layout="fullscreen"][data-halign="right"] .se-chat__list { align-items: flex-end; text-align: right; }
 
-/* Layout footprint */
-.se-chat[data-layout="horizontal"] .msg { max-width: var(--row-maxwidth); width: auto; }
+.se-chat[data-layout="vertical"] .msg { max-width: var(--row-maxwidth); width: auto; }
+
+/* ---- FULLSCREEN: wide column, each row spans the configured width. ---- */
 .se-chat[data-layout="fullscreen"] .msg { width: var(--row-width); max-width: none; }
 .se-chat[data-layout="fullscreen"] .se-chat__list { gap: calc(var(--row-gap) * 1.25); }
 
-/* Floating: messages stack from the BOTTOM up (positioned by widget.js using
-   measured heights, so multi-line never overlaps), gently bob, and fade with
-   age. Transform-based bob is independent of the bottom: offset, so they don't
-   fight. transition on `bottom` makes the reflow glide instead of jump. */
-.se-chat[data-layout="floating"] .se-chat__list {
-  position: relative; display: block; height: 100%; gap: 0; overflow: hidden;
+/* ---- HORIZONTAL: a single row; messages sit side by side and the row
+   scrolls so the newest stays in view. Overflow simply clips older ones
+   (messagesLimit + lifetime keep the count sane). No absolute positioning,
+   so it can never pile up on itself. ---- */
+.se-chat[data-layout="horizontal"] .se-chat__list {
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: flex-end;            /* sit on the baseline like a ticker */
+  height: auto;
+  width: 100%;
 }
-.se-chat[data-layout="floating"] .msg {
-  position: absolute;
-  max-width: min(72%, var(--row-maxwidth));
-  transition: bottom 320ms cubic-bezier(0.22, 1, 0.36, 1);
+.se-chat[data-layout="horizontal"][data-valign="top"] .se-chat__list { align-items: flex-start; }
+/* enter side: right = newest on the right, older pushed left (and clipped) */
+.se-chat[data-layout="horizontal"][data-hdir="right"] .se-chat__list { justify-content: flex-end; }
+.se-chat[data-layout="horizontal"][data-hdir="left"] .se-chat__list { justify-content: flex-start; }
+.se-chat[data-layout="horizontal"] .msg {
+  flex: 0 0 auto;                   /* each message keeps its natural width */
+  max-width: var(--row-maxwidth);
 }
-@keyframes floatBob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
-@keyframes floatDim { 0%, 70% { opacity: 1; } 100% { opacity: 0.18; } }
-.se-chat[data-layout="floating"].fl-float .msg__bubble { animation: floatBob 3.6s ease-in-out infinite; }
-.se-chat[data-layout="floating"].fl-opacity .msg { animation: floatDim var(--float-life, 12s) linear forwards; }
-.se-chat[data-layout="floating"].no-anim .msg__bubble,
-.se-chat[data-layout="floating"].no-anim .msg { animation: none; }
-.se-chat[data-layout="floating"].no-anim .msg { transition: none; }
+/* anchor the whole row to top or bottom of the canvas */
+.se-chat[data-layout="horizontal"][data-valign="bottom"] { align-items: flex-end; }
+.se-chat[data-layout="horizontal"][data-valign="top"] { align-items: flex-start; }
 
 /* Density */
 .se-chat[data-density="compact"] { --row-gap: 6px; }

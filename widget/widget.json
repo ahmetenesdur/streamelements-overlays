@@ -43,11 +43,11 @@
   "layoutMode": {
     "type": "dropdown",
     "label": "Layout",
-    "value": "horizontal",
+    "value": "vertical",
     "options": {
-      "horizontal": "Vertical column (stacked messages)",
-      "fullscreen": "Full screen (wide rows)",
-      "floating": "Floating (bottom-up, fades out)"
+      "vertical": "Vertical (column, newest at bottom)",
+      "horizontal": "Horizontal (messages flow side by side)",
+      "fullscreen": "Full screen (wide column)"
     },
     "group": "Layout"
   },
@@ -108,39 +108,13 @@
     "value": 9,
     "group": "Layout"
   },
-  "floatLifetime": {
-    "type": "number",
-    "label": "Floating: message lifetime (sec)",
-    "value": 12,
-    "group": "Layout"
-  },
-  "floatingFloat": {
+  "hDirection": {
     "type": "dropdown",
-    "label": "Floating: floating animation (bob)",
-    "value": "yes",
+    "label": "Horizontal: new messages enter from",
+    "value": "right",
     "options": {
-      "yes": "Yes",
-      "no": "No"
-    },
-    "group": "Layout"
-  },
-  "floatingOpacity": {
-    "type": "dropdown",
-    "label": "Floating: dynamic opacity (fade with age)",
-    "value": "yes",
-    "options": {
-      "yes": "Yes",
-      "no": "No"
-    },
-    "group": "Layout"
-  },
-  "floatingAvoidOverlap": {
-    "type": "dropdown",
-    "label": "Floating: avoid overlapping (lanes)",
-    "value": "yes",
-    "options": {
-      "yes": "Yes",
-      "no": "No"
+      "right": "Right (flow leftward)",
+      "left": "Left (flow rightward)"
     },
     "group": "Layout"
   },

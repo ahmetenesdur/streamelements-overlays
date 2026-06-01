@@ -234,12 +234,20 @@ test('hideAfter:N schedules removal at N seconds (alert floored to alertMinDurat
   assert.strictEqual(b.timers.at(-1).ms, 8000, 'alert floored to alertMinDuration=8s when hideAfter=3');
 });
 
-test('floating layout: rows positioned with bottom offset, no overlap by measure', () => {
-  const { fire, list } = loadWidget({ layoutMode: 'floating', floatingAvoidOverlap: 'yes', floatLifetime: 60 });
-  for (let i = 0; i < 4; i++) fire('message', { data: tw({ userId: 'f' + i, text: 'row ' + i, tags: { 'room-id': '1', 'user-id': 'f' + i, id: 'fl' + i } }) });
-  const rows = list.children;
-  assert.strictEqual(rows.length, 4);
-  // every floating row must be absolutely positioned with a bottom offset set
-  assert.ok([...rows].every(r => r.style.bottom && r.style.position === 'absolute'),
-    'floating rows must stack via bottom offsets');
+test('layouts: vertical / horizontal / fullscreen all render rows (pure CSS, no JS positioning)', () => {
+  for (const mode of ['vertical', 'horizontal', 'fullscreen']) {
+    const { fire, list, root } = loadWidget({ layoutMode: mode });
+    for (let i = 0; i < 4; i++) fire('message', { data: tw({ userId: mode + i, text: 'row ' + i, tags: { 'room-id': '1', 'user-id': mode + i, id: mode + i } }) });
+    assert.strictEqual(list.children.length, 4, mode + ' renders all rows');
+    assert.strictEqual(root.dataset.layout, mode, mode + ' sets data-layout');
+    // No layout uses inline absolute positioning anymore — it's all flexbox.
+    assert.ok([...list.children].every(r => r.style.position !== 'absolute'),
+      mode + ' must not absolutely-position rows');
+  }
+});
+
+test('horizontal layout: messagesLimit clips old messages (never piles up)', () => {
+  const { fire, list } = loadWidget({ layoutMode: 'horizontal', messagesLimit: 5 });
+  for (let i = 0; i < 30; i++) fire('message', { data: tw({ userId: 'h' + i, text: 'msg ' + i, tags: { 'room-id': '1', 'user-id': 'h' + i, id: 'h' + i } }) });
+  assert.strictEqual(list.children.length, 5, 'rain of 30 → capped at messagesLimit, no pile-up');
 });

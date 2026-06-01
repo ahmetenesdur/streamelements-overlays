@@ -347,8 +347,11 @@ html, body {
 .se-chat.show-icon .msg__icon { display: block; }
 .msg__avatar {
   width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: block;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);   /* pure white/10 image outline (dark) */
 }
+/* Daylight is a LIGHT surface — flip image outlines to pure black/10; a near-white
+   outline on a light background reads as dirt on the image edge (skill: surfaces). */
+.se-chat[data-preset="daylight"] .msg__avatar { box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1); }
 .msg__glyphicon {
   display: flex; align-items: center; justify-content: center;
   width: 100%; height: 100%;
@@ -523,7 +526,7 @@ html, body {
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.92);
   background: color-mix(in srgb, var(--accent) 28%, rgba(0, 0, 0, 0.55));
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);   /* ring, not a border — adapts to any bg + adds no layout width */
 }
 .se-chat.no-badges .msg__badges { display: none; }
 
@@ -618,6 +621,11 @@ html, body {
 }
 .alert__label { font-weight: 750; text-wrap: pretty; }
 .alert__sub { opacity: 0.78; margin-top: 1px; font-weight: 450; }
+/* Tabular numbers on everything that shows live, changing figures (alert amounts,
+   bits, months, viewer counts, the roster count) so digits never jitter the layout. */
+.alert__label, .alert__sub, .se-chat__participants-head, .badge--text {
+  font-variant-numeric: tabular-nums;
+}
 
 /* On ANY surface preset, alerts get a calm FLAT accent wash (single color,
    no gradient) + a 2px accent edge — still no glow ring. */

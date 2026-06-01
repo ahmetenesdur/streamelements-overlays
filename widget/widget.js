@@ -882,6 +882,9 @@
 
   // Expose a tiny hook so the preview harness can confirm load + drive the
   // relay code paths (Kick chat/alert) without opening a real WebSocket.
+  // It ALSO exposes the pure normalize/helper functions so the Node test
+  // suite can exercise them directly. None of this changes SE behaviour —
+  // SE never reads window.__seChat.
   window.__seChatReady = true;
   window.__seChat = {
     // Feed a relay frame exactly as connectRelay().onmessage would receive it.
@@ -889,6 +892,29 @@
       if (!m) return;
       if (m.type === 'message') { const u = normalizeKick(m.payload || m); if (u) handleChat(u); }
       else if (m.type === 'alert') { const u = normalizeKickAlert(m.payload || m); if (u) { addMessage(u); } }
+    },
+    // Let tests set the field config the same way onWidgetLoad would.
+    setFields: function (fields) { F = fields || {}; },
+    getFields: function () { return F; },
+    // Pure functions (no DOM side-effects) — safe to unit test in isolation.
+    fn: {
+      normalizeTwitch: normalizeTwitch,
+      normalizeYouTube: normalizeYouTube,
+      normalizeKick: normalizeKick,
+      normalizeAlert: normalizeAlert,
+      normalizeKickAlert: normalizeKickAlert,
+      rolesFromTwitch: rolesFromTwitch,
+      applyCustomRoles: applyCustomRoles,
+      roleClass: roleClass,
+      roleColorVar: roleColorVar,
+      renderText: renderText,
+      keywordList: keywordList,
+      alertEnabled: alertEnabled,
+      isIgnored: isIgnored,
+      platformEnabled: platformEnabled,
+      nativeEmoteMap: nativeEmoteMap,
+      stableColor: stableColor,
+      htmlEncode: htmlEncode
     }
   };
 })();

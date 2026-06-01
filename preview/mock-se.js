@@ -109,6 +109,28 @@
     twitch() { dispatch('message', twitchRaw(pick(LINES))); },
     youtube() { dispatch('message', youtubeRaw(pick(LINES))); },
     kick() { dispatch('widget-button', { field: 'testKick' }); },
+
+    // Drive the REAL relay code path (normalizeKick) with a Kick-shaped payload,
+    // including an inline emote so we exercise emote rendering end-to-end.
+    kickRelay() {
+      const f = window.__seChat && window.__seChat.relayFrame; if (!f) return;
+      f({ type: 'message', payload: {
+        msgId: 'k' + uid(), userId: 'ku' + id, displayName: 'KickFan_' + id,
+        color: '#53fc18', badges: [{ type: 'moderator', text: 'Moderator' }],
+        emotes: { catJAM: 'https://files.kick.com/emotes/39000/fullsize' },
+        text: 'kick chat via relay catJAM lets go'
+      }});
+    },
+    // Drive a Kick channel alert (sub / community gift / host) through the relay path.
+    kickAlert(kind) {
+      const f = window.__seChat && window.__seChat.relayFrame; if (!f) return;
+      const p = {
+        sub: { type: 'sub', name: 'KickSubber', amount: 3 },
+        gift: { type: 'communitygift', sender: 'KickBoss', count: 8 },
+        host: { type: 'host', name: 'KickRaider', amount: 230 }
+      }[kind || 'sub'];
+      f({ type: 'alert', payload: p });
+    },
     action() {
       const r = twitchRaw('uses a special move!'); r.data.isAction = true; dispatch('message', r);
     },

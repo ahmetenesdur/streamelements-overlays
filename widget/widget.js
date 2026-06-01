@@ -598,13 +598,48 @@
     };
     relaySocket.onmessage = (ev) => {
       let m; try { m = JSON.parse(ev.data); } catch (_) { return; }
-      if (m && m.type === 'message') {
+      if (!m) return;
+      if (m.type === 'message') {
         const u = normalizeKick(m.payload || m);
-        if (u) { handleChat(u); }
+        if (u) handleChat(u);
+      } else if (m.type === 'alert') {
+        const u = normalizeKickAlert(m.payload || m);
+        if (u) { addMessage(u); playSound(u.alert.type); }
+      } else if (m.type === 'subscribed') {
+        console.log('[relay] Kick subscribed:', m.chatroomId);
+      } else if (m.type === 'error') {
+        // Surface relay problems instead of failing silently (e.g. Cloudflare
+        // blocked the slug lookup → pass the numeric chatroom id instead).
+        console.warn('[relay] error:', m.error, m.channel || '');
       }
     };
     relaySocket.onclose = scheduleReconnect;
     relaySocket.onerror = () => { try { relaySocket.close(); } catch (_) {} };
+  }
+
+  // Relay Kick alert payload → inline alert (reuses chat-alert rendering).
+  function normalizeKickAlert(p) {
+    if (!p || !p.type) return null;
+    if (!alertEnabled(p.type)) return null;
+    const name = p.name || 'Someone';
+    const sender = p.sender || name;
+    const amount = p.amount != null ? p.amount : '';
+    const count = p.count != null ? p.count : '';
+    const tmpl = {
+      sub: F.alertLabelSub || '{name} subscribed',
+      gift: F.alertLabelGift || '{sender} gifted a sub to {name}',
+      communitygift: F.alertLabelCommunityGift || '{sender} gifted {count} subs',
+      host: F.alertLabelHost || '{name} hosted with {amount}'
+    }[p.type] || '{name}';
+    const label = String(tmpl)
+      .replace(/{name}/g, name).replace(/{sender}/g, sender)
+      .replace(/{amount}/g, amount).replace(/{count}/g, count);
+    return {
+      platform: 'kick', kind: 'alert', msgId: 'ka' + Date.now(),
+      userId: name, displayName: name, color: '', avatar: '',
+      badges: [], roles: [], emotes: {}, isAction: false,
+      text: label, alert: { type: p.type, amount, label, message: '' }
+    };
   }
   function scheduleReconnect() {
     relayRetry = Math.min(relayRetry + 1, 6);
@@ -845,6 +880,15 @@
     };
   }
 
-  // Expose a tiny hook so the preview harness can confirm load.
+  // Expose a tiny hook so the preview harness can confirm load + drive the
+  // relay code paths (Kick chat/alert) without opening a real WebSocket.
   window.__seChatReady = true;
+  window.__seChat = {
+    // Feed a relay frame exactly as connectRelay().onmessage would receive it.
+    relayFrame: function (m) {
+      if (!m) return;
+      if (m.type === 'message') { const u = normalizeKick(m.payload || m); if (u) handleChat(u); }
+      else if (m.type === 'alert') { const u = normalizeKickAlert(m.payload || m); if (u) { addMessage(u); } }
+    }
+  };
 })();

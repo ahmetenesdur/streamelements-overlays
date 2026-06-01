@@ -81,31 +81,59 @@ function connectKick(chatroomId) {
 
   ws.on('open', () => {
     room.retry = 0;
+    // Subscribe to BOTH the chatroom (chat messages) and the channel
+    // (events: subs, gifts, hosts, raids) so we can surface Kick alerts too.
     ws.send(JSON.stringify({
       event: 'pusher:subscribe',
       data: { auth: '', channel: `chatrooms.${chatroomId}.v2` },
     }));
-    console.log(`[kick] connected → chatrooms.${chatroomId}.v2 (${room.slug})`);
+    ws.send(JSON.stringify({
+      event: 'pusher:subscribe',
+      data: { auth: '', channel: `channel.${chatroomId}` },
+    }));
+    console.log(`[kick] socket open → subscribing chatrooms.${chatroomId}.v2 (${room.slug})`);
   });
 
   ws.on('message', (buf) => {
     let frame;
     try { frame = JSON.parse(buf.toString()); } catch { return; }
 
+    // Pusher housekeeping
     if (frame.event === 'pusher:ping') {
       ws.send(JSON.stringify({ event: 'pusher:pong', data: {} }));
       return;
     }
-    if (frame.event === 'App\\Events\\ChatMessageEvent') {
-      let data;
-      try { data = JSON.parse(frame.data); } catch { return; }
+    if (frame.event === 'pusher:connection_established') return;
+    if (frame.event === 'pusher_internal:subscription_succeeded') {
+      room.alive = true;
+      console.log(`[kick] subscribed ✓ ${frame.channel || chatroomId} (${room.slug})`);
+      return;
+    }
+    if (frame.event === 'pusher:error') {
+      console.warn('[kick] pusher error:', frame.data);
+      return;
+    }
+
+    // Strip the "App\Events\" prefix so we can match the bare event name.
+    const ev = String(frame.event || '').replace(/^App\\Events\\/, '');
+    let data;
+    try { data = typeof frame.data === 'string' ? JSON.parse(frame.data) : frame.data; }
+    catch { return; }
+
+    // Chat — Kick has used both names across versions; accept either.
+    if (ev === 'ChatMessageEvent' || ev === 'ChatMessageSentEvent') {
       const payload = toUnifiedKick(data);
       if (payload) broadcast(chatroomId, { type: 'message', payload });
+      return;
     }
+
+    // Alerts (best-effort; channel events are unofficial and vary).
+    const alert = toUnifiedKickAlert(ev, data);
+    if (alert) broadcast(chatroomId, { type: 'alert', payload: alert });
   });
 
-  ws.on('close', () => scheduleKickReconnect(chatroomId));
-  ws.on('error', () => { try { ws.close(); } catch {} });
+  ws.on('close', () => { room.alive = false; scheduleKickReconnect(chatroomId); });
+  ws.on('error', (e) => { console.warn('[kick] ws error:', e && e.message); try { ws.close(); } catch {} });
 }
 
 function scheduleKickReconnect(chatroomId) {
@@ -128,7 +156,9 @@ function toUnifiedKick(data) {
     displayName: sender.username || 'anon',
     color: identity.color || '',
     avatar: '',
-    badges: (identity.badges || []).map((b) => ({ type: b.type || b.text || '' })),
+    // Keep the badge text too (Kick badges have no image URL) so the widget can
+    // both detect roles and, later, render a text/emoji badge if desired.
+    badges: (identity.badges || []).map((b) => ({ type: b.type || '', text: b.text || '' })),
     emotes,
     text,
   };
@@ -143,6 +173,30 @@ function parseKickContent(content) {
     return name;
   });
   return { text, emotes };
+}
+
+// Best-effort mapping of unofficial Kick channel events → widget alert payload.
+// Shapes vary; we read defensively and skip anything we don't recognise.
+function toUnifiedKickAlert(ev, data) {
+  if (!data) return null;
+  const name = (data.username) ||
+    (data.user && data.user.username) ||
+    (data.subscription && data.subscription.user && data.subscription.user.username) || 'Someone';
+  switch (ev) {
+    case 'SubscriptionEvent':
+      return { type: 'sub', name, amount: data.months || 1 };
+    case 'GiftedSubscriptionsEvent':
+    case 'LuckyUsersWhoGotGiftSubscriptionsEvent': {
+      const ids = data.gifted_usernames || data.usernames || [];
+      const count = data.gifted_amount || (Array.isArray(ids) ? ids.length : 1);
+      const sender = data.gifter_username || data.gifter || name;
+      return { type: count > 1 ? 'communitygift' : 'gift', name: ids[0] || '', sender, count };
+    }
+    case 'StreamHostEvent':
+      return { type: 'host', name: data.host_username || name, amount: data.number_viewers || '' };
+    default:
+      return null;
+  }
 }
 
 // ---------------------------------------------------------------
@@ -208,4 +262,10 @@ const heartbeat = setInterval(() => {
 }, 30000);
 wss.on('close', () => clearInterval(heartbeat));
 
-server.listen(PORT, () => console.log(`[relay] listening on :${PORT}`));
+// Only listen when run directly; exporting the pure parsers lets us unit-test
+// them (see relay/test.cjs) without opening a socket.
+if (require.main === module) {
+  server.listen(PORT, () => console.log(`[relay] listening on :${PORT}`));
+}
+
+module.exports = { parseKickContent, toUnifiedKick, toUnifiedKickAlert };

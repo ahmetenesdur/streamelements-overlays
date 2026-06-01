@@ -10,35 +10,23 @@
 
   <style>
     /* ---- preview-only chrome (NOT part of the widget) ---- */
+    :root {
+      --pw: 340px;            /* panel width */
+      --ink: #e9eaf0; --mut: #8b8f9c; --line: rgba(255,255,255,.08);
+      --field-bg: #16181f; --field-bd: rgba(255,255,255,.10);
+      --accent: #6ea8fe;
+    }
+    * { box-sizing: border-box; }
     html, body { height: 100%; }
-    body { margin: 0; font-family: system-ui, sans-serif; color: #e8e8ef; }
+    body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif; color: var(--ink); }
 
     /* Default stage = clean flat dark, so the chat itself is easy to judge.
        Switch to a colored/photo scene below to test glass over video. */
     #stage {
-      position: absolute; inset: 0 300px 0 0;
+      position: absolute; inset: 0 var(--pw) 0 0;
       background: #15161b;
     }
-    #stage.scene-aurora {
-      background-image:
-        radial-gradient(60% 80% at 20% 15%, #1b6f8c 0%, transparent 60%),
-        radial-gradient(70% 90% at 85% 25%, #7b2ff7 0%, transparent 55%),
-        radial-gradient(90% 90% at 60% 95%, #1f8a5b 0%, transparent 60%),
-        linear-gradient(160deg, #0b1020 0%, #0a0a12 100%);
-    }
-    /* Rich scenes — glass needs a busy/colored backdrop to read properly */
     #stage[class*="scene-"] { background-size: cover; background-position: center; background-repeat: no-repeat; }
-    /* Transparency checker (what OBS actually composites over) */
-    #stage.scene-checker {
-      background-color: #14141c;
-      background-image:
-        linear-gradient(45deg, #1b1b25 25%, transparent 25%),
-        linear-gradient(-45deg, #1b1b25 25%, transparent 25%),
-        linear-gradient(45deg, transparent 75%, #1b1b25 75%),
-        linear-gradient(-45deg, transparent 75%, #1b1b25 75%);
-      background-size: 28px 28px;
-      background-position: 0 0, 0 14px, 14px -14px, -14px 0;
-    }
     #stage.scene-aurora {
       background-image:
         radial-gradient(60% 80% at 20% 15%, #1b6f8c 0%, transparent 60%),
@@ -63,25 +51,67 @@
         radial-gradient(80% 80% at 80% 80%, #cfe0ff 0%, transparent 60%),
         linear-gradient(160deg, #eef2f9 0%, #dfe6f2 100%);
     }
+    #stage.scene-checker {
+      background-color: #14141c;
+      background-image:
+        linear-gradient(45deg, #1b1b25 25%, transparent 25%),
+        linear-gradient(-45deg, #1b1b25 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #1b1b25 75%),
+        linear-gradient(-45deg, transparent 75%, #1b1b25 75%);
+      background-size: 28px 28px;
+      background-position: 0 0, 0 14px, 14px -14px, -14px 0;
+    }
 
+    /* ---- panel: clean, Apple-ish, grouped + collapsible ---- */
     #panel {
-      position: absolute; top: 0; right: 0; bottom: 0; width: 300px;
-      background: #0d0d14; border-left: 1px solid #23232f;
-      padding: 14px; overflow-y: auto; box-sizing: border-box;
+      position: absolute; top: 0; right: 0; bottom: 0; width: var(--pw);
+      background: #0c0d11; border-left: 1px solid var(--line);
+      overflow-y: auto; font-size: 13px;
     }
-    #panel h1 { font-size: 14px; margin: 0 0 4px; letter-spacing: .3px; }
-    #panel .sub { font-size: 11px; color: #8a8a9a; margin-bottom: 12px; }
-    #panel h2 { font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: #7a7a8c; margin: 16px 0 6px; }
+    #panel header { padding: 16px 16px 10px; position: sticky; top: 0; background: #0c0d11; z-index: 2; border-bottom: 1px solid var(--line); }
+    #panel h1 { font-size: 15px; margin: 0; letter-spacing: -.01em; font-weight: 650; }
+    #panel .sub { font-size: 11px; color: var(--mut); margin: 3px 0 0; }
+
+    .grp { border-bottom: 1px solid var(--line); }
+    .grp > summary {
+      list-style: none; cursor: pointer; user-select: none;
+      padding: 11px 16px; font-size: 11px; font-weight: 700; letter-spacing: .06em;
+      text-transform: uppercase; color: var(--mut); display: flex; align-items: center; gap: 8px;
+    }
+    .grp > summary::-webkit-details-marker { display: none; }
+    .grp > summary::before { content: "›"; transition: transform .15s ease; font-size: 14px; color: var(--mut); }
+    .grp[open] > summary::before { transform: rotate(90deg); }
+    .grp > summary:hover { color: var(--ink); }
+    .pad { padding: 4px 16px 14px; display: flex; flex-direction: column; gap: 9px; }
+
+    .field { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 10px; }
+    .field > label { color: #c7cad4; font-size: 12px; line-height: 1.3; }
+    .field .ctl { justify-self: end; width: 150px; }
+    .field.wide { grid-template-columns: 1fr; }
+    .field.wide .ctl { width: 100%; }
+
+    select, input[type=text], input[type=number] {
+      width: 150px; background: var(--field-bg); color: var(--ink);
+      border: 1px solid var(--field-bd); border-radius: 7px; padding: 6px 8px; font-size: 12px; font-family: inherit;
+    }
+    .field.wide select, .field.wide input { width: 100%; }
+    input[type=range] { width: 150px; accent-color: var(--accent); }
+    input[type=color] { width: 34px; height: 26px; padding: 0; border: 1px solid var(--field-bd); border-radius: 6px; background: var(--field-bg); }
+    .rangewrap { display: flex; align-items: center; gap: 8px; justify-content: flex-end; }
+    .rangewrap .val { font-variant-numeric: tabular-nums; color: var(--mut); font-size: 11px; min-width: 30px; text-align: right; }
+    .colorwrap { display: flex; align-items: center; gap: 6px; justify-content: flex-end; }
+    .colorwrap input[type=text] { width: 108px; }
+
     .row { display: flex; flex-wrap: wrap; gap: 6px; }
-    button {
-      background: #1c1c28; color: #e8e8ef; border: 1px solid #2c2c3a; border-radius: 8px;
-      padding: 7px 10px; font-size: 12px; cursor: pointer; flex: 1 1 auto;
+    button.sim {
+      flex: 1 1 auto; background: var(--field-bg); color: var(--ink); border: 1px solid var(--field-bd);
+      border-radius: 7px; padding: 7px 9px; font-size: 12px; cursor: pointer; font-family: inherit;
     }
-    button:hover { background: #26263a; }
-    button.tw { border-color: #9146ff55; } button.yt { border-color: #ff000055; } button.kk { border-color: #53fc1855; }
-    button.al { border-color: #ffc40055; }
-    label.ctl { display: flex; align-items: center; justify-content: space-between; font-size: 12px; color: #c9c9d6; padding: 3px 0; gap: 8px; }
-    label.ctl select { background: #1c1c28; color: #e8e8ef; border: 1px solid #2c2c3a; border-radius: 6px; padding: 3px 6px; font-size: 12px; }
+    button.sim:hover { background: #1f222b; }
+    button.sim.tw { border-color: #9146ff66; } button.sim.yt { border-color: #ff000066; }
+    button.sim.kk { border-color: #53fc1866; } button.sim.al { border-color: #e9c37c66; }
+    button.fieldbtn { width: 100%; }
+    .lbl { font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: var(--mut); margin-top: 4px; }
   </style>
 </head>
 <body>
@@ -94,85 +124,55 @@
 
   <!-- ===== preview control panel ===== -->
   <aside id="panel">
-    <h1>Multistream Chat · Preview</h1>
-    <div class="sub">Local SE event simulator — no StreamElements needed.</div>
+    <header>
+      <h1>Multistream Chat</h1>
+      <p class="sub">Live preview — every setting below is the real widget field.</p>
+    </header>
 
-    <h2>Send messages</h2>
-    <div class="row">
-      <button class="tw" data-act="twitch">Twitch</button>
-      <button class="yt" data-act="youtube">YouTube</button>
-      <button class="kk" data-act="kick">Kick</button>
-    </div>
-    <div class="row" style="margin-top:6px">
-      <button data-act="action">/me action</button>
-      <button data-act="long">Long msg</button>
-      <button data-act="emote">Emote spam</button>
-    </div>
-    <div class="row" style="margin-top:6px">
-      <button data-act="seventv">7TV emote</button>
-      <button data-act="keywords">Keyword demo</button>
-    </div>
+    <details open class="grp">
+      <summary>Simulate</summary>
+      <div class="pad">
+        <div class="row">
+          <button class="sim tw" data-act="twitch">Twitch</button>
+          <button class="sim yt" data-act="youtube">YouTube</button>
+          <button class="sim kk" data-act="kick">Kick</button>
+        </div>
+        <div class="row">
+          <button class="sim" data-act="action">/me</button>
+          <button class="sim" data-act="long">Long</button>
+          <button class="sim" data-act="emote">Emotes</button>
+          <button class="sim" data-act="seventv">7TV</button>
+          <button class="sim" data-act="keywords">Keywords</button>
+        </div>
+        <div class="lbl">Alerts</div>
+        <div class="row">
+          <button class="sim al" data-act="alert:follow">Follow</button>
+          <button class="sim al" data-act="alert:sub">Sub</button>
+          <button class="sim al" data-act="alert:tip">Tip</button>
+          <button class="sim al" data-act="alert:cheer">Cheer</button>
+          <button class="sim al" data-act="alert:raid">Raid</button>
+        </div>
+        <div class="lbl">Control</div>
+        <div class="row">
+          <button class="sim" data-act="rain">Rain ×20</button>
+          <button class="sim" data-act="deleteLast">Delete last</button>
+          <button class="sim" data-act="clear">Clear</button>
+        </div>
+        <div class="field"><label>Preview scene</label>
+          <select class="ctl" data-scene>
+            <option value="">Plain dark</option>
+            <option value="scene-aurora">Aurora</option>
+            <option value="scene-sunset">Sunset</option>
+            <option value="scene-game">Game grid</option>
+            <option value="scene-light">Light</option>
+            <option value="scene-checker">Checker (transparency)</option>
+          </select>
+        </div>
+      </div>
+    </details>
 
-    <h2>Alerts (inline)</h2>
-    <div class="row">
-      <button class="al" data-act="alert:follow">Follow</button>
-      <button class="al" data-act="alert:sub">Sub</button>
-      <button class="al" data-act="alert:tip">Tip</button>
-    </div>
-    <div class="row" style="margin-top:6px">
-      <button class="al" data-act="alert:cheer">Cheer</button>
-      <button class="al" data-act="alert:raid">Raid</button>
-    </div>
-
-    <h2>Stress / control</h2>
-    <div class="row">
-      <button data-act="rain">Rain ×20</button>
-      <button data-act="deleteLast">Delete last</button>
-      <button data-act="clear">Clear</button>
-    </div>
-
-    <h2>Style</h2>
-    <label class="ctl">Preset
-      <select data-set="stylePreset"><option value="editorial">Editorial</option><option value="frosted">Frosted</option><option value="slate">Slate</option></select></label>
-    <label class="ctl">Accent
-      <input type="color" data-color="accent" value="#7aa2ff"></label>
-
-    <h2>Layout</h2>
-    <label class="ctl">Layout
-      <select data-set="layoutMode"><option value="horizontal">vertical</option><option value="fullscreen">fullscreen</option><option value="floating">floating</option></select></label>
-    <label class="ctl">Density
-      <select data-set="density"><option value="comfortable">comfortable</option><option value="compact">compact</option></select></label>
-    <label class="ctl">H-align
-      <select data-set="hAlign"><option value="left">left</option><option value="right">right</option></select></label>
-    <label class="ctl">V-region
-      <select data-set="vAlign"><option value="bottom">bottom</option><option value="top">top</option></select></label>
-    <label class="ctl">Username
-      <select data-set="nickColor"><option value="user">platform</option><option value="message">text</option><option value="custom">custom</option><option value="remove">hidden</option></select></label>
-
-    <h2>Badges & platform</h2>
-    <label class="ctl">Platform logo <input type="checkbox" data-toggle="showPlatformLogo" checked></label>
-    <label class="ctl">Platform dot <input type="checkbox" data-toggle="showPlatformDot"></label>
-    <label class="ctl">Avatar/icon <input type="checkbox" data-toggle="showAvatar"></label>
-    <label class="ctl">Badges <input type="checkbox" data-toggle="displayBadges" checked></label>
-    <label class="ctl">Role highlight <input type="checkbox" data-toggle="roleHighlight" checked></label>
-
-    <h2>Effects</h2>
-    <label class="ctl">Mask
-      <select data-set="maskFade"><option value="none">none</option><option value="top">top</option><option value="bottom">bottom</option><option value="both">both</option></select></label>
-    <label class="ctl">Advanced glass (SVG refraction) <input type="checkbox" data-toggle="glassAdvanced"></label>
-    <label class="ctl">Merge messages <input type="checkbox" data-toggle="mergeMessages"></label>
-    <label class="ctl">Disable animations <input type="checkbox" data-toggle="disableAllAnimations"></label>
-
-    <h2>Scene (preview background)</h2>
-    <label class="ctl">Background
-      <select data-scene>
-        <option value="">Plain dark (default)</option>
-        <option value="scene-aurora">Aurora</option>
-        <option value="scene-sunset">Sunset</option>
-        <option value="scene-game">Game grid</option>
-        <option value="scene-light">Light</option>
-        <option value="scene-checker">Checker (transparency)</option>
-      </select></label>
+    <!-- All widget.json fields are injected here, grouped + collapsible -->
+    <div id="fields"></div>
   </aside>
 
   <script src="../widget/widget.js"></script>

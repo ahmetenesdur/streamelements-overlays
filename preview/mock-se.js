@@ -152,30 +152,121 @@
   };
   window.MockSE = MockSE;
 
-  // ---- wire control panel ---------------------------------------
+  // ================================================================
+  //  Auto-build the settings panel from widget.json — every field
+  //  becomes a live control, grouped + collapsible, just like SE.
+  // ================================================================
+  const GROUP_ORDER = ['Style', 'Layout', 'Typography', 'Username & Colors',
+    'Badges & Platform', 'Roles & Highlights', 'Messages', 'Animations',
+    'Alerts', 'Sound', 'Effects', 'Advanced glass', 'Multistream', 'Test tools'];
+
+  function el(tag, attrs, text) {
+    const e = document.createElement(tag);
+    if (attrs) for (const k in attrs) e.setAttribute(k, attrs[k]);
+    if (text != null) e.textContent = text;
+    return e;
+  }
+  function rgbaToHex(c) {
+    if (!c) return null;
+    const m = String(c).match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/i);
+    if (m) return '#' + [m[1], m[2], m[3]].map(n => (+n).toString(16).padStart(2, '0')).join('');
+    return /^#[0-9a-f]{6}$/i.test(c) ? c : null;
+  }
+
+  function controlFor(key, f) {
+    const cur = MockSE.fieldData[key];
+    if (f.type === 'dropdown') {
+      const s = el('select', { class: 'ctl' });
+      Object.keys(f.options || {}).forEach(v => {
+        const o = el('option', { value: v }, f.options[v]);
+        if (String(cur) === v) o.selected = true;
+        s.appendChild(o);
+      });
+      s.addEventListener('change', () => MockSE.set(key, s.value));
+      return s;
+    }
+    if (f.type === 'number') {
+      const i = el('input', { type: 'number', class: 'ctl' }); i.value = cur != null ? cur : '';
+      i.addEventListener('change', () => MockSE.set(key, i.value));
+      return i;
+    }
+    if (f.type === 'slider') {
+      const wrap = el('div', { class: 'rangewrap' });
+      const i = el('input', { type: 'range' });
+      i.min = f.min != null ? f.min : 0; i.max = f.max != null ? f.max : 100;
+      i.step = f.step != null ? f.step : 1; i.value = cur != null ? cur : 0;
+      const val = el('span', { class: 'val' }, i.value);
+      i.addEventListener('input', () => { val.textContent = i.value; MockSE.set(key, i.value); });
+      wrap.appendChild(i); wrap.appendChild(val);
+      return wrap;
+    }
+    if (f.type === 'colorpicker') {
+      const wrap = el('div', { class: 'colorwrap' });
+      const hex = el('input', { type: 'color' }); hex.value = rgbaToHex(cur) || '#000000';
+      const txt = el('input', { type: 'text' }); txt.value = cur || ''; txt.placeholder = 'empty';
+      hex.addEventListener('input', () => { txt.value = hex.value; MockSE.set(key, hex.value); });
+      txt.addEventListener('change', () => { MockSE.set(key, txt.value); const h = rgbaToHex(txt.value); if (h) hex.value = h; });
+      wrap.appendChild(hex); wrap.appendChild(txt);
+      return wrap;
+    }
+    // text / googleFont / sound-input
+    const i = el('input', { type: 'text', class: 'ctl' });
+    i.value = cur != null ? cur : '';
+    i.placeholder = f.type === 'sound-input' ? 'sound URL' : (f.type === 'googleFont' ? 'Google font name' : '');
+    i.addEventListener('change', () => MockSE.set(key, i.value));
+    return i;
+  }
+
+  function buildFields(json) {
+    const host = document.getElementById('fields');
+    if (!host) return;
+    const groups = {};
+    Object.keys(json).forEach(k => {
+      const f = json[k];
+      if (f.type === 'hidden') return;
+      const g = f.group || 'Other';
+      (groups[g] = groups[g] || []).push([k, f]);
+    });
+    const order = GROUP_ORDER.filter(g => groups[g])
+      .concat(Object.keys(groups).filter(g => GROUP_ORDER.indexOf(g) === -1));
+    order.forEach((g, gi) => {
+      const det = el('details', { class: 'grp' }); if (gi === 0) det.open = true;
+      det.appendChild(el('summary', null, g));
+      const pad = el('div', { class: 'pad' });
+      groups[g].forEach(([key, f]) => {
+        if (f.type === 'button') {
+          const b = el('button', { class: 'sim fieldbtn' }, f.label || key);
+          b.addEventListener('click', () => dispatch('widget-button', { field: key }));
+          pad.appendChild(b); return;
+        }
+        const wide = f.type === 'text' || f.type === 'googleFont' || f.type === 'sound-input';
+        const row = el('div', { class: 'field' + (wide ? ' wide' : '') });
+        row.appendChild(el('label', null, f.label || key));
+        row.appendChild(controlFor(key, f));
+        pad.appendChild(row);
+      });
+      det.appendChild(pad);
+      host.appendChild(det);
+    });
+  }
+
+  // ---- wire simulator actions + scene ---------------------------
   function wire() {
     document.querySelectorAll('[data-act]').forEach(b => b.addEventListener('click', () => {
       const a = b.dataset.act;
-      if (a === 'bg') return document.getElementById('stage').classList.toggle('scene');
       if (a === 'rain') return MockSE.rain(20);
       if (a.startsWith('alert:')) return MockSE.alert(a.split(':')[1]);
       if (typeof MockSE[a] === 'function') MockSE[a]();
     }));
-    document.querySelectorAll('[data-set]').forEach(sel => sel.addEventListener('change', () =>
-      MockSE.set(sel.dataset.set, sel.value)));
-    document.querySelectorAll('[data-toggle]').forEach(cb => cb.addEventListener('change', () =>
-      MockSE.set(cb.dataset.toggle, cb.checked ? 'yes' : 'no')));
-    document.querySelectorAll('[data-color]').forEach(inp => inp.addEventListener('input', () =>
-      MockSE.set(inp.dataset.color, inp.value)));
     const scene = document.querySelector('[data-scene]');
     if (scene) scene.addEventListener('change', () => {
       const stage = document.getElementById('stage');
-      stage.className = '';            // drop all scene-* classes
+      stage.className = '';
       if (scene.value) stage.classList.add(scene.value);
     });
   }
 
-  // ---- boot: load widget.json defaults, then start --------------
+  // ---- boot: load widget.json defaults, build panel, start ------
   fetch('../widget/widget.json')
     .then(r => r.json())
     .then(json => {
@@ -183,8 +274,8 @@
       Object.keys(json).forEach(k => { fd[k] = json[k].value; });
       MockSE.fieldData = fd;
       wire();
+      buildFields(json);
       MockSE.load();
-      // seed a couple of messages so the stage isn't empty on open
       MockSE.twitch(); MockSE.youtube(); MockSE.alert('follow');
     })
     .catch(err => { console.error('Failed to load widget.json', err); });

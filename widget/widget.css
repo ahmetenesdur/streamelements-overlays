@@ -455,6 +455,22 @@ html, body {
   margin-right: 4px;
   border-radius: 4px;
 }
+.badge--text {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  min-width: var(--badge-size);
+  height: var(--badge-size);
+  padding: 0 5px;
+  font-size: calc(var(--font-size) * 0.62);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.92);
+  background: color-mix(in srgb, var(--accent) 28%, rgba(0, 0, 0, 0.55));
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
 .se-chat.no-badges .msg__badges { display: none; }
 
 /* Username — the typographic anchor */
@@ -539,7 +555,6 @@ html, body {
   /* No glow — the accent color alone carries the alert (design: no glow rings). */
 }
 .alert__label { font-weight: 750; text-wrap: pretty; }
-.alert__label .alert__name { color: var(--accent); font-weight: 800; }
 .alert__sub { opacity: 0.78; margin-top: 1px; font-weight: 450; }
 
 /* On surface presets, alerts get a calm FLAT accent wash (single color,

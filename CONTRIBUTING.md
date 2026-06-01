@@ -18,7 +18,7 @@ preview/         → Local development preview
   mock-se.js     → SE event simulator
 test/            → Widget unit tests
   harness.cjs    → Lightweight DOM shim (no jsdom)
-  widget.test.cjs → Widget logic tests (72 cases)
+  widget.test.cjs → Widget logic tests (75 cases)
 scripts/         → Build & validation
   build.mjs      → JSON validator, version sync, field counter
   serve.mjs      → Static preview server (port 5173)
@@ -43,7 +43,7 @@ shared chat, age fade, float layout, and role colors quickly.
 
 ```bash
 npm test
-# Runs: validate → relay tests → widget tests (83 assertions total)
+# Runs: validate → relay tests → widget tests (86 assertions total)
 ```
 
 All tests must pass before submitting a PR. CI (`.github/workflows/ci.yml`) runs the same
@@ -96,7 +96,7 @@ docs: align INSTALL field labels with widget.json
 
 ## Pull Request Checklist
 
-- [ ] `npm test` passes (all 83 assertions green)
+- [ ] `npm test` passes (all 86 assertions green)
 - [ ] `npm run validate` passes (version sync if you bumped `package.json`)
 - [ ] New features include corresponding test cases in `test/widget.test.cjs` or `relay/test.cjs`
 - [ ] CSS/visual changes verified across all **3 style presets** (Editorial, Frosted, Slate) and key layouts (vertical, horizontal, fullscreen)

@@ -8,7 +8,6 @@
               so the same code renders in SE and in /preview.
    ================================================================ */
 
-/* eslint-disable no-unused-vars */
 (function () {
   'use strict';
 
@@ -21,7 +20,7 @@
    * @property {string}  displayName
    * @property {string}  color
    * @property {string}  avatar
-   * @property {Array<{url:string, type:string}>} badges
+   * @property {Array<{url?:string, type:string, text?:string}>} badges
    * @property {string[]} roles
    * @property {Object<string,string>} emotes
    * @property {string}  text
@@ -57,13 +56,6 @@
   let relaySocket = null;
   let relayRetry = 0;
   let emoteLastLoad = 0;            // timestamp of last emote fetch (for TTL refresh)
-
-  /** @enum {string} */
-  var ALERT = {
-    FOLLOW: 'follow', SUB: 'sub', RESUB: 'resub',
-    GIFT: 'gift', COMMUNITY: 'communitygift',
-    TIP: 'tip', CHEER: 'cheer', RAID: 'raid', HOST: 'host'
-  };
 
   const ROLE_PRIORITY = ['broadcaster', 'leadmod', 'moderator', 'artist', 'vip', 'subscriber', 'fav', 'regular'];
   const pronounCache = {};   // twitch login -> short pronoun label ('' = none)
@@ -206,7 +198,11 @@
       displayName: p.displayName || p.sender || 'anon',
       color: p.color || '',
       avatar: p.avatar || '',
-      badges: (p.badges || []).filter(b => b.url).map(b => ({ url: b.url, type: b.type })),
+      badges: (p.badges || []).map(b => ({
+        url: b.url || '',
+        type: b.type || '',
+        text: b.text || ''
+      })).filter(b => b.url || b.text),
       roles: roles,
       emotes: p.emotes || {},
       text: p.text || '',
@@ -430,8 +426,16 @@
   }
 
   function headMarkup(u) {
-    const badges = u.badges.map(b =>
-      '<img class="badge" alt="' + htmlEncode(b.type || 'badge') + '" src="' + encodeURI(b.url) + '">').join('');
+    const badges = u.badges.map(b => {
+      if (b.url) {
+        return '<img class="badge" alt="' + htmlEncode(b.type || 'badge') + '" src="' + encodeURI(b.url) + '">';
+      }
+      if (b.text) {
+        return '<span class="badge badge--text" title="' + htmlEncode(b.type || 'badge') + '">' +
+          htmlEncode(b.text) + '</span>';
+      }
+      return '';
+    }).join('');
     const logo = '<img class="msg__platform-logo" alt="' + u.platform +
       '" src="' + platformLogo(u.platform) + '">';
     const nameStyle = nameColorStyle(u);
@@ -947,7 +951,14 @@
   // ================================================================
   function connectRelay() {
     const url = (F.relayUrl || '').trim();
-    if (!url || !/^wss?:\/\//.test(url)) return;
+    if (!url || !/^wss?:\/\//.test(url)) {
+      if (relaySocket) { try { relaySocket.onclose = null; relaySocket.close(); } catch (_) {} relaySocket = null; }
+      return;
+    }
+    if (relaySocket) {
+      try { relaySocket.onclose = null; relaySocket.close(); } catch (_) {}
+      relaySocket = null;
+    }
     try {
       relaySocket = new WebSocket(url);
     } catch (e) { return scheduleReconnect(); }
@@ -970,11 +981,11 @@
         const u = normalizeKickAlert(m.payload || m);
         if (u) { addMessage(u); playSound(u.alert.type); }
       } else if (m.type === 'subscribed') {
-        console.log('[relay] Kick subscribed:', m.chatroomId);
+        if (debugMode()) console.log('[relay] Kick subscribed:', m.chatroomId);
       } else if (m.type === 'error') {
         // Surface relay problems instead of failing silently (e.g. Cloudflare
         // blocked the slug lookup → pass the numeric chatroom id instead).
-        console.warn('[relay] error:', m.error, m.channel || '');
+        if (debugMode()) console.warn('[relay] error:', m.error, m.channel || '');
       }
     };
     relaySocket.onclose = scheduleReconnect;
@@ -1016,9 +1027,19 @@
   // ================================================================
   //  Sound
   // ================================================================
+  function soundSlotFor(type) {
+    return {
+      message: 'message',
+      follow: 'follow',
+      sub: 'sub', resub: 'sub', gift: 'sub', communitygift: 'sub', member: 'sub',
+      tip: 'tip', cheer: 'tip', superchat: 'tip', reward: 'tip', raid: 'tip', host: 'tip'
+    }[type] || type;
+  }
+
   function playSound(type) {
     if (!yes(F.soundEnabled)) return;
-    const url = { message: F.soundMessage, follow: F.soundFollow, sub: F.soundSub, tip: F.soundTip }[type];
+    const slot = soundSlotFor(type);
+    const url = { message: F.soundMessage, follow: F.soundFollow, sub: F.soundSub, tip: F.soundTip }[slot];
     if (!url) return;
     try {
       const a = new Audio(url);
@@ -1287,13 +1308,12 @@
   // It ALSO exposes the pure normalize/helper functions so the Node test
   // suite can exercise them directly. None of this changes SE behaviour —
   // SE never reads window.__seChat.
-  window.__seChatReady = true;
   window.__seChat = {
     // Feed a relay frame exactly as connectRelay().onmessage would receive it.
     relayFrame: function (m) {
       if (!m) return;
       if (m.type === 'message') { const u = normalizeKick(m.payload || m); if (u) handleChat(u); }
-      else if (m.type === 'alert') { const u = normalizeKickAlert(m.payload || m); if (u) { addMessage(u); } }
+      else if (m.type === 'alert') { const u = normalizeKickAlert(m.payload || m); if (u) { addMessage(u); playSound(u.alert.type); } }
     },
     // Let tests set the field config the same way onWidgetLoad would.
     setFields: function (fields) { F = fields || {}; },
@@ -1317,6 +1337,7 @@
       renderText: renderText,
       keywordList: keywordList,
       alertEnabled: alertEnabled,
+      soundSlotFor: soundSlotFor,
       isIgnored: isIgnored,
       platformEnabled: platformEnabled,
       nativeEmoteMap: nativeEmoteMap,

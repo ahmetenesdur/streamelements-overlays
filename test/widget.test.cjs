@@ -172,6 +172,33 @@ test('normalizeKick: tolerant mapping, role from badges', () => {
   assert.strictEqual(u.platform, 'kick');
   assert.ok(u.roles.includes('moderator'));
   assert.strictEqual(u.color, '#53fc18');
+  assert.strictEqual(u.badges.length, 0, 'type-only Kick badges have no url/text to render');
+});
+
+test('normalizeKick: text-only badges are kept for rendering', () => {
+  const { api, list } = loadWidget({ displayBadges: 'yes' });
+  api.relayFrame({
+    type: 'message',
+    payload: { displayName: 'ModKick', text: 'hello', badges: [{ type: 'moderator', text: 'MOD' }] }
+  });
+  assert.match(list.children[0].innerHTML, /badge--text/);
+  assert.match(list.children[0].innerHTML, /MOD/);
+});
+
+test('normalizeKickAlert: relay sub payload maps to inline alert', () => {
+  const { api } = loadWidget({ showAlerts: 'yes', alertSub: 'yes' });
+  const u = api.fn.normalizeKickAlert({ type: 'sub', name: 'KickSub', amount: 2 });
+  assert.strictEqual(u.kind, 'alert');
+  assert.strictEqual(u.alert.type, 'sub');
+  assert.match(u.alert.label, /KickSub/);
+});
+
+test('soundSlotFor: alert types fall back to nearest configured sound slot', () => {
+  const { api } = loadWidget({});
+  assert.strictEqual(api.fn.soundSlotFor('cheer'), 'tip');
+  assert.strictEqual(api.fn.soundSlotFor('gift'), 'sub');
+  assert.strictEqual(api.fn.soundSlotFor('follow'), 'follow');
+  assert.strictEqual(api.fn.soundSlotFor('message'), 'message');
 });
 
 // ---- alerts --------------------------------------------------------

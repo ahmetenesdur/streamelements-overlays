@@ -46,7 +46,8 @@ The Kick relay supports an optional shared access token for public deployments.
   session (host auto-named, guests labelled), with a running count.
 
 **Alerts** — inline follow / sub / resub / gift / community-gift / tip / cheer / raid / host
-as refined accent lines: per-type enable, custom label format, minimum display time, sound per event.
+as refined accent lines: per-type enable, custom label format, minimum display time,
+sound per event (maps cheer/raid/gift/etc. to the nearest configured sound slot).
 **YouTube-aware subtypes** — Super Chat and membership alerts get their own labels when
 StreamElements provides the platform hints (tolerant detection, falls back to tip/sub).
 **Channel-point / Store rewards** via the `redemption-latest` listener, with a `{reward}` label token.
@@ -93,7 +94,7 @@ docs/      INSTALL.md
 npm run preview     # http://localhost:5173/preview/index.html  (widen the window!)
 npm run validate    # validate widget.json + required files
 npm run build       # stamp widgetVersion from package.json (for auto-update)
-npm test            # validate + relay tests + 72 widget unit tests
+npm test            # validate + relay tests + 75 widget unit tests
 ```
 
 The preview page sends Twitch/YouTube/Kick messages, fires alerts, tests 7TV emotes
@@ -121,7 +122,7 @@ validates, tests, and attaches the four widget files to a GitHub Release.
 
 ## Status
 
-**Current: v1.2.0** · 138 fields · 14 setting groups · 72 widget tests + 11 relay assertions · CI on push/PR (Node 18/20/22)
+**Current: v1.2.0** · 138 fields · 14 setting groups · 75 widget tests + 11 relay assertions · CI on push/PR (Node 18/20/22)
 
 Shipped and verified in the local preview:
 

@@ -27,6 +27,7 @@ Click **Done**. The settings panel (right side) now shows **14 grouped sections*
   **Kick channel (slug, or numeric chatroom id if slug fails)**. Leave both blank if you
   don't stream on Kick — Twitch/YouTube still work. If your relay has `RELAY_TOKEN` set,
   paste the same value into **Relay access token (optional, matches RELAY_TOKEN)**.
+  Kick moderator/VIP badges render as text chips (Kick provides badge labels, not image URLs).
 
 Per-platform chat visibility is in the same **Multistream** group:
 **Show Twitch chat**, **Show YouTube chat**, **Show Kick chat** (each defaults to Yes).
@@ -101,6 +102,8 @@ Alerts, Sound, Effects, Advanced glass, Multistream**.
 - Use **Test tools → ▶ Test chat message / ▶ Test alert (follow) / ▶ Test Kick message** buttons.
 - Or type in your real Twitch/YouTube chat.
 - Inline alerts fire on real follows/subs/tips/cheers/raids (toggle per type in **Alerts**).
+- **Sound** group: four upload slots (message / follow / sub / tip). Other alert types
+  (cheer, raid, gift, Super Chat, reward, etc.) reuse the nearest slot automatically.
 - Or run `npm run preview` locally (see [README](../README.md)) — the preview's **Feature demos**
   buttons exercise grouping, shared chat, age fade, float layout, and role colors without going live.
 

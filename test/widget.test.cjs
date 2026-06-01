@@ -461,6 +461,18 @@ test('normalizeAlert maps YouTube membership-like subscriber payload to member',
   assert.strictEqual(u.text, 'MemberViewer joined as a member');
 });
 
+test('normalizeAlert maps redemption-latest to a reward alert with the title', () => {
+  const { api } = loadWidget({ showAlerts: 'yes', alertReward: 'yes', alertLabelReward: '{name} redeemed {reward}' });
+  const u = api.fn.normalizeAlert('redemption-latest', { name: 'PointSpender', redemption: 'Hydrate!', amount: 500 });
+  assert.strictEqual(u.alert.type, 'reward');
+  assert.strictEqual(u.text, 'PointSpender redeemed Hydrate!');
+});
+
+test('alertReward:no suppresses reward alerts', () => {
+  const { api } = loadWidget({ showAlerts: 'yes', alertReward: 'no' });
+  assert.strictEqual(api.fn.normalizeAlert('redemption-latest', { name: 'X', redemption: 'Y' }), null);
+});
+
 test('normalizeAlert keeps non-YouTube tip/sub payloads on legacy types', () => {
   const { api } = loadWidget({ showAlerts: 'yes', alertTip: 'yes', alertSub: 'yes' });
   const tip = api.fn.normalizeAlert('tip-latest', { name: 'A', amount: '5 USD', type: 'superchat' });

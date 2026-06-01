@@ -35,7 +35,7 @@
 
   /**
    * @typedef {Object} AlertData
-   * @property {'follow'|'sub'|'resub'|'gift'|'communitygift'|'tip'|'cheer'|'raid'|'host'|'superchat'|'member'} type
+   * @property {'follow'|'sub'|'resub'|'gift'|'communitygift'|'tip'|'cheer'|'raid'|'host'|'superchat'|'member'|'reward'} type
    * @property {string|number} amount
    * @property {string} label
    * @property {string} message
@@ -235,6 +235,7 @@
     else if (listener === 'tip-latest') type = isSuperchatPayload(e) ? 'superchat' : 'tip';
     else if (listener === 'raid-latest') type = 'raid';
     else if (listener === 'host-latest') type = 'host';
+    else if (listener === 'redemption-latest') type = 'reward';   // SE Store / channel-point redemption
     else if (listener === 'subscriber-latest') {
       if (e.playedAsCommunityGift) return null;          // already shown by the community-gift alert
       if (isMemberPayload(e)) type = 'member';            // YouTube membership
@@ -250,6 +251,8 @@
     const sender = e.sender || name;
     const amount = e.amount != null ? e.amount : (e.months != null ? e.months : '');
     const count = e.count != null ? e.count : (e.amount != null ? e.amount : '');
+    // Channel-point / SE Store reward title (varies by payload shape).
+    const reward = e.redemption || e.reward || e.rewardTitle || e.title || '';
     const tmpl = {
       follow: F.alertLabelFollow || '{name} followed',
       sub: F.alertLabelSub || '{name} subscribed',
@@ -261,11 +264,13 @@
       raid: F.alertLabelRaid || '{name} raided with {amount} viewers',
       host: F.alertLabelHost || '{name} hosted with {amount} viewers',
       superchat: F.alertLabelSuperchat || '{name} sent a Super Chat {amount}',
-      member: F.alertLabelMember || '{name} became a member'
+      member: F.alertLabelMember || '{name} became a member',
+      reward: F.alertLabelReward || '{name} redeemed {reward}'
     }[type];
     const label = String(tmpl)
       .replace(/{name}/g, name)
       .replace(/{sender}/g, sender)
+      .replace(/{reward}/g, reward)
       .replace(/{amount}/g, amount)
       .replace(/{count}/g, count)
       .replace(/{months}/g, amount)
@@ -458,7 +463,7 @@
 
   function iconMarkup(u) {
     if (u.kind === 'alert') {
-      const glyph = { follow: '♥', sub: '★', resub: '★', gift: '✦', communitygift: '✦', tip: '$', cheer: '◆', raid: '⚑', host: '⌂', superchat: '$', member: '★' }[u.alert.type] || '★';
+      const glyph = { follow: '♥', sub: '★', resub: '★', gift: '✦', communitygift: '✦', tip: '$', cheer: '◆', raid: '⚑', host: '⌂', superchat: '$', member: '★', reward: '◈' }[u.alert.type] || '★';
       return '<div class="msg__icon"><span class="alert__glyph">' + glyph + '</span></div>';
     }
     const style = iconStyleForMessage(u);
@@ -946,7 +951,7 @@
       follow: F.alertFollow, sub: F.alertSub, resub: F.alertSub,
       gift: F.alertGift, communitygift: F.alertGift,
       tip: F.alertTip, cheer: F.alertCheer, raid: F.alertRaid, host: F.alertHost,
-      superchat: F.alertSuperchat, member: F.alertMember
+      superchat: F.alertSuperchat, member: F.alertMember, reward: F.alertReward
     };
     const v = map[type];
     return yes(v != null ? v : 'yes');

@@ -617,6 +617,16 @@
     },
     "group": "Alerts"
   },
+  "alertReward": {
+    "type": "dropdown",
+    "label": "Show channel-point / Store reward alerts",
+    "value": "yes",
+    "options": {
+      "yes": "Yes",
+      "no": "No"
+    },
+    "group": "Alerts"
+  },
   "alertCheer": {
     "type": "dropdown",
     "label": "Alert · Cheers",
@@ -685,6 +695,12 @@
     "type": "text",
     "label": "Member label",
     "value": "{name} became a member",
+    "group": "Alerts"
+  },
+  "alertLabelReward": {
+    "type": "text",
+    "label": "Reward label ({reward} = title)",
+    "value": "{name} redeemed {reward}",
     "group": "Alerts"
   },
   "alertLabelCheer": {

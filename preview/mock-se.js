@@ -162,7 +162,8 @@
         cheer: ['cheer-latest', { name: 'BitLord', amount: 500 }],
         raid: ['raid-latest', { name: 'BigStreamer', amount: 142 }],
         superchat: ['tip-latest', { name: 'YTViewer', amount: '$20', provider: 'youtube', type: 'superchat', message: 'great stream!' }],
-        member: ['subscriber-latest', { name: 'YTMember', provider: 'youtube', type: 'member', amount: 1 }]
+        member: ['subscriber-latest', { name: 'YTMember', provider: 'youtube', type: 'member', amount: 1 }],
+        reward: ['redemption-latest', { name: 'PointSpender', redemption: 'Hydrate!', amount: 500 }]
       }[type];
       if (e) dispatch(e[0], e[1]);
     },

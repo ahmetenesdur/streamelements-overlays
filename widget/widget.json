@@ -313,6 +313,27 @@
     },
     "group": "Badges & Platform"
   },
+  "dotTwitchOn": {
+    "type": "dropdown",
+    "label": "Enable Twitch dot",
+    "value": "yes",
+    "options": { "yes": "Yes", "no": "No" },
+    "group": "Badges & Platform"
+  },
+  "dotYouTubeOn": {
+    "type": "dropdown",
+    "label": "Enable YouTube dot",
+    "value": "yes",
+    "options": { "yes": "Yes", "no": "No" },
+    "group": "Badges & Platform"
+  },
+  "dotKickOn": {
+    "type": "dropdown",
+    "label": "Enable Kick dot",
+    "value": "yes",
+    "options": { "yes": "Yes", "no": "No" },
+    "group": "Badges & Platform"
+  },
   "dotTwitch": {
     "type": "colorpicker",
     "label": "Dot · Twitch",

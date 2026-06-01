@@ -76,6 +76,22 @@ test('shared chat label renders mapped source channel name', () => {
   assert.match(list.children[0].innerHTML, /msg__shared-label/);
 });
 
+test('shared chat label gets a stable per-name color', () => {
+  const { list, fire } = loadWidget({ sharedChatIndicator: 'yes', sharedChatLabels: '200:Ironmouse' });
+  fire('message', { data: tw({
+    displayName: 'GuestViewer', text: 'x',
+    tags: { 'room-id': '100', 'source-room-id': '200', 'user-id': 'u', id: 'm', badges: '' }
+  }) });
+  assert.match(list.children[0].innerHTML, /msg__shared-label" style="color:#[0-9a-f]{6}"/);
+});
+
+test('per-platform dot opt-out toggles root class (master dot stays on)', () => {
+  const { root } = loadWidget({ showPlatformDot: 'yes', dotTwitchOn: 'no', dotKickOn: 'yes' });
+  assert.ok(root.classList.contains('show-dot'), 'master dot still on');
+  assert.ok(root.classList.contains('no-dot-twitch'), 'twitch dot suppressed');
+  assert.ok(!root.classList.contains('no-dot-kick'), 'kick dot kept');
+});
+
 test('rolesFromTwitch: badges/tags → role list', () => {
   const { api } = loadWidget({});
   const r1 = api.fn.rolesFromTwitch({ badges: 'broadcaster/1', mod: '0', subscriber: '0' }, [{ type: 'broadcaster' }]);

@@ -427,7 +427,10 @@
     const nameStyle = nameColorStyle(u);
     const shared = (u.shared && yes(F.sharedChatIndicator))
       ? '<span class="msg__shared" title="shared chat">⤵</span>' +
-        (u.sharedSourceLabel ? '<span class="msg__shared-label">' + htmlEncode(u.sharedSourceLabel) + '</span>' : '')
+        (u.sharedSourceLabel
+          ? '<span class="msg__shared-label" style="color:' + stableColor(u.sharedSourceLabel) +
+            '">' + htmlEncode(u.sharedSourceLabel) + '</span>'
+          : '')
       : '';
     return '<span class="msg__head">' + shared + logo +
       '<span class="msg__badges">' + badges + '</span>' +
@@ -718,6 +721,9 @@
     toggle('show-icon', yes(f.showAvatar));
     toggle('show-arrow', yes(f.showArrow));
     toggle('show-dot', yes(f.showPlatformDot));
+    toggle('no-dot-twitch', f.dotTwitchOn != null && !yes(f.dotTwitchOn));
+    toggle('no-dot-youtube', f.dotYouTubeOn != null && !yes(f.dotYouTubeOn));
+    toggle('no-dot-kick', f.dotKickOn != null && !yes(f.dotKickOn));
     toggle('show-logo', yes(f.showPlatformLogo));
     toggle('no-badges', !yes(f.displayBadges));
     toggle('no-name', str(f.nickColor, 'user') === 'remove');

@@ -310,6 +310,10 @@ html, body {
 .msg--twitch  .msg__dot { background: var(--dot-twitch); }
 .msg--youtube .msg__dot { background: var(--dot-youtube); }
 .msg--kick    .msg__dot { background: var(--dot-kick); }
+/* Per-platform dot opt-out (master show-dot must still be on). */
+.se-chat.no-dot-twitch  .msg--twitch  .msg__dot,
+.se-chat.no-dot-youtube .msg--youtube .msg__dot,
+.se-chat.no-dot-kick    .msg--kick    .msg__dot { display: none; }
 
 .msg__body { min-width: 0; }
 .msg__head { display: inline; margin-right: 0.4em; }

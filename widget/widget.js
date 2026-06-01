@@ -12,15 +12,50 @@
 (function () {
   'use strict';
 
+  /**
+   * @typedef {Object} UnifiedMessage
+   * @property {'twitch'|'youtube'|'kick'} platform
+   * @property {string}  msgId
+   * @property {string}  userId
+   * @property {string}  [login]
+   * @property {string}  displayName
+   * @property {string}  color
+   * @property {string}  avatar
+   * @property {Array<{url:string, type:string}>} badges
+   * @property {string[]} roles
+   * @property {Object<string,string>} emotes
+   * @property {string}  text
+   * @property {boolean} isAction
+   * @property {boolean} [shared]
+   * @property {'chat'|'alert'} kind
+   * @property {AlertData} [alert]
+   */
+
+  /**
+   * @typedef {Object} AlertData
+   * @property {'follow'|'sub'|'resub'|'gift'|'communitygift'|'tip'|'cheer'|'raid'|'host'} type
+   * @property {string|number} amount
+   * @property {string} label
+   * @property {string} message
+   */
+
   // ---- module state ---------------------------------------------
   let F = {};                       // fieldData (settings)
   let listEl = null;                // .se-chat__list
   let rootEl = null;                // .se-chat
   let total = 0;                    // running message counter (unique ids)
   let lastSenderKey = null;         // for mergeMessages
-  const customEmotes = new Map();   // name -> url  (7TV / BTTV / FFZ)
+  const customEmotes = new Map();   // name -> {url,zw} | url  (7TV / BTTV / FFZ)
   let relaySocket = null;
   let relayRetry = 0;
+  let emoteLastLoad = 0;            // timestamp of last emote fetch (for TTL refresh)
+
+  /** @enum {string} */
+  var ALERT = {
+    FOLLOW: 'follow', SUB: 'sub', RESUB: 'resub',
+    GIFT: 'gift', COMMUNITY: 'communitygift',
+    TIP: 'tip', CHEER: 'cheer', RAID: 'raid', HOST: 'host'
+  };
 
   const ROLE_PRIORITY = ['broadcaster', 'leadmod', 'moderator', 'artist', 'vip', 'subscriber', 'fav', 'regular'];
   const pronounCache = {};   // twitch login -> short pronoun label ('' = none)
@@ -41,7 +76,8 @@
     applyTheme(F);
 
     // Async enrichments (never block rendering; fail silently).
-    loadCustomEmotes().catch(() => {});
+    loadCustomEmotes().catch(function() {});
+    emoteLastLoad = Date.now();
     loadPronounMap();
     connectRelay();
   });
@@ -50,28 +86,38 @@
   //  Event router
   // ================================================================
   window.addEventListener('onEventReceived', function (obj) {
-    const d = obj.detail || {};
-    const listener = d.listener;
-    const event = d.event || {};
+    try {
+      var d = obj.detail || {};
+      var listener = d.listener;
+      var event = d.event || {};
 
-    if (listener === 'message') {
-      const data = event.data || event;
-      const u = data && (data.snippet || data.authorDetails || data.avatar)
-        ? normalizeYouTube(data)
-        : normalizeTwitch(data);
-      if (u) handleChat(u);
-      return;
-    }
+      if (listener === 'message') {
+        var data = event.data || event;
+        var u = data && (data.snippet || data.authorDetails || data.avatar)
+          ? normalizeYouTube(data)
+          : normalizeTwitch(data);
+        if (u) handleChat(u);
+        return;
+      }
 
-    if (listener === 'delete-message') { removeByMsgId(event.msgId); return; }
-    if (listener === 'delete-messages') { removeByUser(event.userId); return; }
+      if (listener === 'delete-message') { removeByMsgId(event.msgId); return; }
+      if (listener === 'delete-messages') { removeByUser(event.userId); return; }
 
-    if (listener === 'widget-button') { handleButton(event.field); return; }
+      if (listener === 'event:skip') {
+        var lastAlert = listEl && listEl.querySelector('.msg--alert:last-child');
+        if (lastAlert) animateOut(lastAlert);
+        return;
+      }
 
-    // Alert listeners → inline alert render
-    if (/-latest$/.test(listener || '')) {
-      const u = normalizeAlert(listener, event);
-      if (u) { addMessage(u); playSound(u.alert.type); }
+      if (listener === 'widget-button') { handleButton(event.field); return; }
+
+      // Alert listeners → inline alert render
+      if (/-latest$/.test(listener || '')) {
+        var au = normalizeAlert(listener, event);
+        if (au) { addMessage(au); playSound(au.alert.type); }
+      }
+    } catch (err) {
+      if (debugMode()) console.warn('[se-chat] event error:', err);
     }
   });
 
@@ -200,7 +246,7 @@
       .replace(/{tier}/g, e.tier || '');
 
     return {
-      platform: 'twitch', kind: 'alert', msgId: 'a' + Date.now(),
+      platform: 'twitch', kind: 'alert', msgId: 'a' + Date.now() + '-' + (++total),
       userId: name, displayName: name, color: '', avatar: '',
       badges: [], roles: [], emotes: {}, isAction: false,
       text: label,
@@ -212,7 +258,8 @@
   //  Chat handling (filters + merge)
   // ================================================================
   function handleChat(u) {
-    if (!u.text && u.kind === 'chat') return;
+    if (!u.text && (u.kind === 'chat')) return;
+    maybeRefreshEmotes();
     if (!platformEnabled(u.platform)) return;     // single-platform / combine filter
     if (str(F.hideCommands, 'yes') === 'yes' && u.text.trim().startsWith('!')) return;
     if (isIgnored(u.displayName)) return;
@@ -259,6 +306,11 @@
     const animIn = str(F.animationIn, 'liquidIn');
     if (str(F.disableAllAnimations, 'no') !== 'yes' && animIn !== 'none') {
       row.classList.add('animate__animated', 'animate__' + animIn);
+      // Release GPU layer after entrance animation completes
+      row.addEventListener('animationend', function handler() {
+        row.style.willChange = 'auto';
+        row.removeEventListener('animationend', handler);
+      }, { once: true });
     }
 
     const icon = iconMarkup(u);
@@ -285,7 +337,7 @@
 
   function headMarkup(u) {
     const badges = u.badges.map(b =>
-      '<img class="badge" alt="" src="' + encodeURI(b.url) + '">').join('');
+      '<img class="badge" alt="' + htmlEncode(b.type || 'badge') + '" src="' + encodeURI(b.url) + '">').join('');
     const logo = '<img class="msg__platform-logo" alt="' + u.platform +
       '" src="' + platformLogo(u.platform) + '">';
     const nameStyle = nameColorStyle(u);
@@ -356,18 +408,27 @@
   }
 
   function renderText(text, emoteMap) {
-    const all = Object.assign({}, mapFromObject(customEmotes), emoteMap || {});
-    const keywords = keywordList();
-    const tokens = String(text).split(/(\s+)/); // keep whitespace tokens
-    return tokens.map(tok => {
+    var nativeEmotes = emoteMap || {};
+    var keywords = keywordList();
+    var tokens = String(text).split(/(\s+)/); // keep whitespace tokens
+    return tokens.map(function (tok) {
       if (/^\s+$/.test(tok) || tok === '') return tok;
-      if (all[tok]) {
-        return '<img class="emote" alt="' + htmlEncode(tok) + '" src="' + encodeURI(all[tok]) + '">';
+      // Native emotes take priority, then custom (7TV/BTTV/FFZ)
+      var emoteUrl = nativeEmotes[tok] || null;
+      var isZW = false;
+      if (!emoteUrl && customEmotes.has(tok)) {
+        var entry = customEmotes.get(tok);
+        if (typeof entry === 'string') { emoteUrl = entry; }
+        else { emoteUrl = entry.url; isZW = !!entry.zw; }
       }
-      const enc = htmlEncode(tok);
+      if (emoteUrl) {
+        var cls = 'emote' + (isZW ? ' emote--zerowidth' : '');
+        return '<img class="' + cls + '" alt="' + htmlEncode(tok) + '" src="' + encodeURI(emoteUrl) + '">';
+      }
+      var enc = htmlEncode(tok);
       if (keywords.length) {
         // Strip surrounding punctuation so "gg!" / "(win)" still match "gg" / "win".
-        const bare = tok.replace(/^[^0-9A-Za-z_]+|[^0-9A-Za-z_]+$/g, '').toLowerCase();
+        var bare = tok.replace(/^[^0-9A-Za-z_]+|[^0-9A-Za-z_]+$/g, '').toLowerCase();
         if (bare && keywords.indexOf(bare) !== -1) return '<span class="kw">' + enc + '</span>';
       }
       return enc;
@@ -498,6 +559,7 @@
     // it (Chromium / OBS). Otherwise stay on safe glassmorphism (no class).
     toggle('fx-advanced-glass', yes(f.glassAdvanced) && advancedGlassSupported());
     toggle('no-anim', yes(f.disableAllAnimations));
+    toggle('show-colon', yes(f.showColon));
   }
 
   // ================================================================
@@ -524,23 +586,29 @@
 
   async function fetch7tvGlobal() {
     const j = await getJSON('https://7tv.io/v3/emote-sets/global');
-    (j.emotes || []).forEach(e => customEmotes.set(e.name, sevenTvUrl(e.id)));
+    (j.emotes || []).forEach(function (e) {
+      var isZW = !!((e.data && e.data.flags || e.flags || 0) & (1 << 8));
+      customEmotes.set(e.name, { url: sevenTvUrl(e.id), zw: isZW });
+    });
   }
   async function fetch7tvChannel(id) {
     const j = await getJSON('https://7tv.io/v3/users/twitch/' + id);
     const emotes = j && j.emote_set && j.emote_set.emotes ? j.emote_set.emotes : [];
-    emotes.forEach(e => customEmotes.set(e.name, sevenTvUrl(e.id)));
+    emotes.forEach(function (e) {
+      var isZW = !!((e.data && e.data.flags || e.flags || 0) & (1 << 8));
+      customEmotes.set(e.name, { url: sevenTvUrl(e.id), zw: isZW });
+    });
   }
   const sevenTvUrl = id => 'https://cdn.7tv.app/emote/' + id + '/2x.webp';
 
   async function fetchBttvGlobal() {
     const arr = await getJSON('https://api.betterttv.net/3/cached/emotes/global');
-    (arr || []).forEach(e => customEmotes.set(e.code, bttvUrl(e.id)));
+    (arr || []).forEach(function (e) { customEmotes.set(e.code, { url: bttvUrl(e.id), zw: false }); });
   }
   async function fetchBttvChannel(id) {
     const j = await getJSON('https://api.betterttv.net/3/cached/users/twitch/' + id);
     [].concat(j.channelEmotes || [], j.sharedEmotes || [])
-      .forEach(e => customEmotes.set(e.code, bttvUrl(e.id)));
+      .forEach(function (e) { customEmotes.set(e.code, { url: bttvUrl(e.id), zw: false }); });
   }
   const bttvUrl = id => 'https://cdn.betterttv.net/emote/' + id + '/2x';
 
@@ -554,10 +622,14 @@
   }
   function ffzCollect(j) {
     const sets = (j && j.sets) || {};
-    Object.keys(sets).forEach(k => (sets[k].emoticons || []).forEach(e => {
-      const u = e.urls && (e.urls['2'] || e.urls['1']);
-      if (u) customEmotes.set(e.name, (u.startsWith('//') ? 'https:' + u : u));
-    }));
+    Object.keys(sets).forEach(function (k) { (sets[k].emoticons || []).forEach(function (e) {
+      var u = e.urls && (e.urls['2'] || e.urls['1']);
+      if (u) {
+        var url = u.startsWith('//') ? 'https:' + u : u;
+        var isZW = !!(e.modifier || e.zeroWidth);
+        customEmotes.set(e.name, { url: url, zw: isZW });
+      }
+    }); });
   }
 
   // ================================================================
@@ -615,15 +687,17 @@
       .replace(/{name}/g, name).replace(/{sender}/g, sender)
       .replace(/{amount}/g, amount).replace(/{count}/g, count);
     return {
-      platform: 'kick', kind: 'alert', msgId: 'ka' + Date.now(),
+      platform: 'kick', kind: 'alert', msgId: 'ka' + Date.now() + '-' + (++total),
       userId: name, displayName: name, color: '', avatar: '',
       badges: [], roles: [], emotes: {}, isAction: false,
       text: label, alert: { type: p.type, amount, label, message: '' }
     };
   }
   function scheduleReconnect() {
-    relayRetry = Math.min(relayRetry + 1, 6);
-    setTimeout(connectRelay, 1000 * relayRetry);
+    relayRetry = Math.min(relayRetry + 1, 8);
+    var base = Math.min(1000 * Math.pow(2, relayRetry), 30000);
+    var jitter = Math.random() * base * 0.3;
+    setTimeout(connectRelay, base + jitter);
   }
   function safeSend(o) { try { relaySocket.send(JSON.stringify(o)); } catch (_) {} }
 
@@ -852,13 +926,20 @@
       .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   }
   function cssEsc(s) { return String(s == null ? '' : s).replace(/["\\\]]/g, '\\$&'); }
-  function mapFromObject(map) { const o = {}; map.forEach((v, k) => { o[k] = v; }); return o; }
   function str(v, d) { return (v == null || v === '') ? d : String(v); }
   function num(v, d) { const n = parseFloat(v); return isNaN(n) ? d : n; }
   function yes(v) { return String(v) === 'yes' || v === true; }
   function toggle(cls, on) { if (rootEl) rootEl.classList.toggle(cls, !!on); }
+  function debugMode() { return yes(F.debugMode); }
   function getJSON(url) {
     return fetch(url, { mode: 'cors' }).then(r => r.ok ? r.json() : Promise.reject(r.status));
+  }
+  function maybeRefreshEmotes() {
+    var ttl = num(F.emoteCacheTTL, 0) * 60000;
+    if (ttl <= 0 || (Date.now() - emoteLastLoad) < ttl) return;
+    customEmotes.clear();
+    loadCustomEmotes().catch(function() {});
+    emoteLastLoad = Date.now();
   }
 
   function sampleTwitch() {

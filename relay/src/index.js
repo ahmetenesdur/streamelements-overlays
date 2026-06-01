@@ -140,8 +140,10 @@ function scheduleKickReconnect(chatroomId) {
   const room = rooms.get(chatroomId);
   if (!room) return;
   if (room.subscribers.size === 0) { rooms.delete(chatroomId); return; } // nobody left → drop
-  room.retry = Math.min(room.retry + 1, 6);
-  setTimeout(() => connectKick(chatroomId), 1000 * room.retry);
+  room.retry = Math.min(room.retry + 1, 8);
+  const base = Math.min(1000 * Math.pow(2, room.retry), 60000);
+  const jitter = Math.random() * base * 0.3;
+  setTimeout(() => connectKick(chatroomId), base + jitter);
 }
 
 // Kick ChatMessageEvent → widget normalizeKick() shape.
@@ -227,7 +229,20 @@ function startServer() {
 
   const wss = new WebSocketServer({ server });
 
-  wss.on('connection', (client) => {
+  // Rate limiting: max connections per IP
+  const connectionCounts = new Map();
+  const MAX_CONNS_PER_IP = 5;
+
+  wss.on('connection', (client, req) => {
+    const ip = (req.headers['x-forwarded-for'] || '').split(',')[0].trim()
+             || req.socket.remoteAddress;
+    const count = (connectionCounts.get(ip) || 0) + 1;
+    if (count > MAX_CONNS_PER_IP) {
+      client.close(1008, 'Too many connections');
+      return;
+    }
+    connectionCounts.set(ip, count);
+
     client._rooms = new Set();
     client.isAlive = true;
     client.on('pong', () => { client.isAlive = true; });
@@ -249,6 +264,11 @@ function startServer() {
     });
 
     client.on('close', () => {
+      // Decrement rate-limit counter
+      const c = connectionCounts.get(ip) || 1;
+      if (c <= 1) connectionCounts.delete(ip);
+      else connectionCounts.set(ip, c - 1);
+      // Clean up room subscriptions
       for (const id of client._rooms) {
         const room = rooms.get(id);
         if (room) room.subscribers.delete(client);

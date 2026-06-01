@@ -1,5 +1,7 @@
 # Multistream Chat Overlay (StreamElements)
 
+![CI](https://github.com/ahmetenesdur/streamelements-overlays/actions/workflows/ci.yml/badge.svg)
+
 A fully customizable, **professional multistream chat overlay** for StreamElements —
 shows **Twitch + YouTube + Kick** chat in one unified feed with a clean, modern
 "broadcast editorial" look — soft pastel palette, minimal shadows, no boxes or
@@ -29,7 +31,7 @@ bundled Railway relay). Per-platform show/hide: use one platform or combine any 
 - **Pronouns** (opt-in) via pronouns.alejo.io for Twitch users.
 - Platform logo and/or colored platform dot; badges; **53 icon-bubble glyphs** or user avatar.
 - Username color modes (platform / text / custom / hidden); highlighted keywords.
-- 7TV / BTTV / FFZ custom emotes (global + channel), fetched client-side.
+- 7TV / BTTV / FFZ custom emotes (global + channel), fetched client-side — **zero-width emote overlays** supported.
 - **Shared Chat** (Twitch Stream Together) detection + origin marker.
 
 **Alerts** — inline follow / sub / resub / gift / community-gift / tip / cheer / raid / host
@@ -91,11 +93,16 @@ push to `main`.
 
 ## Status
 
-**Current: v1.0.2** · 31 unit tests + relay parser tests green · verified live in the preview.
+**Current: v1.1.0** · 31 unit tests + relay parser tests green · verified live in the preview.
 
 - ✅ Phases 0–6 — scaffold, core render, design system, inline alerts, effects, Kick relay (code; deploy when needed)
 - ✅ Layout system rebuilt — real **vertical / horizontal ticker / fullscreen** (pure flexbox, no pile-ups)
 - ✅ Feature parity — per-platform show/hide, expanded roles, pronouns, 53-glyph icon library, shared chat
 - ✅ Settings audit + best-practice defaults reconciled across json/css/js (v1.0.1)
 - ✅ Pastel-premium palette + minimal shadows + gradient-free preview scenes (v1.0.2)
+- ✅ Zero-width emote overlays, error boundaries, exponential backoff, relay rate limiting, OBS GPU optimizations (v1.1.0)
 - ⬜ Public publish + live OBS test · TikTok + Ko-fi (future)
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, code style, and PR guidelines.

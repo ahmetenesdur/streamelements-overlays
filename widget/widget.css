@@ -221,6 +221,13 @@ html, body {
   line-height: 1.46;
   letter-spacing: -0.003em;
   word-break: break-word;
+  will-change: transform, opacity;
+  contain: layout style;
+}
+.msg:not(.animate__animated) { will-change: auto; }
+.se-chat[data-layout="vertical"] .msg {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 44px;
 }
 .se-chat[data-halign="right"] .msg { flex-direction: row-reverse; }
 
@@ -343,6 +350,10 @@ html, body {
   margin: 0 1px;
 }
 .emote--zerowidth { position: absolute; margin-left: calc(var(--emote-size) * -1); }
+
+/* Colon — hidden by default, toggled via show-colon class */
+.msg__colon { display: none; }
+.se-chat.show-colon .msg__colon { display: inline; }
 
 /* ================================================================
    ROLES — username tint only (no boxes, no glow).

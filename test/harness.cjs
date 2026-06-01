@@ -50,7 +50,15 @@ function makeEl(tag) {
     // very small querySelector: supports '.cls' within innerHTML-free node trees
     querySelector() { return null; },
     querySelectorAll() { return []; },
-    insertBefore(c, ref) { const i = el.children.indexOf(ref); if (i < 0) el.children.push(c); else el.children.splice(i, 0, c); c.parentNode = el; return c; }
+    insertBefore(c, ref) { const i = el.children.indexOf(ref); if (i < 0) el.children.push(c); else el.children.splice(i, 0, c); c.parentNode = el; return c; },
+    // Event listener stubs (enough for animationend cleanup in addMessage)
+    _listeners: {},
+    addEventListener(type, fn) { (el._listeners[type] = el._listeners[type] || []).push(fn); },
+    removeEventListener(type, fn) {
+      const arr = el._listeners[type];
+      if (arr) { const i = arr.indexOf(fn); if (i >= 0) arr.splice(i, 1); }
+    },
+    dispatchEvent(ev) { (el._listeners[ev.type || ev] || []).forEach(fn => fn(ev)); }
   };
   return el;
 }

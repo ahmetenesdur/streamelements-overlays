@@ -155,6 +155,12 @@
     "value": 28,
     "group": "Typography"
   },
+  "textShadow": {
+    "type": "text",
+    "label": "Text shadow (CSS value, empty = use preset default)",
+    "value": "",
+    "group": "Typography"
+  },
   "nickColor": {
     "type": "dropdown",
     "label": "Username color mode",
@@ -171,6 +177,16 @@
     "type": "colorpicker",
     "label": "Custom username color",
     "value": "rgba(171,194,242,1)",
+    "group": "Username & Colors"
+  },
+  "showColon": {
+    "type": "dropdown",
+    "label": "Show colon after username",
+    "value": "no",
+    "options": {
+      "yes": "Yes",
+      "no": "No"
+    },
     "group": "Username & Colors"
   },
   "displayBadges": {
@@ -668,7 +684,7 @@
   },
   "glassAdvanced": {
     "type": "dropdown",
-    "label": "Advanced glass refraction (Chromium/OBS only, GPU-heavy)",
+    "label": "Advanced glass refraction (Chromium/OBS only, GPU-heavy — keep Max Messages low)",
     "value": "no",
     "options": {
       "yes": "Yes",
@@ -763,6 +779,22 @@
     "min": 0,
     "max": 100,
     "step": 1,
+    "group": "Advanced glass"
+  },
+  "emoteCacheTTL": {
+    "type": "number",
+    "label": "Emote cache refresh (minutes, 0 = no refresh)",
+    "value": 0,
+    "group": "Advanced glass"
+  },
+  "debugMode": {
+    "type": "dropdown",
+    "label": "Debug mode (console logs)",
+    "value": "no",
+    "options": {
+      "yes": "Yes",
+      "no": "No"
+    },
     "group": "Advanced glass"
   },
   "showTwitch": {

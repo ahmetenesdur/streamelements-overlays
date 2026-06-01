@@ -21,7 +21,10 @@
     }
     * { box-sizing: border-box; }
     html, body { height: 100%; }
-    body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif; color: var(--ink); }
+    body {
+      margin: 0; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif; color: var(--ink);
+      -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+    }
 
     /* Default stage = clean flat dark, so the chat itself is easy to judge.
        Switch to a colored/photo scene below to test glass over video. */
@@ -52,7 +55,7 @@
     .grp { border-bottom: 1px solid var(--line); }
     .grp > summary {
       list-style: none; cursor: pointer; user-select: none;
-      padding: 11px 16px; font-size: 11px; font-weight: 700; letter-spacing: .06em;
+      min-height: 40px; padding: 11px 16px; font-size: 11px; font-weight: 700; letter-spacing: .06em;
       text-transform: uppercase; color: var(--mut); display: flex; align-items: center; gap: 8px;
     }
     .grp > summary::-webkit-details-marker { display: none; }
@@ -68,12 +71,13 @@
     .field.wide .ctl { width: 100%; }
 
     select, input[type=text], input[type=number] {
+      min-height: 40px;
       width: 150px; background: var(--field-bg); color: var(--ink);
       border: 1px solid var(--field-bd); border-radius: 7px; padding: 6px 8px; font-size: 12px; font-family: inherit;
     }
     .field.wide select, .field.wide input { width: 100%; }
-    input[type=range] { width: 150px; accent-color: var(--pv-accent); }
-    input[type=color] { width: 34px; height: 26px; padding: 0; border: 1px solid var(--field-bd); border-radius: 6px; background: var(--field-bg); }
+    input[type=range] { width: 150px; min-height: 40px; accent-color: var(--pv-accent); }
+    input[type=color] { width: 40px; height: 40px; padding: 3px; border: 1px solid var(--field-bd); border-radius: 8px; background: var(--field-bg); }
     .rangewrap { display: flex; align-items: center; gap: 8px; justify-content: flex-end; }
     .rangewrap .val { font-variant-numeric: tabular-nums; color: var(--mut); font-size: 11px; min-width: 30px; text-align: right; }
     .colorwrap { display: flex; align-items: center; gap: 6px; justify-content: flex-end; }
@@ -82,20 +86,45 @@
     .row { display: flex; flex-wrap: wrap; gap: 6px; }
     button.sim {
       flex: 1 1 auto; background: var(--field-bg); color: var(--ink); border: 1px solid var(--field-bd);
-      border-radius: 7px; padding: 7px 9px; font-size: 12px; cursor: pointer; font-family: inherit;
+      min-height: 40px; border-radius: 7px; padding: 8px 10px; font-size: 12px; cursor: pointer; font-family: inherit;
+      transition-property: transform, background-color, box-shadow, border-color;
+      transition-duration: 140ms;
+      transition-timing-function: ease-out;
     }
     button.sim:hover { background: #1f222b; }
+    button.sim:active { transform: scale(0.96); }
+    :is(button, select, input, summary):focus-visible {
+      outline: 2px solid var(--pv-accent);
+      outline-offset: 2px;
+      box-shadow: 0 0 0 4px rgba(110, 168, 254, 0.18);
+    }
     button.sim.tw { border-color: #9146ff66; } button.sim.yt { border-color: #ff000066; }
     button.sim.kk { border-color: #53fc1866; } button.sim.al { border-color: #e9c37c66; }
     button.fieldbtn { width: 100%; }
     .lbl { font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: var(--mut); margin-top: 4px; }
+
+    @media (max-width: 760px) {
+      :root { --pw: 100vw; }
+      #stage { inset: 0 0 44vh 0; }
+      #panel {
+        top: auto; left: 0; right: 0; width: 100%; height: 44vh;
+        border-left: 0; border-top: 1px solid var(--line);
+      }
+      #panel header { padding: 12px 14px 8px; }
+      .pad { padding: 4px 14px 14px; }
+      .field { grid-template-columns: 1fr; align-items: stretch; }
+      .field .ctl, select, input[type=text], input[type=number], input[type=range] { width: 100%; }
+      .rangewrap, .colorwrap { justify-content: stretch; }
+      .rangewrap input[type=range] { flex: 1 1 auto; }
+      .colorwrap input[type=text] { flex: 1 1 auto; width: auto; }
+    }
   </style>
 </head>
 <body>
   <!-- ===== widget DOM (mirror of widget.html) ===== -->
   <div id="stage">
     <div class="se-chat" id="seChat" data-layout="vertical" data-halign="left" data-valign="bottom">
-      <div class="se-chat__list" id="chatList"></div>
+      <div class="se-chat__list" id="chatList" role="log" aria-live="polite" aria-relevant="additions"></div>
     </div>
   </div>
 
@@ -110,33 +139,33 @@
       <summary>Simulate</summary>
       <div class="pad">
         <div class="row">
-          <button class="sim tw" data-act="twitch">Twitch</button>
-          <button class="sim yt" data-act="youtube">YouTube</button>
-          <button class="sim kk" data-act="kick">Kick</button>
+          <button type="button" class="sim tw" data-act="twitch">Twitch</button>
+          <button type="button" class="sim yt" data-act="youtube">YouTube</button>
+          <button type="button" class="sim kk" data-act="kick">Kick</button>
         </div>
         <div class="row">
-          <button class="sim" data-act="action">/me</button>
-          <button class="sim" data-act="long">Long</button>
-          <button class="sim" data-act="emote">Emotes</button>
-          <button class="sim" data-act="seventv">7TV</button>
-          <button class="sim" data-act="keywords">Keywords</button>
+          <button type="button" class="sim" data-act="action">/me</button>
+          <button type="button" class="sim" data-act="long">Long</button>
+          <button type="button" class="sim" data-act="emote">Emotes</button>
+          <button type="button" class="sim" data-act="seventv">7TV</button>
+          <button type="button" class="sim" data-act="keywords">Keywords</button>
         </div>
         <div class="lbl">Alerts</div>
         <div class="row">
-          <button class="sim al" data-act="alert:follow">Follow</button>
-          <button class="sim al" data-act="alert:sub">Sub</button>
-          <button class="sim al" data-act="alert:tip">Tip</button>
-          <button class="sim al" data-act="alert:cheer">Cheer</button>
-          <button class="sim al" data-act="alert:raid">Raid</button>
+          <button type="button" class="sim al" data-act="alert:follow">Follow</button>
+          <button type="button" class="sim al" data-act="alert:sub">Sub</button>
+          <button type="button" class="sim al" data-act="alert:tip">Tip</button>
+          <button type="button" class="sim al" data-act="alert:cheer">Cheer</button>
+          <button type="button" class="sim al" data-act="alert:raid">Raid</button>
         </div>
         <div class="lbl">Control</div>
         <div class="row">
-          <button class="sim" data-act="rain">Rain ×20</button>
-          <button class="sim" data-act="deleteLast">Delete last</button>
-          <button class="sim" data-act="clear">Clear</button>
+          <button type="button" class="sim" data-act="rain">Rain ×20</button>
+          <button type="button" class="sim" data-act="deleteLast">Delete last</button>
+          <button type="button" class="sim" data-act="clear">Clear</button>
         </div>
-        <div class="field"><label>Preview scene</label>
-          <select class="ctl" data-scene>
+        <div class="field"><label for="previewScene">Preview scene</label>
+          <select class="ctl" id="previewScene" data-scene>
             <option value="">Plain dark</option>
             <option value="scene-light">Light</option>
             <option value="scene-mid">Mid gray</option>

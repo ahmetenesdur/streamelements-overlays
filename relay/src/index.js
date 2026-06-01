@@ -23,6 +23,7 @@ const http = require('http');
 const { WebSocketServer, WebSocket } = require('ws');
 
 const PORT = process.env.PORT || 8080;
+const RELAY_TOKEN = process.env.RELAY_TOKEN || '';
 
 // Kick's public Pusher app (same one kick.com uses in the browser).
 const KICK_PUSHER_URL =
@@ -213,6 +214,25 @@ function broadcast(chatroomId, msg) {
   }
 }
 
+function isAuthorizedSubscribe(msg, requiredToken) {
+  if (!requiredToken) return true;
+  return !!(msg && msg.token && String(msg.token) === String(requiredToken));
+}
+
+function detachClientFromRooms(client, roomMap = rooms) {
+  if (!client || !client._rooms) return;
+  for (const id of client._rooms) {
+    const room = roomMap.get(id);
+    if (!room) continue;
+    room.subscribers.delete(client);
+    if (room.subscribers.size === 0) {
+      try { if (room.ws) room.ws.close(); } catch {}
+      roomMap.delete(id);
+    }
+  }
+  client._rooms.clear();
+}
+
 // All server setup lives inside startServer() so that `require`-ing this file
 // (e.g. from relay/test.cjs) creates NO sockets, timers, or open handles — the
 // process can exit cleanly. Only running it directly starts the server.
@@ -251,6 +271,11 @@ function startServer() {
       let msg;
       try { msg = JSON.parse(buf.toString()); } catch { return; }
       if (msg && msg.type === 'subscribe' && msg.platform === 'kick') {
+        if (!isAuthorizedSubscribe(msg, RELAY_TOKEN)) {
+          client.send(JSON.stringify({ type: 'error', error: 'unauthorized' }));
+          client.close(1008, 'Unauthorized');
+          return;
+        }
         const chatroomId = await resolveChatroomId(msg.channel);
         if (!chatroomId) {
           client.send(JSON.stringify({ type: 'error', error: 'kick_channel_unresolved', channel: msg.channel }));
@@ -269,10 +294,7 @@ function startServer() {
       if (c <= 1) connectionCounts.delete(ip);
       else connectionCounts.set(ip, c - 1);
       // Clean up room subscriptions
-      for (const id of client._rooms) {
-        const room = rooms.get(id);
-        if (room) room.subscribers.delete(client);
-      }
+      detachClientFromRooms(client);
     });
   });
 
@@ -296,4 +318,11 @@ if (require.main === module) {
   startServer();
 }
 
-module.exports = { parseKickContent, toUnifiedKick, toUnifiedKickAlert, startServer };
+module.exports = {
+  parseKickContent,
+  toUnifiedKick,
+  toUnifiedKickAlert,
+  isAuthorizedSubscribe,
+  detachClientFromRooms,
+  startServer
+};

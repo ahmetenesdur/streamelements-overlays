@@ -197,8 +197,9 @@
 
   function controlFor(key, f) {
     const cur = MockSE.fieldData[key];
+    const id = 'field-' + key;
     if (f.type === 'dropdown') {
-      const s = el('select', { class: 'ctl' });
+      const s = el('select', { class: 'ctl', id });
       Object.keys(f.options || {}).forEach(v => {
         const o = el('option', { value: v }, f.options[v]);
         if (String(cur) === v) o.selected = true;
@@ -208,13 +209,13 @@
       return s;
     }
     if (f.type === 'number') {
-      const i = el('input', { type: 'number', class: 'ctl' }); i.value = cur != null ? cur : '';
+      const i = el('input', { type: 'number', class: 'ctl', id, autocomplete: 'off' }); i.value = cur != null ? cur : '';
       i.addEventListener('change', () => MockSE.set(key, i.value));
       return i;
     }
     if (f.type === 'slider') {
       const wrap = el('div', { class: 'rangewrap' });
-      const i = el('input', { type: 'range' });
+      const i = el('input', { type: 'range', id });
       i.min = f.min != null ? f.min : 0; i.max = f.max != null ? f.max : 100;
       i.step = f.step != null ? f.step : 1; i.value = cur != null ? cur : 0;
       const val = el('span', { class: 'val' }, i.value);
@@ -224,15 +225,15 @@
     }
     if (f.type === 'colorpicker') {
       const wrap = el('div', { class: 'colorwrap' });
-      const hex = el('input', { type: 'color' }); hex.value = rgbaToHex(cur) || '#000000';
-      const txt = el('input', { type: 'text' }); txt.value = cur || ''; txt.placeholder = 'empty';
+      const hex = el('input', { type: 'color', id }); hex.value = rgbaToHex(cur) || '#000000';
+      const txt = el('input', { type: 'text', autocomplete: 'off', spellcheck: 'false' }); txt.value = cur || ''; txt.placeholder = 'empty';
       hex.addEventListener('input', () => { txt.value = hex.value; MockSE.set(key, hex.value); });
       txt.addEventListener('change', () => { MockSE.set(key, txt.value); const h = rgbaToHex(txt.value); if (h) hex.value = h; });
       wrap.appendChild(hex); wrap.appendChild(txt);
       return wrap;
     }
     // text / googleFont / sound-input
-    const i = el('input', { type: 'text', class: 'ctl' });
+    const i = el('input', { type: 'text', class: 'ctl', id, autocomplete: 'off', spellcheck: 'false' });
     i.value = cur != null ? cur : '';
     i.placeholder = f.type === 'sound-input' ? 'sound URL' : (f.type === 'googleFont' ? 'Google font name' : '');
     i.addEventListener('change', () => MockSE.set(key, i.value));
@@ -257,13 +258,13 @@
       const pad = el('div', { class: 'pad' });
       groups[g].forEach(([key, f]) => {
         if (f.type === 'button') {
-          const b = el('button', { class: 'sim fieldbtn' }, f.label || key);
+          const b = el('button', { class: 'sim fieldbtn', type: 'button' }, f.label || key);
           b.addEventListener('click', () => dispatch('widget-button', { field: key }));
           pad.appendChild(b); return;
         }
         const wide = f.type === 'text' || f.type === 'googleFont' || f.type === 'sound-input';
         const row = el('div', { class: 'field' + (wide ? ' wide' : '') });
-        row.appendChild(el('label', null, f.label || key));
+        row.appendChild(el('label', { for: 'field-' + key }, f.label || key));
         row.appendChild(controlFor(key, f));
         pad.appendChild(row);
       });

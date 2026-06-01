@@ -162,6 +162,19 @@ test('renderText: escapes HTML (XSS safety)', () => {
   assert.match(html, /&lt;script&gt;/);
 });
 
+test('message render: rejects unsafe inline color values', () => {
+  const { list, fire } = loadWidget({ nickColor: 'user' });
+  fire('message', { data: tw({
+    displayName: 'UnsafeColor',
+    displayColor: '#fff";background:url(javascript:alert(1))',
+    text: 'safe text'
+  }) });
+  assert.strictEqual(list.children.length, 1);
+  const html = list.children[0].innerHTML;
+  assert.ok(!html.includes('background:'), 'malicious CSS declaration must not be rendered');
+  assert.ok(!html.includes('javascript:'), 'javascript URL must not be rendered');
+});
+
 // ---- filters -------------------------------------------------------
 test('isIgnored: case-insensitive CSV match', () => {
   const { api } = loadWidget({ ignoredUsers: 'StreamElements, Nightbot' });
@@ -307,16 +320,37 @@ test('shipped defaults: common chat bots are ignored out of the box', () => {
 
 // ---- Phase 7: new test scenarios ----------------------------------
 
-test('renderText: zero-width emote gets emote--zerowidth class', () => {
+test('renderText: custom zero-width emote gets emote--zerowidth class', () => {
   const { api } = loadWidget({ enable7tv: 'no', enableBttv: 'no', enableFfz: 'no' });
-  // Manually inject a zero-width emote into the customEmotes map via renderText's native emotes path
-  // For unit testing, we use native emotes which are plain url strings — zero-width comes from customEmotes
-  // So test renderText with native emotes only (no zw), confirming basic img output
-  const html = api.fn.renderText('catJAM', { catJAM: 'http://cdn/catjam.webp' });
-  assert.match(html, /class="emote"/, 'native emote gets emote class');
-  assert.match(html, /src="http:\/\/cdn\/catjam.webp"/, 'native emote src is correct');
-  // Confirm no zerowidth class for normal native emotes
-  assert.ok(!html.includes('emote--zerowidth'), 'native emotes are not zero-width');
+  api.test.setCustomEmote('Paint', { url: 'http://cdn/paint.webp', zw: true });
+  const html = api.fn.renderText('Paint', {});
+  assert.match(html, /class="emote emote--zerowidth"/, 'custom zero-width emote gets overlay class');
+  assert.match(html, /src="http:\/\/cdn\/paint.webp"/, 'custom emote src is correct');
+});
+
+test('emote cache refresh reloads channel emotes after TTL expiry', async () => {
+  const calls = [];
+  const fakeFetch = (url) => {
+    calls.push(url);
+    const body = String(url).includes('/users/twitch/99')
+      ? { emote_set: { emotes: [{ name: 'ChannelOnly', id: 'channel-emote', data: { flags: 0 } }] } }
+      : { emotes: [{ name: 'GlobalOnly', id: 'global-emote', data: { flags: 0 } }] };
+    return Promise.resolve({ ok: true, json: () => Promise.resolve(body) });
+  };
+
+  const { api, fire } = loadWidget({
+    enable7tv: 'yes', enableBttv: 'no', enableFfz: 'no', emoteCacheTTL: 1
+  }, { fetch: fakeFetch });
+
+  fire('message', { data: tw({ tags: { 'room-id': '99', 'user-id': 'u1', id: 'm1', mod: '0', subscriber: '0', badges: '' } }) });
+  await new Promise(resolve => setImmediate(resolve));
+  assert.ok(calls.some(url => String(url).includes('/users/twitch/99')), 'initial channel emotes load');
+
+  calls.length = 0;
+  api.test.setEmoteLastLoad(0);
+  fire('message', { data: tw({ tags: { 'room-id': '99', 'user-id': 'u2', id: 'm2', mod: '0', subscriber: '0', badges: '' } }) });
+  await new Promise(resolve => setImmediate(resolve));
+  assert.ok(calls.some(url => String(url).includes('/users/twitch/99')), 'TTL refresh reloads channel emotes');
 });
 
 test('error boundary: malformed event does not throw', () => {

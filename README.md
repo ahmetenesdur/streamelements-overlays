@@ -12,6 +12,7 @@ and GitHub auto-update.
 
 **Platforms** — Twitch + YouTube (native via StreamElements) + Kick (via the
 bundled Railway relay). Per-platform show/hide: use one platform or combine any subset.
+The Kick relay supports an optional shared access token for public deployments.
 
 **Look & layout**
 - 3 style presets: **Editorial** (text on video), **Frosted** (clean glass panel),
@@ -93,7 +94,7 @@ push to `main`.
 
 ## Status
 
-**Current: v1.1.0** · 31 unit tests + relay parser tests green · verified live in the preview.
+**Current: v1.1.0** · 40 widget unit tests + 11 relay parser/lifecycle assertions green · verified live in the preview.
 
 - ✅ Phases 0–6 — scaffold, core render, design system, inline alerts, effects, Kick relay (code; deploy when needed)
 - ✅ Layout system rebuilt — real **vertical / horizontal ticker / fullscreen** (pure flexbox, no pile-ups)

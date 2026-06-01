@@ -46,6 +46,8 @@
   let total = 0;                    // running message counter (unique ids)
   let lastSenderKey = null;         // for mergeMessages
   const customEmotes = new Map();   // name -> {url,zw} | url  (7TV / BTTV / FFZ)
+  const channelEmoteIds = new Set();// Twitch room ids whose channel emotes should refresh with globals
+  const channelEmotesLoaded = new Set();
   let relaySocket = null;
   let relayRetry = 0;
   let emoteLastLoad = 0;            // timestamp of last emote fetch (for TTL refresh)
@@ -403,7 +405,7 @@
     if (mode === 'custom') return ' style="color:var(--custom-nick-color)"';
     if (mode === 'message') return '';
     // user / platform color, with a stable per-user fallback color
-    const c = u.color || stableColor(u.displayName);
+    const c = safeCssColor(u.color) || stableColor(u.displayName);
     return ' style="color:' + c + '"';
   }
 
@@ -573,14 +575,16 @@
     await Promise.allSettled(tasks);
   }
   // Channel sets are loaded lazily on the first Twitch message (needs room-id).
-  let channelEmotesLoaded = false;
-  async function loadChannelEmotes(twitchId) {
-    if (channelEmotesLoaded || !twitchId) return;
-    channelEmotesLoaded = true;
+  async function loadChannelEmotes(twitchId, force) {
+    const id = String(twitchId || '').trim();
+    if (!id) return;
+    channelEmoteIds.add(id);
+    if (!force && channelEmotesLoaded.has(id)) return;
+    channelEmotesLoaded.add(id);
     const tasks = [];
-    if (yes(F.enable7tv)) tasks.push(fetch7tvChannel(twitchId));
-    if (yes(F.enableBttv)) tasks.push(fetchBttvChannel(twitchId));
-    if (yes(F.enableFfz)) tasks.push(fetchFfzChannel(twitchId));
+    if (yes(F.enable7tv)) tasks.push(fetch7tvChannel(id));
+    if (yes(F.enableBttv)) tasks.push(fetchBttvChannel(id));
+    if (yes(F.enableFfz)) tasks.push(fetchFfzChannel(id));
     await Promise.allSettled(tasks);
   }
 
@@ -645,7 +649,9 @@
     relaySocket.onopen = () => {
       relayRetry = 0;
       if (F.kickChannel) {
-        safeSend({ type: 'subscribe', platform: 'kick', channel: F.kickChannel });
+        const msg = { type: 'subscribe', platform: 'kick', channel: F.kickChannel };
+        if (F.relayToken) msg.token = F.relayToken;
+        safeSend(msg);
       }
     };
     relaySocket.onmessage = (ev) => {
@@ -918,6 +924,13 @@
     for (let i = 0; i < s.length; i++) hash = (hash * 31 + s.charCodeAt(i)) >>> 0;
     return palette[hash % palette.length];
   }
+  function safeCssColor(value) {
+    const s = String(value || '').trim();
+    if (!s) return '';
+    if (/^#[0-9a-f]{3,8}$/i.test(s)) return s;
+    if (/^(rgba?|hsla?)\([\d\s.,%+-]+\)$/i.test(s)) return s;
+    return '';
+  }
 
   // utils
   function htmlEncode(s) {
@@ -938,7 +951,11 @@
     var ttl = num(F.emoteCacheTTL, 0) * 60000;
     if (ttl <= 0 || (Date.now() - emoteLastLoad) < ttl) return;
     customEmotes.clear();
+    channelEmotesLoaded.clear();
     loadCustomEmotes().catch(function() {});
+    Array.from(channelEmoteIds).forEach(function (id) {
+      loadChannelEmotes(id, true).catch(function() {});
+    });
     emoteLastLoad = Date.now();
   }
 
@@ -968,6 +985,11 @@
     // Let tests set the field config the same way onWidgetLoad would.
     setFields: function (fields) { F = fields || {}; },
     getFields: function () { return F; },
+    test: {
+      setCustomEmote: function (name, entry) { customEmotes.set(name, entry); },
+      clearCustomEmotes: function () { customEmotes.clear(); },
+      setEmoteLastLoad: function (ts) { emoteLastLoad = num(ts, emoteLastLoad); }
+    },
     // Pure functions (no DOM side-effects) — safe to unit test in isolation.
     fn: {
       normalizeTwitch: normalizeTwitch,
@@ -986,6 +1008,7 @@
       platformEnabled: platformEnabled,
       nativeEmoteMap: nativeEmoteMap,
       stableColor: stableColor,
+      safeCssColor: safeCssColor,
       htmlEncode: htmlEncode
     }
   };

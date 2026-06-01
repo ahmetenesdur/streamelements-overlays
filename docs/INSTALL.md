@@ -23,7 +23,8 @@ Click **Done**. The settings panel (right side) now shows **14 grouped sections*
 - **YouTube**: connect YouTube in SE (**Account → Channels**) and be **live** — SE then
   forwards YouTube chat to the same `message` event the widget already handles.
 - **Kick**: set **Multistream → Relay WebSocket URL** + **Kick channel** (needs the Railway
-  relay from Phase 6; until then leave blank — Twitch/YouTube still work).
+  relay from Phase 6; until then leave blank — Twitch/YouTube still work). If your
+  Railway relay has `RELAY_TOKEN` set, paste the same value into **Relay access token**.
 
 ## 4. Configure (Fields panel) — simple first
 Start at the top **Style** group:

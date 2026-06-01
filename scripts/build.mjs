@@ -15,6 +15,7 @@ function fail(msg) { console.error('✗ ' + msg); process.exitCode = 1; }
 
 const pkg = JSON.parse(await read('package.json'));
 const rawJson = await read('widget/widget.json');
+const readme = await read('README.md');
 
 let fields;
 try { fields = JSON.parse(rawJson); }
@@ -23,6 +24,13 @@ catch (e) { fail('widget.json is not valid JSON: ' + e.message); process.exit(1)
 // Required hidden fields for auto-update.
 for (const k of ['widgetName', 'widgetAuthor', 'widgetVersion', 'widgetUpdateUrl']) {
   if (!fields[k]) fail(`widget.json missing required field: ${k}`);
+}
+if (CHECK && fields.widgetVersion.value !== pkg.version) {
+  fail(`widgetVersion (${fields.widgetVersion.value}) does not match package.json (${pkg.version})`);
+}
+const readmeVersion = readme.match(/\*\*Current: v([^*]+)\*\*/);
+if (readmeVersion && readmeVersion[1] !== pkg.version) {
+  fail(`README current version (${readmeVersion[1]}) does not match package.json (${pkg.version})`);
 }
 // Every field needs a type.
 for (const [k, v] of Object.entries(fields)) {

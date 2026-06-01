@@ -63,7 +63,8 @@ function makeEl(tag) {
   return el;
 }
 
-function loadWidget(fields) {
+function loadWidget(fields, options) {
+  options = options || {};
   const root = makeEl('div'); root.id = 'seChat';
   const list = makeEl('div'); list.id = 'chatList';
   root.appendChild(list);
@@ -92,7 +93,7 @@ function loadWidget(fields) {
     setTimeout: (fn, ms) => { timers.push({ fn, ms }); return timers.length; },
     clearTimeout: () => {},
     requestAnimationFrame: (fn) => { if (typeof fn === 'function') fn(); return 1; },
-    fetch: () => Promise.reject(new Error('no network in tests')),
+    fetch: options.fetch || (() => Promise.reject(new Error('no network in tests'))),
     CSS: { supports: () => false },
     navigator: { userAgent: 'node-test' },
     location: { href: 'http://test/' },

@@ -2,7 +2,13 @@
    Pusher frames. Run: node relay/test.cjs  (exit 0 = pass) */
 'use strict';
 const assert = require('assert');
-const { parseKickContent, toUnifiedKick, toUnifiedKickAlert } = require('./src/index.js');
+const {
+  parseKickContent,
+  toUnifiedKick,
+  toUnifiedKickAlert,
+  isAuthorizedSubscribe,
+  detachClientFromRooms
+} = require('./src/index.js');
 
 let n = 0;
 const ok = (label) => { n++; console.log('  ✓ ' + label); };
@@ -78,6 +84,27 @@ const ok = (label) => { n++; console.log('  ✓ ' + label); };
   assert.strictEqual(toUnifiedKickAlert('SomeUnknownEvent', {}), null);
   assert.strictEqual(toUnifiedKickAlert('ChatMessageEvent', {}), null);
   ok('toUnifiedKickAlert: unknown event → null (ignored)');
+}
+
+// ---- relay security / lifecycle -------------------------------------
+{
+  assert.strictEqual(isAuthorizedSubscribe({ token: 'abc' }, ''), true);
+  assert.strictEqual(isAuthorizedSubscribe({ token: 'abc' }, 'abc'), true);
+  assert.strictEqual(isAuthorizedSubscribe({ token: 'wrong' }, 'abc'), false);
+  assert.strictEqual(isAuthorizedSubscribe({}, 'abc'), false);
+  ok('isAuthorizedSubscribe: optional shared token gates subscriptions');
+}
+{
+  let closed = false;
+  const client = { _rooms: new Set(['1']) };
+  const rooms = new Map([['1', {
+    ws: { close: () => { closed = true; } },
+    subscribers: new Set([client])
+  }]]);
+  detachClientFromRooms(client, rooms);
+  assert.strictEqual(closed, true, 'upstream Kick socket is closed when last subscriber leaves');
+  assert.strictEqual(rooms.has('1'), false, 'empty room is removed immediately');
+  ok('detachClientFromRooms: empty rooms close upstream socket and are deleted');
 }
 
 console.log(`\n${n} assertions passed.`);

@@ -155,34 +155,49 @@
     };
   }
 
+  // Maps the 6 native SE alert listeners → our alert types. subscriber-latest
+  // is split into sub / resub / gift / community-gift per the SDK event fields.
+  // (tip-latest also carries YouTube Super Chat; subscriber-latest also carries
+  // YouTube memberships.) No channel-points/superchat listeners exist in the SDK.
   function normalizeAlert(listener, e) {
-    const map = {
-      'follower-latest': 'follow',
-      'subscriber-latest': 'sub',
-      'tip-latest': 'tip',
-      'cheer-latest': 'cheer',
-      'raid-latest': 'raid',
-      'host-latest': 'host'
-    };
-    const type = map[listener];
-    if (!type) return null;
+    let type = null;
+    if (listener === 'follower-latest') type = 'follow';
+    else if (listener === 'cheer-latest') type = 'cheer';
+    else if (listener === 'tip-latest') type = 'tip';
+    else if (listener === 'raid-latest') type = 'raid';
+    else if (listener === 'host-latest') type = 'host';
+    else if (listener === 'subscriber-latest') {
+      if (e.playedAsCommunityGift) return null;          // already shown by the community-gift alert
+      if (e.bulkGifted || e.isCommunityGift) type = 'communitygift';
+      else if (e.gifted) type = 'gift';
+      else if (num(e.amount, 1) > 1) type = 'resub';
+      else type = 'sub';
+    } else return null;
+
     if (!alertEnabled(type)) return null;
 
     const name = e.name || e.displayName || 'Someone';
-    const amount = e.amount != null ? e.amount : (e.months || '');
+    const sender = e.sender || name;
+    const amount = e.amount != null ? e.amount : (e.months != null ? e.months : '');
+    const count = e.count != null ? e.count : (e.amount != null ? e.amount : '');
     const tmpl = {
       follow: F.alertLabelFollow || '{name} followed',
       sub: F.alertLabelSub || '{name} subscribed',
+      resub: F.alertLabelResub || '{name} resubscribed ({amount} months)',
+      gift: F.alertLabelGift || '{sender} gifted a sub to {name}',
+      communitygift: F.alertLabelCommunityGift || '{sender} gifted {count} subs',
       tip: F.alertLabelTip || '{name} tipped {amount}',
-      cheer: F.alertLabelCheer || '{name} cheered {amount}',
+      cheer: F.alertLabelCheer || '{name} cheered {amount} bits',
       raid: F.alertLabelRaid || '{name} raided with {amount}',
-      host: '{name} hosted with {amount}'
+      host: F.alertLabelHost || '{name} hosted with {amount}'
     }[type];
-    const label = tmpl
+    const label = String(tmpl)
       .replace(/{name}/g, name)
+      .replace(/{sender}/g, sender)
       .replace(/{amount}/g, amount)
-      .replace(/{tier}/g, e.tier || '')
-      .replace(/{months}/g, e.amount || '');
+      .replace(/{count}/g, count)
+      .replace(/{months}/g, amount)
+      .replace(/{tier}/g, e.tier || '');
 
     return {
       platform: 'twitch', kind: 'alert', msgId: 'a' + Date.now(),
@@ -314,7 +329,7 @@
 
   function iconMarkup(u) {
     if (u.kind === 'alert') {
-      const glyph = { follow: '♥', sub: '★', tip: '$', cheer: '◆', raid: '⚑', host: '⚑' }[u.alert.type] || '★';
+      const glyph = { follow: '♥', sub: '★', resub: '★', gift: '✦', communitygift: '✦', tip: '$', cheer: '◆', raid: '⚑', host: '⌂' }[u.alert.type] || '★';
       return '<div class="msg__icon"><span class="alert__glyph">' + glyph + '</span></div>';
     }
     const style = str(F.iconStyle, 'avatar');
@@ -668,8 +683,13 @@
 
   function alertEnabled(type) {
     if (!yes(F.showAlerts)) return false;
-    const map = { follow: F.alertFollow, sub: F.alertSub, tip: F.alertTip, cheer: F.alertCheer, raid: F.alertRaid, host: 'yes' };
-    return yes(map[type] != null ? map[type] : 'yes');
+    const map = {
+      follow: F.alertFollow, sub: F.alertSub, resub: F.alertSub,
+      gift: F.alertGift, communitygift: F.alertGift,
+      tip: F.alertTip, cheer: F.alertCheer, raid: F.alertRaid, host: F.alertHost
+    };
+    const v = map[type];
+    return yes(v != null ? v : 'yes');
   }
 
   // ================================================================

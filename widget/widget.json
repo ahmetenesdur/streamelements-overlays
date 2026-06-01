@@ -547,6 +547,26 @@
     },
     "group": "Alerts"
   },
+  "alertGift": {
+    "type": "dropdown",
+    "label": "Alert · Gift subs (single + community)",
+    "value": "yes",
+    "options": {
+      "yes": "Yes",
+      "no": "No"
+    },
+    "group": "Alerts"
+  },
+  "alertHost": {
+    "type": "dropdown",
+    "label": "Alert · Hosts",
+    "value": "yes",
+    "options": {
+      "yes": "Yes",
+      "no": "No"
+    },
+    "group": "Alerts"
+  },
   "alertLabelFollow": {
     "type": "text",
     "label": "Label · Follow",
@@ -575,6 +595,30 @@
     "type": "text",
     "label": "Label · Raid",
     "value": "{name} raided with {amount}",
+    "group": "Alerts"
+  },
+  "alertLabelResub": {
+    "type": "text",
+    "label": "Label · Resub",
+    "value": "{name} resubscribed ({amount} months)",
+    "group": "Alerts"
+  },
+  "alertLabelGift": {
+    "type": "text",
+    "label": "Label · Gift sub",
+    "value": "{sender} gifted a sub to {name}",
+    "group": "Alerts"
+  },
+  "alertLabelCommunityGift": {
+    "type": "text",
+    "label": "Label · Community gift",
+    "value": "{sender} gifted {count} subs",
+    "group": "Alerts"
+  },
+  "alertLabelHost": {
+    "type": "text",
+    "label": "Label · Host",
+    "value": "{name} hosted with {amount}",
     "group": "Alerts"
   },
   "alertMinDuration": {

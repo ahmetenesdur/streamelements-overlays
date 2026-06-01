@@ -10,6 +10,21 @@
     },
     "group": "Style"
   },
+  "quickSetupPreset": {
+    "type": "dropdown",
+    "label": "Quick setup preset (overrides detailed fields)",
+    "value": "manual",
+    "options": {
+      "manual": "Manual / custom (use fields below)",
+      "cleanEditorial": "Clean editorial (transparent text)",
+      "frostedStack": "Frosted stacked chat",
+      "multistreamMinimal": "Multistream minimal dots",
+      "bottomTicker": "Bottom ticker",
+      "fullscreenFloat": "Full screen float",
+      "roleRich": "Role-rich bubbles"
+    },
+    "group": "Style"
+  },
   "accent": {
     "type": "colorpicker",
     "label": "Accent color (leave empty = preset)",
@@ -21,24 +36,6 @@
     "label": "Overlay background",
     "value": "rgba(0,0,0,0)",
     "group": "Style"
-  },
-  "testMessage": {
-    "type": "button",
-    "label": "▶ Test chat message",
-    "value": "Test message",
-    "group": "Test tools"
-  },
-  "testAlert": {
-    "type": "button",
-    "label": "▶ Test alert (follow)",
-    "value": "Test alert",
-    "group": "Test tools"
-  },
-  "testKick": {
-    "type": "button",
-    "label": "▶ Test Kick message",
-    "value": "Test kick",
-    "group": "Test tools"
   },
   "layoutMode": {
     "type": "dropdown",

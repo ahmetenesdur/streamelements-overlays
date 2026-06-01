@@ -261,7 +261,7 @@
   // ================================================================
   const GROUP_ORDER = ['Style', 'Layout', 'Typography', 'Username & Colors',
     'Badges & Platform', 'Roles & Highlights', 'Messages', 'Animations',
-    'Alerts', 'Sound', 'Effects', 'Advanced glass', 'Multistream', 'Test tools'];
+    'Alerts', 'Sound', 'Effects', 'Advanced glass', 'Multistream'];
 
   function el(tag, attrs, text) {
     const e = document.createElement(tag);

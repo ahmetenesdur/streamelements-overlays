@@ -22,6 +22,7 @@ function jsonDefaults() {
 
 test('phase 8 fields ship with conservative defaults', () => {
   const fd = jsonDefaults();
+  assert.strictEqual(fd.quickSetupPreset, 'manual');
   assert.strictEqual(fd.messageGrouping, 'off');
   assert.strictEqual(fd.dynamicOpacity, 'no');
   assert.strictEqual(fd.oldestMessageOpacity, 38);
@@ -31,6 +32,67 @@ test('phase 8 fields ship with conservative defaults', () => {
   assert.strictEqual(fd.perspectiveFov, 1000);
   assert.strictEqual(fd.alertSuperchat, 'yes');
   assert.strictEqual(fd.alertMember, 'yes');
+  assert.strictEqual(fd.testMessage, undefined);
+  assert.strictEqual(fd.testAlert, undefined);
+  assert.strictEqual(fd.testKick, undefined);
+});
+
+test('quickSetupPreset:manual leaves detailed fields in control', () => {
+  const { api, root } = loadWidget({
+    quickSetupPreset: 'manual',
+    stylePreset: 'slate',
+    layoutMode: 'horizontal',
+    messageGrouping: 'inline',
+    showPlatformDot: 'yes'
+  });
+  assert.strictEqual(api.getFields().stylePreset, 'slate');
+  assert.strictEqual(api.getFields().messageGrouping, 'inline');
+  assert.strictEqual(root.dataset.preset, 'slate');
+  assert.strictEqual(root.dataset.layout, 'horizontal');
+  assert.ok(root.classList.contains('show-dot'));
+});
+
+test('quickSetupPreset:frostedStack applies a ready grouped bubble setup', () => {
+  const { api, root, list, fire } = loadWidget({
+    quickSetupPreset: 'frostedStack',
+    stylePreset: 'editorial',
+    layoutMode: 'horizontal',
+    messageGrouping: 'off',
+    dynamicOpacity: 'no',
+    showAvatar: 'no',
+    showArrow: 'no'
+  });
+  assert.strictEqual(api.getFields().stylePreset, 'frosted');
+  assert.strictEqual(api.getFields().layoutMode, 'vertical');
+  assert.strictEqual(api.getFields().messageGrouping, 'stack');
+  assert.strictEqual(api.getFields().dynamicOpacity, 'yes');
+  assert.strictEqual(root.dataset.preset, 'frosted');
+  assert.strictEqual(root.dataset.layout, 'vertical');
+  assert.ok(root.classList.contains('show-icon'));
+  assert.ok(root.classList.contains('show-arrow'));
+  fire('message', { data: tw({ userId: 'u1', displayName: 'Ada', text: 'first', tags: { 'room-id': '1', 'user-id': 'u1', id: 'm1' } }) });
+  fire('message', { data: tw({ userId: 'u1', displayName: 'Ada', text: 'second', tags: { 'room-id': '1', 'user-id': 'u1', id: 'm2' } }) });
+  assert.strictEqual(list.children.length, 1);
+  assert.match(list.children[0].innerHTML, /msg__text--continued/);
+});
+
+test('quickSetupPreset:bottomTicker applies compact horizontal ticker settings', () => {
+  const { api, root } = loadWidget({
+    quickSetupPreset: 'bottomTicker',
+    stylePreset: 'editorial',
+    layoutMode: 'vertical',
+    density: 'comfortable',
+    showPlatformDot: 'no',
+    showPlatformLogo: 'yes'
+  });
+  assert.strictEqual(api.getFields().layoutMode, 'horizontal');
+  assert.strictEqual(api.getFields().density, 'compact');
+  assert.strictEqual(api.getFields().showPlatformDot, 'yes');
+  assert.strictEqual(api.getFields().showPlatformLogo, 'no');
+  assert.strictEqual(root.dataset.layout, 'horizontal');
+  assert.strictEqual(root.dataset.density, 'compact');
+  assert.ok(root.classList.contains('show-dot'));
+  assert.ok(!root.classList.contains('show-logo'));
 });
 
 // Helper: a Twitch raw `message.data` with sensible defaults.
@@ -142,6 +204,23 @@ test('per-platform dot opt-out toggles root class (master dot stays on)', () => 
   assert.ok(root.classList.contains('show-dot'), 'master dot still on');
   assert.ok(root.classList.contains('no-dot-twitch'), 'twitch dot suppressed');
   assert.ok(!root.classList.contains('no-dot-kick'), 'kick dot kept');
+});
+
+test('widget-button handler tolerates StreamElements payload variants', () => {
+  const detailField = loadWidget({});
+  detailField.window.dispatchEvent({
+    type: 'onEventReceived',
+    detail: { listener: 'widget-button', field: 'testMessage', event: {} }
+  });
+  assert.strictEqual(detailField.list.children.length, 1, 'detail.field button payload renders test message');
+
+  const nestedListener = loadWidget({});
+  nestedListener.window.dispatchEvent({
+    type: 'onEventReceived',
+    detail: { event: { listener: 'widget-button', field: 'testMessage' } }
+  });
+  assert.strictEqual(nestedListener.list.children.length, 1, 'event.listener button payload renders test message');
+  assert.match(nestedListener.list.children[0].innerHTML, /Test message/);
 });
 
 test('rolesFromTwitch: badges/tags → role list', () => {

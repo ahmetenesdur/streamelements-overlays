@@ -15,6 +15,8 @@ bundled Railway relay). Per-platform show/hide: use one platform or combine any 
 The Kick relay supports an optional shared access token for public deployments.
 
 **Look & layout**
+- **Quick setup presets** for common setups (editorial, frosted stack, multistream dots,
+  ticker, fullscreen float, role-rich) plus Manual mode for full custom control.
 - 3 style presets: **Editorial** (text on video), **Frosted** (clean glass panel),
   **Slate** (solid chip) — plus full token overrides.
 - 3 layouts: **Vertical** (column), **Horizontal** (side-by-side ticker — newest enters
@@ -62,7 +64,8 @@ glassmorphism elsewhere). Signature liquid entrance + reduced-motion support.
 > require separate platform/webhook integration beyond the native StreamElements widget event
 > surface, so they are planned as their own phase rather than a widget CSS/JS enhancement.
 
-**Testing tools** — fire test chat/alert/Kick messages right from the Fields panel.
+**Local preview tools** — fire simulated chat, alerts, feature demos, and scene checks
+without relying on StreamElements editor buttons.
 
 ## Architecture (hybrid)
 
@@ -94,11 +97,11 @@ docs/      INSTALL.md
 npm run preview     # http://localhost:5173/preview/index.html  (widen the window!)
 npm run validate    # validate widget.json + required files
 npm run build       # stamp widgetVersion from package.json (for auto-update)
-npm test            # validate + relay tests + 75 widget unit tests
+npm test            # validate + relay tests + 82 widget unit tests
 ```
 
 The preview page sends Twitch/YouTube/Kick messages, fires alerts, tests 7TV emotes
-and keywords, live-toggles every Fields setting (138 fields in 14 groups), and
+and keywords, live-toggles every Fields setting (136 fields in 13 groups), and
 previews against flat test scenes (light / mid-gray / deep-teal / transparency checker).
 **Feature demos** buttons exercise message grouping, shared chat + participants panel,
 age fade, fullscreen float, and per-role colors — no StreamElements account needed.
@@ -106,7 +109,7 @@ age fade, fullscreen float, and per-role colors — no StreamElements account ne
 ## Deploy
 
 - **Widget**: paste `widget.{html,css,js,json}` into the matching tabs of a SE Custom
-  Widget. Configure from the **Fields** panel (14 grouped sections; start at *Style → Style preset*).
+  Widget. Configure from the **Fields** panel (13 grouped sections; start at *Style → Quick setup preset*).
   Full steps in [docs/INSTALL.md](docs/INSTALL.md).
 - **Kick relay**: deploy `relay/` to Railway, then set **Relay WebSocket URL (Railway, wss://...)** +
   **Kick channel (slug, or numeric chatroom id if slug fails)** in the Multistream group.
@@ -122,7 +125,7 @@ validates, tests, and attaches the four widget files to a GitHub Release.
 
 ## Status
 
-**Current: v1.2.0** · 138 fields · 14 setting groups · 75 widget tests + 11 relay assertions · CI on push/PR (Node 18/20/22)
+**Current: v1.2.0** · 136 fields · 13 setting groups · 82 widget tests + 11 relay assertions · CI on push/PR (Node 18/20/22)
 
 Shipped and verified in the local preview:
 

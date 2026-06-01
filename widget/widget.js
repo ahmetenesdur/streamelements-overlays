@@ -58,6 +58,99 @@
   let emoteLastLoad = 0;            // timestamp of last emote fetch (for TTL refresh)
 
   const ROLE_PRIORITY = ['broadcaster', 'leadmod', 'moderator', 'artist', 'vip', 'subscriber', 'fav', 'regular'];
+  const QUICK_SETUP_PRESETS = {
+    cleanEditorial: {
+      stylePreset: 'editorial',
+      layoutMode: 'vertical',
+      density: 'comfortable',
+      showAvatar: 'no',
+      showArrow: 'no',
+      showPlatformLogo: 'yes',
+      showPlatformDot: 'no',
+      messageGrouping: 'off',
+      dynamicOpacity: 'no',
+      fullscreenFloat: 'no',
+      roleHighlight: 'no',
+      roleNameBg: 'no',
+      roleMsgBg: 'no',
+      roleMsgText: 'no'
+    },
+    frostedStack: {
+      stylePreset: 'frosted',
+      layoutMode: 'vertical',
+      density: 'comfortable',
+      showAvatar: 'yes',
+      showArrow: 'yes',
+      showPlatformLogo: 'yes',
+      showPlatformDot: 'no',
+      messageGrouping: 'stack',
+      dynamicOpacity: 'yes',
+      oldestMessageOpacity: 38,
+      fullscreenFloat: 'no'
+    },
+    multistreamMinimal: {
+      stylePreset: 'editorial',
+      layoutMode: 'vertical',
+      density: 'compact',
+      showAvatar: 'no',
+      showArrow: 'no',
+      showPlatformLogo: 'no',
+      showPlatformDot: 'yes',
+      dotTwitchOn: 'yes',
+      dotYouTubeOn: 'yes',
+      dotKickOn: 'yes',
+      messageGrouping: 'stack',
+      dynamicOpacity: 'yes',
+      oldestMessageOpacity: 40,
+      sharedChatIndicator: 'yes'
+    },
+    bottomTicker: {
+      stylePreset: 'slate',
+      layoutMode: 'horizontal',
+      hDirection: 'right',
+      density: 'compact',
+      messagesLimit: 10,
+      rowMaxWidth: 420,
+      showAvatar: 'no',
+      showArrow: 'no',
+      showPlatformLogo: 'no',
+      showPlatformDot: 'yes',
+      messageGrouping: 'off',
+      dynamicOpacity: 'no',
+      fullscreenFloat: 'no'
+    },
+    fullscreenFloat: {
+      stylePreset: 'frosted',
+      layoutMode: 'fullscreen',
+      fullscreenFloat: 'yes',
+      density: 'comfortable',
+      messagesLimit: 12,
+      rowWidth: 100,
+      showAvatar: 'yes',
+      showArrow: 'yes',
+      showPlatformLogo: 'yes',
+      showPlatformDot: 'no',
+      messageGrouping: 'off',
+      dynamicOpacity: 'yes',
+      oldestMessageOpacity: 35
+    },
+    roleRich: {
+      stylePreset: 'frosted',
+      layoutMode: 'vertical',
+      density: 'comfortable',
+      showAvatar: 'yes',
+      showArrow: 'yes',
+      displayBadges: 'yes',
+      showPlatformLogo: 'yes',
+      showPlatformDot: 'no',
+      messageGrouping: 'stack',
+      roleHighlight: 'yes',
+      roleNameBg: 'yes',
+      roleMsgBg: 'yes',
+      roleMsgText: 'no',
+      nativeColorPlacement: 'background'
+    }
+  };
   const pronounCache = {};   // twitch login -> short pronoun label ('' = none)
   let pronounMap = null;     // id -> short label (loaded once)
 
@@ -66,7 +159,7 @@
   // ================================================================
   window.addEventListener('onWidgetLoad', function (obj) {
     const detail = obj.detail || {};
-    F = detail.fieldData || {};
+    F = applyQuickSetup(detail.fieldData || {});
     const ch = detail.channel || {};
     channelName = ch.username || ch.name || ch.displayName || channelName;
     rootEl = document.getElementById('seChat');
@@ -111,7 +204,8 @@
         return;
       }
 
-      if (listener === 'widget-button') { handleButton(event.field); return; }
+      var buttonField = buttonFieldFromEvent(listener, d, event);
+      if (buttonField) { handleButton(buttonField); return; }
 
       // Alert listeners → inline alert render
       if (/-latest$/.test(listener || '')) {
@@ -122,6 +216,23 @@
       if (debugMode()) console.warn('[se-chat] event error:', err);
     }
   });
+
+  function applyQuickSetup(fields) {
+    const raw = Object.assign({}, fields || {});
+    const preset = String(raw.quickSetupPreset || 'manual');
+    const overrides = QUICK_SETUP_PRESETS[preset];
+    if (!overrides) {
+      raw.quickSetupPreset = 'manual';
+      return raw;
+    }
+    return Object.assign(raw, overrides, { quickSetupPreset: preset });
+  }
+
+  function buttonFieldFromEvent(listener, detail, event) {
+    const nestedListener = event && event.listener;
+    if (listener !== 'widget-button' && nestedListener !== 'widget-button') return '';
+    return String((event && event.field) || (detail && detail.field) || '');
+  }
 
   // ================================================================
   //  Normalizers → UnifiedMessage
@@ -1326,7 +1437,7 @@
       else if (m.type === 'alert') { const u = normalizeKickAlert(m.payload || m); if (u) { addMessage(u); playSound(u.alert.type); } }
     },
     // Let tests set the field config the same way onWidgetLoad would.
-    setFields: function (fields) { F = fields || {}; },
+    setFields: function (fields) { F = applyQuickSetup(fields || {}); },
     getFields: function () { return F; },
     test: {
       setCustomEmote: function (name, entry) { customEmotes.set(name, entry); },
@@ -1354,6 +1465,8 @@
       stableColor: stableColor,
       safeCssColor: safeCssColor,
       htmlEncode: htmlEncode,
+      applyQuickSetup: applyQuickSetup,
+      buttonFieldFromEvent: buttonFieldFromEvent,
       pickFloatPosition: pickFloatPosition,
       rectsOverlap: rectsOverlap
     }

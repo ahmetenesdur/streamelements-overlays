@@ -16,7 +16,7 @@ The editor has four tabs. Paste each repo file into the matching tab:
 | **JS** | [`widget/widget.js`](../widget/widget.js) |
 | **FIELDS** | [`widget/widget.json`](../widget/widget.json) |
 
-Click **Done**. The settings panel (right side) now shows **14 grouped sections** (138 fields total).
+Click **Done**. The settings panel (right side) now shows **13 grouped sections** (136 fields total).
 
 ## 3. Connect platforms
 - **Twitch**: works once the overlay runs on your Twitch-connected SE account.
@@ -37,6 +37,17 @@ Custom emote providers are also in **Multistream** — **7TV emotes**, **BTTV em
 
 ## 4. Configure (Fields panel) — simple first
 Start at the top **Style** group:
+- **Quick setup preset (overrides detailed fields)**: choose a ready setup first, or leave
+  `Manual / custom` if you want every detailed field below to stay fully in control.
+  Quick setup is a runtime preset layer, not a StreamElements button, so it is stable in the
+  SE editor and in OBS.
+  - `Clean editorial`: transparent text-on-video default.
+  - `Frosted stacked chat`: bubble style + avatar/arrow + second-message grouping + age fade.
+  - `Multistream minimal dots`: compact text with platform dots instead of logos.
+  - `Bottom ticker`: compact horizontal ticker.
+  - `Full screen float`: fullscreen scatter layout with overlap avoidance + age fade.
+  - `Role-rich bubbles`: role colors, avatars, badges, and role-tinted chips/washes.
+  Switch back to `Manual / custom` before fine-tuning individual detailed fields.
 - **Style preset**: `Editorial (text on video, default)` · `Frosted (clean glass panel)` · `Slate (solid chip)`.
   Pick one and you have a polished look instantly.
 - **Accent color (leave empty = preset)**: leave empty to use the preset's accent, or set one to recolor
@@ -44,7 +55,7 @@ Start at the top **Style** group:
 - **Overlay background**: defaults to fully transparent (`rgba(0,0,0,0)`). Set only if you want a tint
   behind the whole chat area.
 
-Then tweak only what you want. Groups: **Style, Test tools, Layout, Typography,
+Then tweak only what you want. Groups: **Style, Layout, Typography,
 Username & Colors, Badges & Platform, Roles & Highlights, Messages, Animations,
 Alerts, Sound, Effects, Advanced glass, Multistream**.
 - **Advanced glass** overrides the active preset's surface/blur values only when
@@ -99,13 +110,13 @@ Alerts, Sound, Effects, Advanced glass, Multistream**.
   preset if you want visible bubbles.
 
 ## 5. Test
-- Use **Test tools → ▶ Test chat message / ▶ Test alert (follow) / ▶ Test Kick message** buttons.
-- Or type in your real Twitch/YouTube chat.
+- In StreamElements, type in your real Twitch/YouTube chat or trigger a real supported alert.
 - Inline alerts fire on real follows/subs/tips/cheers/raids (toggle per type in **Alerts**).
 - **Sound** group: four upload slots (message / follow / sub / tip). Other alert types
   (cheer, raid, gift, Super Chat, reward, etc.) reuse the nearest slot automatically.
-- Or run `npm run preview` locally (see [README](../README.md)) — the preview's **Feature demos**
-  buttons exercise grouping, shared chat, age fade, float layout, and role colors without going live.
+- For simulated messages and feature demos, run `npm run preview` locally (see [README](../README.md)).
+  The preview's **Simulate** and **Feature demos** buttons exercise chat, alerts, grouping,
+  shared chat, age fade, float layout, and role colors without going live.
 
 ## 6. Use in OBS
 Copy the overlay URL (**…→ Copy URL**) into an OBS **Browser Source** at your canvas size.

@@ -151,6 +151,27 @@
       nativeColorPlacement: 'background'
     }
   };
+  // Per-preset COLOR + FONT identity. applyTheme resolves each token as
+  // `user field -> preset value -> global default`. Surface/structure lives in
+  // CSS [data-preset]; this is the slice applyTheme must own because it sets
+  // those tokens unconditionally and injects webfonts. Distinctive, non-cliché
+  // accents + fonts (never Inter / a purple gradient) give each its own feel.
+  const PRESET_THEME = {
+    editorial: { accent: '#e8c99a', font: 'Hanken Grotesk' },
+    frosted:   { accent: '#bcd3ff', font: 'Hanken Grotesk' },
+    slate:     { accent: '#e8c99a', font: 'Hanken Grotesk' },
+    pulse:     { accent: '#7c9cff', font: 'Bricolage Grotesque' },
+    daylight:  {
+      accent: '#b9762e', font: 'Hanken Grotesk', nameFont: 'Instrument Serif',
+      ink: 'rgba(28,26,24,0.94)', nick: '#4a63b8',
+      dotTwitch: '#7a52c8', dotYouTube: '#cc3b3b', dotKick: '#3a9e2a',
+      roles: {
+        broadcaster: '#c0445c', leadmod: '#1f8f7e', mod: '#2f9c57',
+        artist: '#b5631f', vip: '#b54a93', sub: '#4a63b8', fav: '#9a7416'
+      }
+    },
+    terminal:  { accent: '#8bf2a6', font: 'Space Mono', nameFont: 'Space Mono' }
+  };
   const pronounCache = {};   // twitch login -> short pronoun label ('' = none)
   let pronounMap = null;     // id -> short label (loaded once)
 
@@ -889,12 +910,21 @@
     // This is the heart of "preset gives great defaults, you override only what you touch".
     const setIf = (k, v) => { hasOverride(v) ? set(k, v) : clear(k); };
 
+    // ---- Per-preset identity (color + font): user field -> preset -> default ----
+    const preset = str(f.stylePreset, 'editorial');
+    const pt = PRESET_THEME[preset] || PRESET_THEME.editorial;
+    const userFont = (f.fontName && String(f.fontName).trim()) || '';
+    const bodyFont = userFont || pt.font || 'Hanken Grotesk';
+    const nameFont = pt.nameFont || bodyFont;
+
     // ---- Typography (always applied) ----
-    injectFont(f.fontName);   // ensure the chosen webfont is loaded (idempotent)
-    set('--font-name', "'" + (f.fontName || 'Hanken Grotesk') + "'");
+    injectFont(bodyFont);                          // ensure the chosen webfont is loaded (idempotent)
+    if (nameFont !== bodyFont) injectFont(nameFont);
+    set('--font-name', "'" + bodyFont + "'");
+    set('--name-font', "'" + nameFont + "'");
     set('--font-size', num(f.fontSize, 22) + 'px');
     set('--font-weight', str(f.fontWeight, '500'));
-    set('--font-color', f.fontColor || 'rgba(255,255,255,0.96)');
+    set('--font-color', f.fontColor || pt.ink || 'rgba(255,255,255,0.96)');
     setIf('--text-shadow', f.textShadow);
     set('--emote-size', num(f.emoteSize, 28) + 'px');
     set('--badge-size', Math.round(num(f.fontSize, 22) * 0.92) + 'px');
@@ -904,8 +934,8 @@
     set('--row-maxwidth', num(f.rowMaxWidth, 460) + 'px');
     set('--row-width', num(f.rowWidth, 100) + '%');
 
-    // ---- Glass: accent + overlay are simple-first (apply if set) ----
-    setIf('--accent', f.accent);
+    // ---- Accent: user override -> preset accent -> default. Overlay simple-first. ----
+    set('--accent', (f.accent && String(f.accent).trim()) || pt.accent || '#e8c99a');
     set('--overlay-bg', f.overlayBackground || 'rgba(0,0,0,0)');
 
     // ---- Surface overrides (only when the gate is on) ----
@@ -913,39 +943,49 @@
       setIf('--surface', f.glassTint);
       hasOverride(f.glassBlur) ? set('--surface-blur', num(f.glassBlur, 22) + 'px') : clear('--surface-blur');
       hasOverride(f.glassRadius) ? set('--surface-radius', num(f.glassRadius, 16) + 'px') : clear('--surface-radius');
-      hasOverride(f.glassShadow) ? set('--surface-shadow', String(num(f.glassShadow, 30) / 100)) : clear('--surface-shadow');
-      hasOverride(f.glassHighlight) ? set('--surface-highlight', String(num(f.glassHighlight, 10) / 100)) : clear('--surface-highlight');
+      hasOverride(f.glassShadow) ? set('--shadow', '0 2px 10px -6px rgba(0,0,0,' + (num(f.glassShadow, 30) / 100) + ')') : clear('--shadow');
+      hasOverride(f.glassHighlight) ? set('--sheen', 'inset 0 1px 0 rgba(255,255,255,' + (num(f.glassHighlight, 10) / 100) + ')') : clear('--sheen');
     } else {
-      ['--surface', '--surface-blur', '--surface-radius', '--surface-shadow', '--surface-highlight'].forEach(clear);
+      ['--surface', '--surface-blur', '--surface-radius', '--shadow', '--sheen'].forEach(clear);
     }
 
     // ---- Username / highlight / dots / roles ----
     // Fallbacks mirror the widget.json field defaults, so clearing a color
     // field returns it to the documented default (not a stale legacy tone).
-    set('--custom-nick-color', f.customNickColor || '#abc2f2');
+    set('--custom-nick-color', f.customNickColor || pt.nick || '#abc2f2');
     setIf('--keyword-color', f.keywordColor);   // empty → follows --accent
 
-    set('--dot-twitch', f.dotTwitch || '#a98be8');
-    set('--dot-youtube', f.dotYouTube || '#ef7479');
-    set('--dot-kick', f.dotKick || '#6fdd54');
+    set('--dot-twitch', f.dotTwitch || pt.dotTwitch || '#a98be8');
+    set('--dot-youtube', f.dotYouTube || pt.dotYouTube || '#ef7479');
+    set('--dot-kick', f.dotKick || pt.dotKick || '#6fdd54');
 
-    set('--role-broadcaster', f.colorBroadcaster || '#f2969d');
-    set('--role-mod', f.colorMod || '#90d9a4');
-    set('--role-vip', f.colorVip || '#efa8d6');
-    set('--role-sub', f.colorSub || '#a7bef2');
-    set('--role-leadmod', f.colorLeadMod || '#84d2c2');
-    set('--role-artist', f.colorArtist || '#f4b083');
-    set('--role-fav', f.colorFav || '#f1d396');
+    // Roles: user field -> preset palette (e.g. Daylight's darker ink set) -> default.
+    const rt = pt.roles || {};
+    const role = (k, field, dflt) => f[field] || rt[k] || dflt;
+    const rBroadcaster = role('broadcaster', 'colorBroadcaster', '#f2969d');
+    const rMod = role('mod', 'colorMod', '#90d9a4');
+    const rVip = role('vip', 'colorVip', '#efa8d6');
+    const rSub = role('sub', 'colorSub', '#a7bef2');
+    const rLeadmod = role('leadmod', 'colorLeadMod', '#84d2c2');
+    const rArtist = role('artist', 'colorArtist', '#f4b083');
+    const rFav = role('fav', 'colorFav', '#f1d396');
+    set('--role-broadcaster', rBroadcaster);
+    set('--role-mod', rMod);
+    set('--role-vip', rVip);
+    set('--role-sub', rSub);
+    set('--role-leadmod', rLeadmod);
+    set('--role-artist', rArtist);
+    set('--role-fav', rFav);
     setIf('--role-regular', f.colorRegular);   // empty → regulars keep their own color
 
     // Role icon bubble tints (used by .role-highlight .msg--role-* .msg__icon).
-    set('--role-bubble-broadcaster', f.colorBroadcaster || '#f2969d');
-    set('--role-bubble-mod', f.colorMod || '#90d9a4');
-    set('--role-bubble-vip', f.colorVip || '#efa8d6');
-    set('--role-bubble-sub', f.colorSub || '#a7bef2');
-    set('--role-bubble-leadmod', f.colorLeadMod || '#84d2c2');
-    set('--role-bubble-artist', f.colorArtist || '#f4b083');
-    set('--role-bubble-fav', f.colorFav || '#f1d396');
+    set('--role-bubble-broadcaster', rBroadcaster);
+    set('--role-bubble-mod', rMod);
+    set('--role-bubble-vip', rVip);
+    set('--role-bubble-sub', rSub);
+    set('--role-bubble-leadmod', rLeadmod);
+    set('--role-bubble-artist', rArtist);
+    set('--role-bubble-fav', rFav);
     // Per-role visual matrix tint strength (used by name/message backgrounds).
     set('--role-tint', Math.max(4, Math.min(60, num(f.roleTintStrength, 18))) + '%');
 

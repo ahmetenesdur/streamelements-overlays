@@ -4,9 +4,12 @@
     "label": "Style preset",
     "value": "editorial",
     "options": {
-      "editorial": "Editorial (text on video, default)",
-      "frosted": "Frosted (clean glass panel)",
-      "slate": "Slate (solid chip)"
+      "editorial": "Editorial — type on video (default)",
+      "frosted": "Frosted — refined liquid glass",
+      "slate": "Slate — solid onyx chip",
+      "pulse": "Pulse — accent-forward, high energy",
+      "daylight": "Daylight — light editorial print",
+      "terminal": "Terminal — dev monospace"
     },
     "group": "Style"
   },
@@ -127,8 +130,8 @@
   },
   "fontName": {
     "type": "googleFont",
-    "label": "Font",
-    "value": "Hanken Grotesk",
+    "label": "Font (empty = preset's font)",
+    "value": "",
     "group": "Typography"
   },
   "fontSize": {
@@ -153,7 +156,7 @@
   "fontColor": {
     "type": "colorpicker",
     "label": "Text color",
-    "value": "rgba(255,255,255,0.96)",
+    "value": "",
     "group": "Typography"
   },
   "emoteSize": {
@@ -202,7 +205,7 @@
   "customNickColor": {
     "type": "colorpicker",
     "label": "Custom username color",
-    "value": "rgba(171,194,242,1)",
+    "value": "",
     "group": "Username & Colors"
   },
   "showColon": {
@@ -361,19 +364,19 @@
   "dotTwitch": {
     "type": "colorpicker",
     "label": "Dot · Twitch",
-    "value": "rgba(169,139,232,1)",
+    "value": "",
     "group": "Badges & Platform"
   },
   "dotYouTube": {
     "type": "colorpicker",
     "label": "Dot · YouTube",
-    "value": "rgba(239,116,121,1)",
+    "value": "",
     "group": "Badges & Platform"
   },
   "dotKick": {
     "type": "colorpicker",
     "label": "Dot · Kick",
-    "value": "rgba(111,221,84,1)",
+    "value": "",
     "group": "Badges & Platform"
   },
   "roleHighlight": {
@@ -428,43 +431,43 @@
   "colorBroadcaster": {
     "type": "colorpicker",
     "label": "Role · Broadcaster",
-    "value": "rgba(242,150,157,1)",
+    "value": "",
     "group": "Roles & Highlights"
   },
   "colorMod": {
     "type": "colorpicker",
     "label": "Role · Moderator",
-    "value": "rgba(144,217,164,1)",
+    "value": "",
     "group": "Roles & Highlights"
   },
   "colorVip": {
     "type": "colorpicker",
     "label": "Role · VIP",
-    "value": "rgba(239,168,214,1)",
+    "value": "",
     "group": "Roles & Highlights"
   },
   "colorSub": {
     "type": "colorpicker",
     "label": "Role · Subscriber",
-    "value": "rgba(167,190,242,1)",
+    "value": "",
     "group": "Roles & Highlights"
   },
   "colorLeadMod": {
     "type": "colorpicker",
     "label": "Role · Lead mod",
-    "value": "rgba(132,210,194,1)",
+    "value": "",
     "group": "Roles & Highlights"
   },
   "colorArtist": {
     "type": "colorpicker",
     "label": "Role · Artist",
-    "value": "rgba(244,176,131,1)",
+    "value": "",
     "group": "Roles & Highlights"
   },
   "colorFav": {
     "type": "colorpicker",
     "label": "Role · Fav list",
-    "value": "rgba(241,211,150,1)",
+    "value": "",
     "group": "Roles & Highlights"
   },
   "colorRegular": {

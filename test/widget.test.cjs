@@ -783,7 +783,9 @@ test('empty override fields clear stale preset CSS variables', () => {
       accent: '', textShadow: '', keywordColor: '', colorRegular: ''
     }), channel: {}, session: { data: {} } }
   });
-  assert.strictEqual(rootStyle.getPropertyValue('--accent'), '');
+  // Accent now resolves to the active preset's accent when cleared (editorial → champagne),
+  // not to empty — each preset owns a distinct default accent.
+  assert.strictEqual(rootStyle.getPropertyValue('--accent'), '#e8c99a');
   assert.strictEqual(rootStyle.getPropertyValue('--text-shadow'), '');
   assert.strictEqual(rootStyle.getPropertyValue('--keyword-color'), '');
   assert.strictEqual(rootStyle.getPropertyValue('--role-regular'), '');
@@ -802,8 +804,8 @@ test('disabling glass override clears stale surface CSS variables', () => {
   assert.strictEqual(rootStyle.getPropertyValue('--surface'), 'rgba(10,20,30,0.4)');
   assert.strictEqual(rootStyle.getPropertyValue('--surface-blur'), '30px');
   assert.strictEqual(rootStyle.getPropertyValue('--surface-radius'), '24px');
-  assert.strictEqual(rootStyle.getPropertyValue('--surface-shadow'), '0.7');
-  assert.strictEqual(rootStyle.getPropertyValue('--surface-highlight'), '0.35');
+  assert.strictEqual(rootStyle.getPropertyValue('--shadow'), '0 2px 10px -6px rgba(0,0,0,0.7)');
+  assert.strictEqual(rootStyle.getPropertyValue('--sheen'), 'inset 0 1px 0 rgba(255,255,255,0.35)');
 
   window.dispatchEvent({
     type: 'onWidgetLoad',
@@ -819,8 +821,42 @@ test('disabling glass override clears stale surface CSS variables', () => {
   assert.strictEqual(rootStyle.getPropertyValue('--surface'), '');
   assert.strictEqual(rootStyle.getPropertyValue('--surface-blur'), '');
   assert.strictEqual(rootStyle.getPropertyValue('--surface-radius'), '');
-  assert.strictEqual(rootStyle.getPropertyValue('--surface-shadow'), '');
-  assert.strictEqual(rootStyle.getPropertyValue('--surface-highlight'), '');
+  assert.strictEqual(rootStyle.getPropertyValue('--shadow'), '');
+  assert.strictEqual(rootStyle.getPropertyValue('--sheen'), '');
+});
+
+// ---- premium presets (Phase A) ------------------------------------
+test('each preset resolves its own accent + font when those fields are empty', () => {
+  const cases = {
+    editorial: { accent: '#e8c99a', font: 'Hanken Grotesk' },
+    frosted:   { accent: '#bcd3ff', font: 'Hanken Grotesk' },
+    slate:     { accent: '#e8c99a', font: 'Hanken Grotesk' },
+    pulse:     { accent: '#7c9cff', font: 'Bricolage Grotesque' },
+    daylight:  { accent: '#b9762e', font: 'Hanken Grotesk' },
+    terminal:  { accent: '#8bf2a6', font: 'Space Mono' }
+  };
+  for (const preset of Object.keys(cases)) {
+    const { rootStyle } = loadWidget({ stylePreset: preset, accent: '', fontName: '' });
+    assert.strictEqual(rootStyle.getPropertyValue('--accent'), cases[preset].accent, preset + ' accent');
+    assert.strictEqual(rootStyle.getPropertyValue('--font-name'), "'" + cases[preset].font + "'", preset + ' font');
+  }
+});
+
+test('user accent + font override the preset defaults', () => {
+  const { rootStyle } = loadWidget({ stylePreset: 'pulse', accent: '#123456', fontName: 'Roboto' });
+  assert.strictEqual(rootStyle.getPropertyValue('--accent'), '#123456');
+  assert.strictEqual(rootStyle.getPropertyValue('--font-name'), "'Roboto'");
+});
+
+test('daylight preset uses ink text, a serif name font, and a darker role palette', () => {
+  const { rootStyle } = loadWidget({ stylePreset: 'daylight', fontColor: '', colorSub: '' });
+  assert.strictEqual(rootStyle.getPropertyValue('--font-color'), 'rgba(28,26,24,0.94)');
+  assert.strictEqual(rootStyle.getPropertyValue('--name-font'), "'Instrument Serif'");
+  assert.strictEqual(rootStyle.getPropertyValue('--role-sub'), '#4a63b8');
+});
+
+test('fontName ships empty so the preset font is used out of the box', () => {
+  assert.strictEqual(jsonDefaults().fontName, '');
 });
 
 // ---- fullscreen float / collision avoidance -----------------------

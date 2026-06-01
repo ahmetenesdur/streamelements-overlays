@@ -20,6 +20,7 @@
      These :root values mirror the widget.json field defaults so the pre-JS
      paint (and any no-JS fallback) matches what applyTheme() will set. */
   --font-name: 'Hanken Grotesk';
+  --name-font: var(--font-name);   /* display font for usernames (a preset may override, e.g. Daylight serif) */
   --font-size: 22px;
   --font-weight: 500;
   --font-color: rgba(255, 255, 255, 0.96);
@@ -45,9 +46,13 @@
   --surface-blur: 0px;
   --surface-saturate: 1;
   --surface-radius: 14px;
-  --surface-shadow: 0;             /* alpha of the drop shadow */
-  --surface-highlight: 0;          /* alpha of the 1px top highlight */
   --surface-pad: 0px 0px;          /* inner padding when a surface exists */
+  /* Composite depth — each preset composes its own from three single-purpose,
+     transparent-by-default layers (editorial = none, pure type on video).
+     One signature detail per preset, never layered shadows or a gradient fill. */
+  --shadow: 0 0 0 0 transparent;        /* drop / contact shadow */
+  --sheen: inset 0 0 0 0 transparent;   /* inset top hairline = the only edge cue */
+  --edge: inset 0 0 0 0 transparent;    /* inset accent leading edge (signature) */
 
   /* Accent — one warm, refined tone (soft champagne). Drives alerts + keywords only. */
   --accent: #e8c99a;
@@ -84,30 +89,80 @@
    PRESETS
    ================================================================ */
 
-/* Frosted — a single clean translucent panel. No border, no gradient;
-   just blur + a calm dark tint + one soft shadow + a hairline top light. */
+/* FROSTED — refined liquid glass. Blur + calm dark tint + ONE iridescent
+   hairline top-sheen (the accent tints the sheen, never a fill gradient).
+   Pairs with the opt-in SVG refraction (fx-advanced-glass) on Chromium/OBS. */
 .se-chat[data-preset="frosted"] {
-  --surface: rgba(12, 14, 18, 0.32);
+  --surface: rgba(12, 14, 18, 0.30);
   --surface-blur: 26px;
-  --surface-saturate: 1.1;
+  --surface-saturate: 1.12;
   --surface-radius: 16px;
-  --surface-shadow: 0;        /* no drop shadow — blur + tint separate it from video */
-  --surface-highlight: 0.12;  /* one hairline top sheen is the only edge cue */
   --surface-pad: 9px 14px;
   --row-padding: 9px 14px;
-  --text-shadow: 0 1px 2px rgba(0,0,0,0.22);
+  --sheen: inset 0 1px 0 color-mix(in srgb, var(--accent) 38%, rgba(255, 255, 255, 0.16));
+  --text-shadow: 0 1px 2px rgba(0, 0, 0, 0.22);
 }
 
-/* Slate — near-opaque calm chip for bright / busy scenes. */
+/* SLATE — solid onyx chip for bright / busy scenes. Near-opaque deep tint,
+   a micro inner top-light, an ultra-tight contact shadow, and a whisper
+   accent hairline on the leading edge. Always readable, broadcast-grade. */
 .se-chat[data-preset="slate"] {
-  --surface: rgba(18, 20, 26, 0.9);
+  --surface: rgba(17, 19, 25, 0.9);
   --surface-blur: 0px;
-  --surface-saturate: 1;
   --surface-radius: 13px;
-  --surface-shadow: 0.10;     /* whisper contact only — the chip's opacity carries it */
-  --surface-highlight: 0.06;
   --surface-pad: 9px 14px;
   --row-padding: 9px 14px;
+  --shadow: 0 2px 10px -7px rgba(0, 0, 0, 0.55);
+  --sheen: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  --edge: inset 1px 0 0 color-mix(in srgb, var(--accent) 50%, transparent);
+  --text-shadow: none;
+}
+
+/* PULSE — high-energy, accent-forward chip for gaming / hype streams. The
+   signature is a 2px accent leading bar + a heavier accent-tinted name.
+   Controlled, never a glow-soup. */
+.se-chat[data-preset="pulse"] {
+  --surface: rgba(14, 15, 22, 0.72);
+  --surface-blur: 12px;
+  --surface-saturate: 1.15;
+  --surface-radius: 12px;
+  --surface-pad: 8px 13px;
+  --row-padding: 8px 13px;
+  --name-weight: 800;
+  --shadow: 0 2px 12px -8px rgba(0, 0, 0, 0.6);
+  --sheen: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  --edge: inset 2px 0 0 var(--accent);
+  --text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+/* DAYLIGHT — a refined LIGHT, editorial-print identity (most overlays are
+   dark; this is the distinctive one). Warm off-white surface, ink text
+   (set by applyTheme), a serif display name, and a hairline rule. */
+.se-chat[data-preset="daylight"] {
+  --surface: rgba(244, 241, 234, 0.93);
+  --surface-blur: 6px;
+  --surface-saturate: 1.05;
+  --surface-radius: 13px;
+  --surface-pad: 9px 14px;
+  --row-padding: 9px 14px;
+  --name-weight: 600;
+  --shadow: 0 2px 12px -8px rgba(20, 16, 10, 0.3);
+  --sheen: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  --edge: inset 0 -1px 0 rgba(20, 16, 10, 0.1);
+  --text-shadow: none;
+}
+
+/* TERMINAL — dev / tech monospace identity. Deep chip, faint phosphor ring,
+   a "›" prompt caret before each name (added below). Tabular by nature. */
+.se-chat[data-preset="terminal"] {
+  --surface: rgba(10, 13, 11, 0.82);
+  --surface-blur: 4px;
+  --surface-radius: 8px;
+  --surface-pad: 8px 12px;
+  --row-padding: 8px 12px;
+  --name-weight: 700;
+  --shadow: 0 2px 10px -7px rgba(0, 0, 0, 0.6);
+  --sheen: inset 0 0 0 1px color-mix(in srgb, var(--accent) 14%, transparent);
   --text-shadow: none;
 }
 
@@ -256,11 +311,10 @@ html, body {
   background: var(--surface);
   -webkit-backdrop-filter: blur(var(--surface-blur)) saturate(var(--surface-saturate));
   backdrop-filter: blur(var(--surface-blur)) saturate(var(--surface-saturate));
-  /* Minimal depth: a tight contact shadow (0 by default) + one hairline top sheen.
-     No large diffuse drop shadow — invisible on dark video and visually noisy. */
-  box-shadow:
-    0 2px 8px -5px rgba(0, 0, 0, var(--surface-shadow)),
-    inset 0 1px 0 rgba(255, 255, 255, var(--surface-highlight));
+  /* Composite depth: one drop/contact shadow + one inset top hairline + one
+     accent edge — each preset sets only the layers it needs (editorial = none).
+     No large diffuse shadow, no gradient fill. */
+  box-shadow: var(--shadow), var(--sheen), var(--edge);
   text-shadow: var(--text-shadow);
 }
 
@@ -475,8 +529,16 @@ html, body {
 
 /* Username — the typographic anchor */
 .msg__name {
+  font-family: var(--name-font, inherit);
   font-weight: var(--name-weight);
   letter-spacing: -0.01em;
+}
+/* Terminal preset: a phosphor "›" prompt caret before each username. */
+.se-chat[data-preset="terminal"] .msg__name::before {
+  content: "\203A\00a0";
+  color: var(--accent);
+  opacity: 0.7;
+  font-weight: 700;
 }
 /* Native/platform color rendered as a username chip instead of text color. */
 .msg__name--chip {
@@ -557,23 +619,14 @@ html, body {
 .alert__label { font-weight: 750; text-wrap: pretty; }
 .alert__sub { opacity: 0.78; margin-top: 1px; font-weight: 450; }
 
-/* On surface presets, alerts get a calm FLAT accent wash (single color,
-   no gradient) + a thin accent edge — still no glow ring. */
-.se-chat[data-preset="frosted"] .msg--alert .msg__bubble,
-.se-chat[data-preset="slate"]   .msg--alert .msg__bubble {
-  background:
-    color-mix(in srgb, var(--accent) 12%, var(--surface));
-  box-shadow:
-    0 2px 8px -5px rgba(0, 0, 0, var(--surface-shadow)),
-    inset 0 1px 0 rgba(255, 255, 255, var(--surface-highlight)),
-    inset 2px 0 0 var(--accent);
+/* On ANY surface preset, alerts get a calm FLAT accent wash (single color,
+   no gradient) + a 2px accent edge — still no glow ring. */
+.se-chat:not([data-preset="editorial"]) .msg--alert .msg__bubble {
+  background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+  box-shadow: var(--shadow), var(--sheen), inset 2px 0 0 var(--accent);
 }
-.se-chat[data-preset="frosted"][data-halign="right"] .msg--alert .msg__bubble,
-.se-chat[data-preset="slate"][data-halign="right"]   .msg--alert .msg__bubble {
-  box-shadow:
-    0 2px 8px -5px rgba(0, 0, 0, var(--surface-shadow)),
-    inset 0 1px 0 rgba(255, 255, 255, var(--surface-highlight)),
-    inset -2px 0 0 var(--accent);
+.se-chat:not([data-preset="editorial"])[data-halign="right"] .msg--alert .msg__bubble {
+  box-shadow: var(--shadow), var(--sheen), inset -2px 0 0 var(--accent);
 }
 
 /* ================================================================

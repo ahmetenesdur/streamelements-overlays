@@ -122,7 +122,10 @@ function loadWidget(fields, options) {
 
   const api = window.__seChat;
   const fire = (listener, event) => window.dispatchEvent({ type: 'onEventReceived', detail: { listener, event } });
-  return { api, root, list, fire, window, timers };
+  // rootStyle exposes the CSS custom properties applyTheme() writes to
+  // document.documentElement (e.g. --persp-zoom), for theme-token assertions.
+  const rootStyle = document.documentElement.style;
+  return { api, root, list, fire, window, timers, rootStyle };
 }
 
 module.exports = { loadWidget, makeEl };

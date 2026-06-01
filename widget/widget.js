@@ -27,13 +27,15 @@
    * @property {string}  text
    * @property {boolean} isAction
    * @property {boolean} [shared]
+   * @property {string} [sharedSourceRoomId]
+   * @property {string} [sharedSourceLabel]
    * @property {'chat'|'alert'} kind
    * @property {AlertData} [alert]
    */
 
   /**
    * @typedef {Object} AlertData
-   * @property {'follow'|'sub'|'resub'|'gift'|'communitygift'|'tip'|'cheer'|'raid'|'host'} type
+   * @property {'follow'|'sub'|'resub'|'gift'|'communitygift'|'tip'|'cheer'|'raid'|'host'|'superchat'|'member'} type
    * @property {string|number} amount
    * @property {string} label
    * @property {string} message
@@ -136,9 +138,12 @@
     // Shared Chat (Stream Together): message originates in another channel.
     const srcRoom = tags['source-room-id'];
     const shared = !!(srcRoom && tags['room-id'] && srcRoom !== tags['room-id']);
+    const sharedSourceRoomId = shared ? String(srcRoom) : '';
     return {
       platform: 'twitch',
       shared: shared,
+      sharedSourceRoomId: sharedSourceRoomId,
+      sharedSourceLabel: sharedSourceRoomId ? sharedLabelForRoom(sharedSourceRoomId) : '',
       msgId: data.msgId || tags.id || ('t' + Date.now()),
       userId: data.userId || tags['user-id'] || data.nick,
       login: (data.nick || tags.login || data.displayName || '').toLowerCase(),
@@ -207,16 +212,33 @@
   // is split into sub / resub / gift / community-gift per the SDK event fields.
   // (tip-latest also carries YouTube Super Chat; subscriber-latest also carries
   // YouTube memberships.) No channel-points/superchat listeners exist in the SDK.
+  // YouTube reuses Twitch's tip/subscriber listeners for Super Chats and
+  // memberships. These detectors stay tolerant: they only re-classify when the
+  // payload clearly says so, otherwise the legacy tip/sub behavior is kept.
+  function lowerEventText(e, keys) {
+    return keys.map(k => String(e && e[k] || '').toLowerCase()).join(' ');
+  }
+  function isYouTubePayload(e) {
+    return /youtube|yt/.test(lowerEventText(e, ['provider', 'platform', 'source', 'service']));
+  }
+  function isSuperchatPayload(e) {
+    return isYouTubePayload(e) && /superchat|super chat/.test(lowerEventText(e, ['type', 'kind', 'activityType', 'name']));
+  }
+  function isMemberPayload(e) {
+    return isYouTubePayload(e) && /member|membership|sponsor/.test(lowerEventText(e, ['type', 'kind', 'activityType']));
+  }
+
   function normalizeAlert(listener, e) {
     let type = null;
     if (listener === 'follower-latest') type = 'follow';
     else if (listener === 'cheer-latest') type = 'cheer';
-    else if (listener === 'tip-latest') type = 'tip';
+    else if (listener === 'tip-latest') type = isSuperchatPayload(e) ? 'superchat' : 'tip';
     else if (listener === 'raid-latest') type = 'raid';
     else if (listener === 'host-latest') type = 'host';
     else if (listener === 'subscriber-latest') {
       if (e.playedAsCommunityGift) return null;          // already shown by the community-gift alert
-      if (e.bulkGifted || e.isCommunityGift) type = 'communitygift';
+      if (isMemberPayload(e)) type = 'member';            // YouTube membership
+      else if (e.bulkGifted || e.isCommunityGift) type = 'communitygift';
       else if (e.gifted) type = 'gift';
       else if (num(e.amount, 1) > 1) type = 'resub';
       else type = 'sub';
@@ -237,7 +259,9 @@
       tip: F.alertLabelTip || '{name} tipped {amount}',
       cheer: F.alertLabelCheer || '{name} cheered {amount} bits',
       raid: F.alertLabelRaid || '{name} raided with {amount} viewers',
-      host: F.alertLabelHost || '{name} hosted with {amount} viewers'
+      host: F.alertLabelHost || '{name} hosted with {amount} viewers',
+      superchat: F.alertLabelSuperchat || '{name} sent a Super Chat {amount}',
+      member: F.alertLabelMember || '{name} became a member'
     }[type];
     const label = String(tmpl)
       .replace(/{name}/g, name)
@@ -390,10 +414,12 @@
       '" src="' + platformLogo(u.platform) + '">';
     const nameStyle = nameColorStyle(u);
     const shared = (u.shared && yes(F.sharedChatIndicator))
-      ? '<span class="msg__shared" title="shared chat">⤵</span>' : '';
+      ? '<span class="msg__shared" title="shared chat">⤵</span>' +
+        (u.sharedSourceLabel ? '<span class="msg__shared-label">' + htmlEncode(u.sharedSourceLabel) + '</span>' : '')
+      : '';
     return '<span class="msg__head">' + shared + logo +
       '<span class="msg__badges">' + badges + '</span>' +
-      '<span class="msg__name"' + nameStyle + '>' + htmlEncode(u.displayName) + '</span>' +
+      '<span class="msg__name' + nameClass(u) + '"' + nameStyle + '>' + htmlEncode(u.displayName) + '</span>' +
       pronounTag(u) +
       '<span class="msg__colon">:</span></span>';
   }
@@ -404,12 +430,31 @@
     return '<span class="alert__label">' + htmlEncode(u.alert.label) + '</span>' + sub;
   }
 
+  // Per-role icon overrides. Each field value can be a Unicode glyph,
+  // 'platform', or 'avatar'; empty falls back to the global iconStyle.
+  const ROLE_ICON_FIELD = {
+    broadcaster: 'iconBroadcaster', leadmod: 'iconLeadMod', moderator: 'iconMod',
+    vip: 'iconVip', subscriber: 'iconSub', artist: 'iconArtist',
+    fav: 'iconFav', regular: 'iconRegular'
+  };
+  function primaryRole(u) {
+    for (const r of ROLE_PRIORITY) {
+      if (u.roles.indexOf(r) !== -1) return r;
+    }
+    return 'regular';
+  }
+  function iconStyleForMessage(u) {
+    const field = ROLE_ICON_FIELD[primaryRole(u)];
+    const roleIcon = field ? str(F[field], '') : '';
+    return roleIcon || str(F.iconStyle, 'avatar');
+  }
+
   function iconMarkup(u) {
     if (u.kind === 'alert') {
-      const glyph = { follow: '♥', sub: '★', resub: '★', gift: '✦', communitygift: '✦', tip: '$', cheer: '◆', raid: '⚑', host: '⌂' }[u.alert.type] || '★';
+      const glyph = { follow: '♥', sub: '★', resub: '★', gift: '✦', communitygift: '✦', tip: '$', cheer: '◆', raid: '⚑', host: '⌂', superchat: '$', member: '★' }[u.alert.type] || '★';
       return '<div class="msg__icon"><span class="alert__glyph">' + glyph + '</span></div>';
     }
-    const style = str(F.iconStyle, 'avatar');
+    const style = iconStyleForMessage(u);
     let inner;
     if (style === 'platform') {
       inner = '<img class="msg__avatar" alt="" src="' + platformLogo(u.platform) + '">';
@@ -421,6 +466,20 @@
         encodeURI(u.avatar || platformLogo(u.platform)) + '">';
     }
     return '<div class="msg__icon">' + inner + '<span class="msg__dot"></span></div>';
+  }
+
+  function sharedLabelForRoom(roomId) {
+    const id = String(roomId || '').trim();
+    if (!id) return '';
+    const pairs = String(F.sharedChatLabels || '').split(',');
+    for (const pair of pairs) {
+      const idx = pair.indexOf(':');
+      if (idx === -1) continue;
+      const key = pair.slice(0, idx).trim();
+      const value = pair.slice(idx + 1).trim();
+      if (key === id && value) return value;
+    }
+    return '';
   }
 
   // Map the highest-priority role to its CSS color variable.
@@ -450,9 +509,18 @@
     }
     if (mode === 'custom') return ' style="color:var(--custom-nick-color)"';
     if (mode === 'message') return '';
+    const placement = str(F.nativeColorPlacement, 'text');
+    if (placement === 'off') return '';
     // user / platform color, with a stable per-user fallback color
     const c = safeCssColor(u.color) || stableColor(u.displayName);
+    if (placement === 'background') return ' style="background-color:' + c + '"';
     return ' style="color:' + c + '"';
+  }
+
+  function nameClass(u) {
+    if (str(F.nickColor, 'user') !== 'user') return '';
+    if (yes(F.roleHighlight) && roleColorVar(u)) return '';
+    return str(F.nativeColorPlacement, 'text') === 'background' ? ' msg__name--chip' : '';
   }
 
   function renderText(text, emoteMap) {
@@ -605,13 +673,26 @@
     set('--role-fav', f.colorFav || '#f1d396');
     setIf('--role-regular', f.colorRegular);   // empty → regulars keep their own color
 
+    // Role icon bubble tints (used by .role-highlight .msg--role-* .msg__icon).
+    set('--role-bubble-broadcaster', f.colorBroadcaster || '#f2969d');
+    set('--role-bubble-mod', f.colorMod || '#90d9a4');
+    set('--role-bubble-vip', f.colorVip || '#efa8d6');
+    set('--role-bubble-sub', f.colorSub || '#a7bef2');
+    set('--role-bubble-leadmod', f.colorLeadMod || '#84d2c2');
+    set('--role-bubble-artist', f.colorArtist || '#f4b083');
+    set('--role-bubble-fav', f.colorFav || '#f1d396');
+
     set('--anim-duration', num(f.animationSpeed, 460) + 'ms');
 
-    // Perspective tilt (X/Y/Z)
+    // Perspective tilt (X/Y/Z) + zoom / field of view
     const px = num(f.perspectiveX, 0), py = num(f.perspectiveY, 0), pz = num(f.perspectiveZ, 0);
     set('--persp-x', px + 'deg');
     set('--persp-y', py + 'deg');
     set('--persp-z', pz + 'deg');
+    const zoom = Math.max(0.5, Math.min(1.6, num(f.perspectiveZoom, 100) / 100));
+    const fov = Math.max(350, Math.min(1800, num(f.perspectiveFov, 1000)));
+    set('--persp-zoom', String(zoom));
+    set('--persp-fov', fov + 'px');
 
     if (!rootEl) return;
     rootEl.dataset.preset = str(f.stylePreset, 'editorial');
@@ -857,7 +938,8 @@
     const map = {
       follow: F.alertFollow, sub: F.alertSub, resub: F.alertSub,
       gift: F.alertGift, communitygift: F.alertGift,
-      tip: F.alertTip, cheer: F.alertCheer, raid: F.alertRaid, host: F.alertHost
+      tip: F.alertTip, cheer: F.alertCheer, raid: F.alertRaid, host: F.alertHost,
+      superchat: F.alertSuperchat, member: F.alertMember
     };
     const v = map[type];
     return yes(v != null ? v : 'yes');

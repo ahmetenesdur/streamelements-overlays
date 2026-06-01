@@ -288,6 +288,15 @@ html, body {
   line-height: 1;
 }
 
+/* Role-tinted icon bubble — only when role highlighting is on. */
+.se-chat.role-highlight .msg--role-broadcaster .msg__icon { background: color-mix(in srgb, var(--role-bubble-broadcaster) 26%, transparent); }
+.se-chat.role-highlight .msg--role-leadmod .msg__icon { background: color-mix(in srgb, var(--role-bubble-leadmod) 26%, transparent); }
+.se-chat.role-highlight .msg--role-moderator .msg__icon { background: color-mix(in srgb, var(--role-bubble-mod) 26%, transparent); }
+.se-chat.role-highlight .msg--role-artist .msg__icon { background: color-mix(in srgb, var(--role-bubble-artist) 26%, transparent); }
+.se-chat.role-highlight .msg--role-vip .msg__icon { background: color-mix(in srgb, var(--role-bubble-vip) 26%, transparent); }
+.se-chat.role-highlight .msg--role-subscriber .msg__icon { background: color-mix(in srgb, var(--role-bubble-sub) 26%, transparent); }
+.se-chat.role-highlight .msg--role-fav .msg__icon { background: color-mix(in srgb, var(--role-bubble-fav) 26%, transparent); }
+
 /* Platform dot */
 .msg__dot {
   position: absolute;
@@ -319,6 +328,15 @@ html, body {
 
 /* Shared Chat (Stream Together) origin marker */
 .msg__shared { opacity: 0.5; margin-right: 4px; font-size: 0.8em; vertical-align: 0.05em; }
+.msg__shared-label {
+  display: inline-block;
+  margin-right: 0.45em;
+  font-size: 0.72em;
+  font-weight: 800;
+  opacity: 0.78;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
 
 /* Badges */
 .msg__badges { display: inline; }
@@ -335,6 +353,13 @@ html, body {
 .msg__name {
   font-weight: var(--name-weight);
   letter-spacing: -0.01em;
+}
+/* Native/platform color rendered as a username chip instead of text color. */
+.msg__name--chip {
+  color: rgba(255, 255, 255, 0.96);
+  border-radius: 999px;
+  padding: 0.04em 0.38em 0.08em;
+  text-shadow: none;
 }
 /* No colon in editorial type style — weight + spacing separate name from text */
 .msg__colon { display: none; }
@@ -460,10 +485,14 @@ html, body {
 /* ================================================================
    EFFECTS (kept, restrained)
    ================================================================ */
-/* Perspective tilt (X/Y/Z) — opt-in, off by default (all angles 0). */
-.se-chat.fx-perspective { perspective: 1000px; }
+/* Perspective tilt (X/Y/Z) + zoom — opt-in, off by default (all angles 0). */
+.se-chat.fx-perspective { perspective: var(--persp-fov, 1000px); }
 .se-chat.fx-perspective .se-chat__list {
-  transform: rotateX(var(--persp-x, 0deg)) rotateY(var(--persp-y, 0deg)) rotateZ(var(--persp-z, 0deg));
+  transform:
+    rotateX(var(--persp-x, 0deg))
+    rotateY(var(--persp-y, 0deg))
+    rotateZ(var(--persp-z, 0deg))
+    scale(var(--persp-zoom, 1));
   transform-origin: center center;
 }
 

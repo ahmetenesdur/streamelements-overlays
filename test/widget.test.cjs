@@ -56,6 +56,26 @@ test('normalizeTwitch: identity, color, action, shared-chat flag', () => {
   assert.strictEqual(shared.shared, true, 'source-room-id != room-id → shared');
 });
 
+test('normalizeTwitch records shared chat source room id', () => {
+  const { api } = loadWidget({});
+  const shared = api.fn.normalizeTwitch(tw({
+    tags: { 'room-id': '100', 'source-room-id': '200', 'user-id': 'u', id: 'm', badges: '' }
+  }));
+  assert.strictEqual(shared.shared, true);
+  assert.strictEqual(shared.sharedSourceRoomId, '200');
+});
+
+test('shared chat label renders mapped source channel name', () => {
+  const { list, fire } = loadWidget({ sharedChatIndicator: 'yes', sharedChatLabels: '200:Ironmouse' });
+  fire('message', { data: tw({
+    displayName: 'GuestViewer',
+    text: 'hello shared',
+    tags: { 'room-id': '100', 'source-room-id': '200', 'user-id': 'u', id: 'm', badges: '' }
+  }) });
+  assert.match(list.children[0].innerHTML, /Ironmouse/);
+  assert.match(list.children[0].innerHTML, /msg__shared-label/);
+});
+
 test('rolesFromTwitch: badges/tags → role list', () => {
   const { api } = loadWidget({});
   const r1 = api.fn.rolesFromTwitch({ badges: 'broadcaster/1', mod: '0', subscriber: '0' }, [{ type: 'broadcaster' }]);
@@ -186,6 +206,42 @@ test('message render: rejects unsafe inline color values', () => {
   const html = list.children[0].innerHTML;
   assert.ok(!html.includes('background:'), 'malicious CSS declaration must not be rendered');
   assert.ok(!html.includes('javascript:'), 'javascript URL must not be rendered');
+});
+
+test('nativeColorPlacement:background applies user color as username background', () => {
+  const { list, fire } = loadWidget({ nickColor: 'user', nativeColorPlacement: 'background' });
+  fire('message', { data: tw({ displayName: 'Ada', displayColor: '#123456' }) });
+  const html = list.children[0].innerHTML;
+  assert.match(html, /class="msg__name msg__name--chip"/);
+  assert.match(html, /background-color:#123456/);
+});
+
+test('nativeColorPlacement:off disables platform color fallback', () => {
+  const { list, fire } = loadWidget({ nickColor: 'user', nativeColorPlacement: 'off' });
+  fire('message', { data: tw({ displayName: 'Ada', displayColor: '#123456' }) });
+  const html = list.children[0].innerHTML;
+  assert.ok(!html.includes('#123456'));
+});
+
+test('role icon override wins over global iconStyle', () => {
+  const { list, fire } = loadWidget({ showAvatar: 'yes', iconStyle: 'avatar', iconMod: '★' });
+  fire('message', { data: tw({
+    displayName: 'ModUser',
+    badges: [{ type: 'moderator' }],
+    tags: { 'room-id': '1', 'user-id': 'u', id: 'm', mod: '1', badges: 'moderator/1' }
+  }) });
+  assert.match(list.children[0].innerHTML, /msg__glyphicon/);
+  assert.match(list.children[0].innerHTML, /★/);
+});
+
+test('role icon override falls back to global iconStyle when unset', () => {
+  const { list, fire } = loadWidget({ showAvatar: 'yes', iconStyle: 'platform' });
+  fire('message', { data: tw({
+    displayName: 'ModUser',
+    badges: [{ type: 'moderator' }],
+    tags: { 'room-id': '1', 'user-id': 'u', id: 'm', mod: '1', badges: 'moderator/1' }
+  }) });
+  assert.ok(!list.children[0].innerHTML.includes('msg__glyphicon'), 'no glyph override → uses platform logo');
 });
 
 // ---- filters -------------------------------------------------------
@@ -359,6 +415,48 @@ test('shipped defaults: EVERY alert label resolves cleanly (no leftover {placeho
   }
 });
 
+test('normalizeAlert maps YouTube superchat-like tip payload to superchat', () => {
+  const { api } = loadWidget({
+    showAlerts: 'yes',
+    alertTip: 'yes',
+    alertSuperchat: 'yes',
+    alertLabelSuperchat: '{name} super chatted {amount}'
+  });
+  const u = api.fn.normalizeAlert('tip-latest', {
+    name: 'YTViewer',
+    amount: '$20',
+    provider: 'youtube',
+    type: 'superchat'
+  });
+  assert.strictEqual(u.alert.type, 'superchat');
+  assert.strictEqual(u.text, 'YTViewer super chatted $20');
+});
+
+test('normalizeAlert maps YouTube membership-like subscriber payload to member', () => {
+  const { api } = loadWidget({
+    showAlerts: 'yes',
+    alertSub: 'yes',
+    alertMember: 'yes',
+    alertLabelMember: '{name} joined as a member'
+  });
+  const u = api.fn.normalizeAlert('subscriber-latest', {
+    name: 'MemberViewer',
+    provider: 'youtube',
+    type: 'member',
+    amount: 1
+  });
+  assert.strictEqual(u.alert.type, 'member');
+  assert.strictEqual(u.text, 'MemberViewer joined as a member');
+});
+
+test('normalizeAlert keeps non-YouTube tip/sub payloads on legacy types', () => {
+  const { api } = loadWidget({ showAlerts: 'yes', alertTip: 'yes', alertSub: 'yes' });
+  const tip = api.fn.normalizeAlert('tip-latest', { name: 'A', amount: '5 USD', type: 'superchat' });
+  assert.strictEqual(tip.alert.type, 'tip', 'no provider hint → stays a tip');
+  const sub = api.fn.normalizeAlert('subscriber-latest', { name: 'B', amount: 1, type: 'member' });
+  assert.strictEqual(sub.alert.type, 'sub', 'no provider hint → stays a sub');
+});
+
 test('shipped defaults: common chat bots are ignored out of the box', () => {
   const { api } = loadWidget(jsonDefaults());
   for (const bot of ['Nightbot', 'StreamElements', 'Moobot', 'Fossabot', 'Sery_Bot']) {
@@ -438,6 +536,13 @@ test('textShadow field sets --text-shadow CSS var', () => {
   const { window } = loadWidget({ textShadow: '0 2px 4px black' });
   const val = window.document.documentElement.style.getPropertyValue('--text-shadow');
   assert.strictEqual(val, '0 2px 4px black', 'textShadow field maps to --text-shadow CSS var');
+});
+
+test('applyTheme exposes perspective zoom and fov CSS variables', () => {
+  const { rootStyle, root } = loadWidget({ perspectiveX: 8, perspectiveZoom: 120, perspectiveFov: 700 });
+  assert.strictEqual(rootStyle.getPropertyValue('--persp-zoom'), '1.2');
+  assert.strictEqual(rootStyle.getPropertyValue('--persp-fov'), '700px');
+  assert.ok(root.classList.contains('fx-perspective'));
 });
 
 test('event:skip removes last alert', () => {

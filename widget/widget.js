@@ -411,6 +411,8 @@
     listEl.appendChild(row);
     enforceLimit();
     refreshDynamicOpacity();
+    // Fullscreen float: drop the row at a non-overlapping absolute position.
+    if (isFullscreenFloat()) placeFloating(row);
     // In horizontal mode keep the newest message scrolled into view.
     if (str(F.layoutMode, 'vertical') === 'horizontal') {
       const toRight = str(F.hDirection, 'right') === 'right';
@@ -590,6 +592,60 @@
     });
   }
 
+  // ---- Fullscreen float / collision avoidance ---------------------
+  // Two axis-aligned rects overlap if they overlap on BOTH axes (with padding).
+  function rectsOverlap(a, b, pad) {
+    return !(a.x + a.w + pad <= b.x || b.x + b.w + pad <= a.x ||
+             a.y + a.h + pad <= b.y || b.y + b.h + pad <= a.y);
+  }
+  // Find a spot for a rw×rh box inside cw×ch that clears every occupied rect.
+  // Sampling-based: returns the first collision-free spot, else the least-bad
+  // one. rng is injectable so the placement is deterministic in tests.
+  function pickFloatPosition(cw, ch, rw, rh, occupied, opts) {
+    opts = opts || {};
+    const pad = opts.pad != null ? opts.pad : 8;
+    const tries = opts.tries || 40;
+    const rng = opts.rng || Math.random;
+    const maxX = Math.max(0, cw - rw), maxY = Math.max(0, ch - rh);
+    let best = null, bestHits = Infinity;
+    for (let i = 0; i < tries; i++) {
+      const x = Math.round(rng() * maxX), y = Math.round(rng() * maxY);
+      const cand = { x: x, y: y, w: rw, h: rh };
+      let hits = 0;
+      for (let j = 0; j < occupied.length; j++) {
+        if (rectsOverlap(cand, occupied[j], pad)) hits++;
+      }
+      if (hits === 0) return { x: x, y: y, fit: true };
+      if (hits < bestHits) { bestHits = hits; best = { x: x, y: y, fit: false }; }
+    }
+    return best || { x: 0, y: 0, fit: false };
+  }
+
+  function isFullscreenFloat() {
+    return str(F.layoutMode, 'vertical') === 'fullscreen' && yes(F.fullscreenFloat);
+  }
+
+  // Measure the freshly added row + its siblings and drop it at a
+  // non-overlapping absolute position within the fullscreen stage.
+  function placeFloating(row) {
+    if (!listEl || !row) return;
+    const cw = listEl.clientWidth || 0, ch = listEl.clientHeight || 0;
+    const rw = row.offsetWidth || 0, rh = row.offsetHeight || 0;
+    if (!cw || !ch || !rw || !rh) return;     // not laid out yet → skip gracefully
+    const occupied = [];
+    Array.prototype.forEach.call(listEl.children, function (el) {
+      if (el === row) return;
+      occupied.push({
+        x: parseFloat(el.style.left) || 0, y: parseFloat(el.style.top) || 0,
+        w: el.offsetWidth || 0, h: el.offsetHeight || 0
+      });
+    });
+    const pos = pickFloatPosition(cw, ch, rw, rh, occupied, { pad: 10 });
+    row.style.position = 'absolute';
+    row.style.left = pos.x + 'px';
+    row.style.top = pos.y + 'px';
+  }
+
   function scheduleRemoval(row, u) {
     // hideAfter is the master "auto-hide" control. 0 = keep forever (only the
     // messagesLimit removes rows). Same behaviour in every layout.
@@ -734,6 +790,7 @@
     toggle('role-msgbg', yes(f.roleMsgBg));
     toggle('role-msgtext', yes(f.roleMsgText));
     toggle('fx-perspective', px !== 0 || py !== 0 || pz !== 0);
+    toggle('fx-float', str(f.layoutMode, 'vertical') === 'fullscreen' && yes(f.fullscreenFloat));
     toggle('fx-crayon', yes(f.crayonTexture));
     // Real SVG refraction — opt-in AND only where the renderer can composite
     // it (Chromium / OBS). Otherwise stay on safe glassmorphism (no class).
@@ -1194,7 +1251,9 @@
       nativeEmoteMap: nativeEmoteMap,
       stableColor: stableColor,
       safeCssColor: safeCssColor,
-      htmlEncode: htmlEncode
+      htmlEncode: htmlEncode,
+      pickFloatPosition: pickFloatPosition,
+      rectsOverlap: rectsOverlap
     }
   };
 })();

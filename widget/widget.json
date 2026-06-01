@@ -71,6 +71,16 @@
     },
     "group": "Layout"
   },
+  "fullscreenFloat": {
+    "type": "dropdown",
+    "label": "Full screen: float & avoid overlapping",
+    "value": "no",
+    "options": {
+      "yes": "Yes",
+      "no": "No"
+    },
+    "group": "Layout"
+  },
   "density": {
     "type": "dropdown",
     "label": "Density",

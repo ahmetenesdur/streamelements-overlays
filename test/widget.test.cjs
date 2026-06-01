@@ -594,6 +594,46 @@ test('textShadow field sets --text-shadow CSS var', () => {
   assert.strictEqual(val, '0 2px 4px black', 'textShadow field maps to --text-shadow CSS var');
 });
 
+// ---- fullscreen float / collision avoidance -----------------------
+function seqRng(arr) { let i = 0; return () => arr[i++ % arr.length]; }
+
+test('rectsOverlap: detects overlap and respects padding gap', () => {
+  const { api } = loadWidget({});
+  const a = { x: 0, y: 0, w: 100, h: 100 };
+  assert.strictEqual(api.fn.rectsOverlap(a, { x: 50, y: 50, w: 100, h: 100 }, 0), true, 'clearly overlapping');
+  assert.strictEqual(api.fn.rectsOverlap(a, { x: 120, y: 0, w: 50, h: 50 }, 0), false, 'separated on X');
+  assert.strictEqual(api.fn.rectsOverlap(a, { x: 108, y: 0, w: 50, h: 50 }, 10), true, 'within padding gap counts as overlap');
+});
+
+test('pickFloatPosition: empty stage returns an in-bounds spot', () => {
+  const { api } = loadWidget({});
+  const p = api.fn.pickFloatPosition(1000, 1000, 200, 100, [], { rng: () => 0.5 });
+  assert.strictEqual(p.x, 400);
+  assert.strictEqual(p.y, 450);
+  assert.strictEqual(p.fit, true);
+});
+
+test('pickFloatPosition: skips a colliding spot for a clear one', () => {
+  const { api } = loadWidget({});
+  const occupied = [{ x: 0, y: 0, w: 500, h: 1000 }];          // left half blocked
+  const p = api.fn.pickFloatPosition(1000, 1000, 200, 100, occupied, { rng: seqRng([0.1, 0.5, 0.9, 0.5]), pad: 8 });
+  assert.strictEqual(p.fit, true);
+  assert.strictEqual(api.fn.rectsOverlap(p, occupied[0], 8), false, 'chosen spot clears the blocked region');
+});
+
+test('pickFloatPosition: fully blocked stage returns best-effort fit:false', () => {
+  const { api } = loadWidget({});
+  const p = api.fn.pickFloatPosition(800, 600, 200, 100, [{ x: 0, y: 0, w: 800, h: 600 }], { rng: () => 0, tries: 10 });
+  assert.strictEqual(p.fit, false);
+});
+
+test('fx-float class only engages in fullscreen layout', () => {
+  const on = loadWidget({ layoutMode: 'fullscreen', fullscreenFloat: 'yes' });
+  assert.ok(on.root.classList.contains('fx-float'), 'fullscreen + float → fx-float on');
+  const off = loadWidget({ layoutMode: 'vertical', fullscreenFloat: 'yes' });
+  assert.ok(!off.root.classList.contains('fx-float'), 'float ignored outside fullscreen');
+});
+
 test('applyTheme exposes perspective zoom and fov CSS variables', () => {
   const { rootStyle, root } = loadWidget({ perspectiveX: 8, perspectiveZoom: 120, perspectiveFov: 700 });
   assert.strictEqual(rootStyle.getPropertyValue('--persp-zoom'), '1.2');

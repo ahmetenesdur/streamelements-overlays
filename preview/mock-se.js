@@ -193,6 +193,38 @@
       event.data.tags.id = 'shared-preview-' + uid();
       dispatch('message', event);
     },
+    // Fullscreen float: scatter several messages with overlap avoidance.
+    floatScene() {
+      MockSE.set('layoutMode', 'fullscreen');
+      MockSE.set('fullscreenFloat', 'yes');
+      MockSE.set('hideAfter', 0);
+      MockSE.clear();
+      ['floating chat one', 'second message drifts in', 'a third one here',
+       'number four floats', 'fifth and counting', 'sixth message', 'lucky seven', 'last one'
+      ].forEach((text, i) => {
+        const e = twitchRaw(text);
+        e.data.displayName = 'Viewer' + i; e.data.userId = 'float' + i;
+        e.data.tags['user-id'] = 'float' + i; e.data.tags.id = 'float-' + i + '-' + uid();
+        dispatch('message', e);
+      });
+    },
+    // Per-role visual matrix: each role gets its own tinted name + bubble.
+    roleMatrix() {
+      MockSE.set('roleHighlight', 'yes');
+      MockSE.set('roleNameBg', 'yes');
+      MockSE.set('roleMsgBg', 'yes');
+      MockSE.clear();
+      const roles = [
+        ['broadcaster', 'TheStreamer', 'broadcaster line'],
+        ['moderator', 'ModSquad', 'moderator line'],
+        ['vip', 'PixelQueen', 'vip line'],
+        ['subscriber', 'NightWolf', 'subscriber line']
+      ];
+      roles.forEach(([role, name, text]) => {
+        const e = twitchRaw(text, { name: name, color: '#cccccc', roles: [role] });
+        dispatch('message', e);
+      });
+    },
     // Four messages so older visible rows fade by age.
     ageFade() {
       MockSE.set('dynamicOpacity', 'yes');

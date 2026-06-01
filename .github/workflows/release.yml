@@ -16,6 +16,7 @@ jobs:
         with:
           node-version: 20
           cache: npm
+          cache-dependency-path: relay/package-lock.json
       - name: Install relay dependencies
         run: cd relay && npm ci
       - name: Validate & Test

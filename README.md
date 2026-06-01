@@ -23,6 +23,8 @@ The Kick relay supports an optional shared access token for public deployments.
   by default — depth comes from a hairline top sheen, not heavy drop shadows.
 - Left/right align, top/bottom origin, comfortable/compact density, max messages,
   hide-after, message width/gap.
+- **Second-message grouping** — legacy inline merge or a stacked follow-up that drops
+  the repeated header, plus **dynamic opacity** that fades older visible rows by age.
 - Distinctive default font (Hanken Grotesk) or any Google font; full color/size control.
 - Self-contained: **no external CSS/JS** (no animate.css, no md5) — only the chosen webfont.
 
@@ -30,17 +32,26 @@ The Kick relay supports an optional shared access token for public deployments.
 - Roles: broadcaster · lead mod · moderator · artist · vip · subscriber · fav list · regular,
   each with its own color (lead mod / fav are user-defined username lists).
 - **Pronouns** (opt-in) via pronouns.alejo.io for Twitch users.
-- Platform logo and/or colored platform dot; badges; **53 icon-bubble glyphs** or user avatar.
-- Username color modes (platform / text / custom / hidden); highlighted keywords.
+- Platform logo and/or colored platform dot; badges; **53 icon-bubble glyphs** or user avatar,
+  with **per-role icon overrides** (broadcaster / lead mod / mod / VIP / sub / artist / fav / regular).
+- Username color modes (platform / text / custom / hidden); **native color placement** on the
+  username text or as a username-background chip; highlighted keywords.
 - 7TV / BTTV / FFZ custom emotes (global + channel), fetched client-side — **zero-width emote overlays** supported.
-- **Shared Chat** (Twitch Stream Together) detection + origin marker.
+- **Shared Chat** (Twitch Stream Together) detection + origin marker, with optional
+  **`roomId:name` origin labels** so guest-channel messages name their source.
 
 **Alerts** — inline follow / sub / resub / gift / community-gift / tip / cheer / raid / host
 as refined accent lines: per-type enable, custom label format, minimum display time, sound per event.
+**YouTube-aware subtypes** — Super Chat and membership alerts get their own labels when
+StreamElements provides the platform hints (tolerant detection, falls back to tip/sub).
 
-**Effects** — edge-fade mask, perspective tilt (X/Y/Z), crayon texture, and an
-opt-in **Liquid Glass refraction** (real SVG, Chromium/OBS; auto-falls back to
+**Effects** — edge-fade mask, perspective tilt (X/Y/Z) with **zoom + field-of-view**, crayon
+texture, and an opt-in **Liquid Glass refraction** (real SVG, Chromium/OBS; auto-falls back to
 glassmorphism elsewhere). Signature liquid entrance + reduced-motion support.
+
+> **Deferred:** TikTok and Ko-fi ingestion are intentionally out of scope for now — they
+> require separate platform/webhook integration beyond the native StreamElements widget event
+> surface, so they are planned as their own phase rather than a widget CSS/JS enhancement.
 
 **Testing tools** — fire test chat/alert/Kick messages right from the Fields panel.
 
@@ -94,7 +105,7 @@ push to `main`.
 
 ## Status
 
-**Current: v1.1.0** · 40 widget unit tests + 11 relay parser/lifecycle assertions green · verified live in the preview.
+**Current: v1.1.0** · 55 widget unit tests + 11 relay parser/lifecycle assertions green · verified live in the preview.
 
 - ✅ Phases 0–6 — scaffold, core render, design system, inline alerts, effects, Kick relay (code; deploy when needed)
 - ✅ Layout system rebuilt — real **vertical / horizontal ticker / fullscreen** (pure flexbox, no pile-ups)
@@ -102,6 +113,7 @@ push to `main`.
 - ✅ Settings audit + best-practice defaults reconciled across json/css/js (v1.0.1)
 - ✅ Pastel-premium palette + minimal shadows + gradient-free preview scenes (v1.0.2)
 - ✅ Zero-width emote overlays, error boundaries, exponential backoff, relay rate limiting, OBS GPU optimizations (v1.1.0)
+- ✅ Phase 8 competitive parity — second-message stack grouping, dynamic age opacity, shared-chat origin labels, username color placement, per-role icon overrides, YouTube Super Chat/member alerts, perspective zoom/FOV
 - ⬜ Public publish + live OBS test · TikTok + Ko-fi (future)
 
 ## Contributing

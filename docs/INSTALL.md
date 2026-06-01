@@ -42,6 +42,27 @@ Alerts, Sound, Effects, Advanced glass, Multistream**.
   Chromium / OBS; on unsupported renderers it auto-falls back to plain glassmorphism.
   GPU-heavy — keep **Max messages** modest if you enable it.
 
+### Competitive-parity options (Phase 8)
+- **Messages → Consecutive message grouping**: `Off`, `Inline merge (legacy)`, or
+  `Second message stack` (drops the repeated header for a follow-up from the same sender).
+  The legacy **Merge messages** toggle still works and maps to `Inline merge`.
+- **Effects → Dynamic opacity for older messages** + **Oldest visible message opacity %**:
+  fade older visible rows by age (newest stays fully opaque).
+- **Multistream → Shared chat labels**: comma-separated `roomId:name` pairs, e.g.
+  `200:Ironmouse,300:Lirik`. Twitch Shared Chat (Stream Together) messages from a mapped
+  source room show that name; unmapped rooms still show the shared-chat marker.
+- **Username & Colors → Platform/native username color placement**: render the native
+  color on the username text, as a username-background chip, or disable it.
+- **Roles & Highlights → role icon overrides**: per-role glyph / `platform` / `avatar`
+  override that wins over the global icon style (leave empty to inherit it).
+- **Alerts → Super Chat / Member**: YouTube Super Chat and membership alerts with their own
+  labels, shown when StreamElements provides the platform hints.
+- **Effects → Perspective zoom % / field of view**: pair with the X/Y/Z tilt for a tuned
+  3D look.
+- For the closest competitor-style grouped layout, set **Consecutive message grouping** to
+  `Second message stack`, enable **Dynamic opacity**, and use the `Frosted` or `Slate`
+  preset if you want visible bubbles.
+
 ## 5. Test
 - Use **Test tools → Test chat message / Test alert / Test Kick message** buttons.
 - Or type in your real Twitch/YouTube chat.

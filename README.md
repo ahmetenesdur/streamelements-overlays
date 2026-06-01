@@ -41,7 +41,9 @@ The Kick relay supports an optional shared access token for public deployments.
   username text or as a username-background chip; highlighted keywords.
 - 7TV / BTTV / FFZ custom emotes (global + channel), fetched client-side — **zero-width emote overlays** supported.
 - **Shared Chat** (Twitch Stream Together) detection + origin marker, with optional
-  **`roomId:name` origin labels** (auto-colored per channel) so guest-channel messages name their source.
+  **`roomId:name` origin labels** (auto-colored per channel) so guest-channel messages name their source,
+  plus an opt-in **participants panel** — a live, corner-positioned roster of the channels in the
+  session (host auto-named, guests labelled), with a running count.
 
 **Alerts** — inline follow / sub / resub / gift / community-gift / tip / cheer / raid / host
 as refined accent lines: per-type enable, custom label format, minimum display time, sound per event.
@@ -111,7 +113,7 @@ push to `main`.
 
 ## Status
 
-**Current: v1.1.0** · 67 widget unit tests + 11 relay parser/lifecycle assertions green · verified live in the preview.
+**Current: v1.2.0** · 72 widget unit tests + 11 relay parser/lifecycle assertions green · verified live in the preview.
 
 - ✅ Phases 0–6 — scaffold, core render, design system, inline alerts, effects, Kick relay (code; deploy when needed)
 - ✅ Layout system rebuilt — real **vertical / horizontal ticker / fullscreen** (pure flexbox, no pile-ups)
@@ -121,7 +123,8 @@ push to `main`.
 - ✅ Zero-width emote overlays, error boundaries, exponential backoff, relay rate limiting, OBS GPU optimizations (v1.1.0)
 - ✅ Phase 8 competitive parity — second-message stack grouping, dynamic age opacity, shared-chat origin labels, username color placement, per-role icon overrides, YouTube Super Chat/member alerts, perspective zoom/FOV
 - ✅ Competitor gap close — channel-point/Store reward alerts, full per-role visual matrix, fullscreen float (overlap avoidance), per-platform dot toggles, auto-colored shared-chat labels
-- ⬜ Public publish + live OBS test · TikTok + Ko-fi (future)
+- ✅ Shared Chat **participants panel** (v1.2.0) — opt-in corner roster (host + guests) with live count
+- ⬜ Public publish + live OBS test · TikTok + Ko-fi (future, intentionally deferred)
 
 ## Contributing
 

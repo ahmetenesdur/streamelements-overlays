@@ -51,6 +51,11 @@ Alerts, Sound, Effects, Advanced glass, Multistream**.
 - **Multistream → Shared chat labels**: comma-separated `roomId:name` pairs, e.g.
   `200:Ironmouse,300:Lirik`. Twitch Shared Chat (Stream Together) messages from a mapped
   source room show that name; unmapped rooms still show the shared-chat marker.
+- **Multistream → Shared Chat: show participants panel** (+ **Participants panel position**):
+  opt-in corner roster of the channels in the current Stream Together session. Your own channel
+  is auto-named (from StreamElements) and pinned as the host; guests use the `Shared chat labels`
+  mapping (unmapped rooms show as `#roomId`). The panel only appears once a shared-chat message
+  is detected, so it stays hidden on solo streams.
 - **Username & Colors → Platform/native username color placement**: render the native
   color on the username text, as a username-background chip, or disable it.
 - **Roles & Highlights → per-role icons**: pick each role's icon from a dropdown — a glyph,
@@ -86,3 +91,17 @@ The widget carries `widgetVersion` + `widgetUpdateUrl`
 StreamElements shows an **"update available"** prompt on the widget. To cut a release:
 `npm run build` (stamps the version from `package.json`) → commit → push to `main`.
 If SE doesn't surface it, re-paste the changed file(s) manually.
+
+## 8. Share / publish (one-click install for others)
+
+The four-file paste above is the install path. To give other streamers a **one-click**
+install (like a marketplace widget), share the overlay itself:
+
+1. In **My Overlays**, open the **⋯** menu on the overlay → **Share** → **Create share link**.
+2. Anyone opening that link gets **"Add to my overlays"** — the widget (all four files +
+   field defaults) is copied into their account in one click. No file pasting, no `widget.io`.
+3. It works in **OBS / OBS Studio / Streamlabs OBS** as a Browser Source like any SE overlay.
+
+> Listing it in the **public StreamElements overlay library** is a separate, manual submission
+> through StreamElements (maintainer step) — it can't be automated from this repo. Until then,
+> the **share link** above already delivers the same one-click experience.

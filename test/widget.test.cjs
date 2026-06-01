@@ -331,6 +331,18 @@ test('dynamic opacity disabled clears inline row opacity', () => {
   assert.strictEqual(list.children[0].style.opacity, '');
 });
 
+test('entrance animation classes are stripped on animationend (so inline opacity wins)', () => {
+  // The liquidIn keyframe ends at opacity:1 with fill-mode:both; if the classes
+  // are never removed they permanently override the age-fade inline opacity.
+  const { list, fire } = loadWidget({ animationIn: 'liquidIn', dynamicOpacity: 'yes' });
+  fire('message', { data: tw({ text: 'one', userId: 'u1', tags: { 'room-id': '1', 'user-id': 'u1', id: 'm1' } }) });
+  const row = list.children[0];
+  assert.ok(row.classList.contains('animate__liquidIn'), 'entrance class applied on add');
+  row.dispatchEvent({ type: 'animationend' });
+  assert.ok(!row.classList.contains('animate__liquidIn'), 'entrance class removed after animationend');
+  assert.ok(!row.classList.contains('animate__animated'), 'base animate class removed after animationend');
+});
+
 test('delete-message + delete-messages remove rows', () => {
   // querySelector in the shim is a no-op, so we assert the handlers run without throwing.
   const { fire } = loadWidget({});

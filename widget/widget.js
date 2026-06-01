@@ -377,9 +377,16 @@
     const animIn = str(F.animationIn, 'liquidIn');
     if (str(F.disableAllAnimations, 'no') !== 'yes' && animIn !== 'none') {
       row.classList.add('animate__animated', 'animate__' + animIn);
-      // Release GPU layer after entrance animation completes
+      // When the entrance animation ends: release the GPU layer AND strip the
+      // entrance classes. The keyframe ends at opacity:1 with fill-mode:both, so
+      // leaving it on would permanently override the inline opacity that
+      // dynamic-opacity (age fade) writes. Guard against a row that is already
+      // exiting (animateOut swaps in the out-animation classes).
       row.addEventListener('animationend', function handler() {
         row.style.willChange = 'auto';
+        if (row.classList.contains('animate__' + animIn)) {
+          row.classList.remove('animate__animated', 'animate__' + animIn);
+        }
         row.removeEventListener('animationend', handler);
       }, { once: true });
     }

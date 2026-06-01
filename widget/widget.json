@@ -362,6 +362,36 @@
     },
     "group": "Roles & Highlights"
   },
+  "roleMsgText": {
+    "type": "dropdown",
+    "label": "Per-role: color message text",
+    "value": "no",
+    "options": { "yes": "Yes", "no": "No" },
+    "group": "Roles & Highlights"
+  },
+  "roleNameBg": {
+    "type": "dropdown",
+    "label": "Per-role: username background chip",
+    "value": "no",
+    "options": { "yes": "Yes", "no": "No" },
+    "group": "Roles & Highlights"
+  },
+  "roleMsgBg": {
+    "type": "dropdown",
+    "label": "Per-role: message background wash",
+    "value": "no",
+    "options": { "yes": "Yes", "no": "No" },
+    "group": "Roles & Highlights"
+  },
+  "roleTintStrength": {
+    "type": "number",
+    "label": "Per-role background tint strength %",
+    "value": 18,
+    "min": 4,
+    "max": 60,
+    "step": 1,
+    "group": "Roles & Highlights"
+  },
   "colorBroadcaster": {
     "type": "colorpicker",
     "label": "Role · Broadcaster",

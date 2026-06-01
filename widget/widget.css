@@ -297,6 +297,36 @@ html, body {
 .se-chat.role-highlight .msg--role-subscriber .msg__icon { background: color-mix(in srgb, var(--role-bubble-sub) 26%, transparent); }
 .se-chat.role-highlight .msg--role-fav .msg__icon { background: color-mix(in srgb, var(--role-bubble-fav) 26%, transparent); }
 
+/* ---- Per-role visual matrix (opt-in, each driven by that role's color) ----
+   role-msgtext : message text takes the role color
+   role-namebg  : username sits in a role-tinted chip
+   role-msgbg   : the whole bubble gets a role-tinted wash
+   Tint strength is shared via --role-tint. */
+.se-chat.role-msgtext .msg--role-broadcaster .msg__text { color: var(--role-broadcaster); }
+.se-chat.role-msgtext .msg--role-leadmod     .msg__text { color: var(--role-leadmod); }
+.se-chat.role-msgtext .msg--role-moderator   .msg__text { color: var(--role-mod); }
+.se-chat.role-msgtext .msg--role-artist      .msg__text { color: var(--role-artist); }
+.se-chat.role-msgtext .msg--role-vip         .msg__text { color: var(--role-vip); }
+.se-chat.role-msgtext .msg--role-subscriber  .msg__text { color: var(--role-sub); }
+.se-chat.role-msgtext .msg--role-fav         .msg__text { color: var(--role-fav); }
+
+.se-chat.role-namebg .msg__name { border-radius: 999px; padding: 0.04em 0.42em 0.08em; text-shadow: none; }
+.se-chat.role-namebg .msg--role-broadcaster .msg__name { background: color-mix(in srgb, var(--role-broadcaster) var(--role-tint, 18%), transparent); }
+.se-chat.role-namebg .msg--role-leadmod     .msg__name { background: color-mix(in srgb, var(--role-leadmod) var(--role-tint, 18%), transparent); }
+.se-chat.role-namebg .msg--role-moderator   .msg__name { background: color-mix(in srgb, var(--role-mod) var(--role-tint, 18%), transparent); }
+.se-chat.role-namebg .msg--role-artist      .msg__name { background: color-mix(in srgb, var(--role-artist) var(--role-tint, 18%), transparent); }
+.se-chat.role-namebg .msg--role-vip         .msg__name { background: color-mix(in srgb, var(--role-vip) var(--role-tint, 18%), transparent); }
+.se-chat.role-namebg .msg--role-subscriber  .msg__name { background: color-mix(in srgb, var(--role-sub) var(--role-tint, 18%), transparent); }
+.se-chat.role-namebg .msg--role-fav         .msg__name { background: color-mix(in srgb, var(--role-fav) var(--role-tint, 18%), transparent); }
+
+.se-chat.role-msgbg .msg--role-broadcaster .msg__bubble { background: color-mix(in srgb, var(--role-broadcaster) var(--role-tint, 18%), transparent); }
+.se-chat.role-msgbg .msg--role-leadmod     .msg__bubble { background: color-mix(in srgb, var(--role-leadmod) var(--role-tint, 18%), transparent); }
+.se-chat.role-msgbg .msg--role-moderator   .msg__bubble { background: color-mix(in srgb, var(--role-mod) var(--role-tint, 18%), transparent); }
+.se-chat.role-msgbg .msg--role-artist      .msg__bubble { background: color-mix(in srgb, var(--role-artist) var(--role-tint, 18%), transparent); }
+.se-chat.role-msgbg .msg--role-vip         .msg__bubble { background: color-mix(in srgb, var(--role-vip) var(--role-tint, 18%), transparent); }
+.se-chat.role-msgbg .msg--role-subscriber  .msg__bubble { background: color-mix(in srgb, var(--role-sub) var(--role-tint, 18%), transparent); }
+.se-chat.role-msgbg .msg--role-fav         .msg__bubble { background: color-mix(in srgb, var(--role-fav) var(--role-tint, 18%), transparent); }
+
 /* Platform dot */
 .msg__dot {
   position: absolute;

@@ -696,6 +696,8 @@
     set('--role-bubble-leadmod', f.colorLeadMod || '#84d2c2');
     set('--role-bubble-artist', f.colorArtist || '#f4b083');
     set('--role-bubble-fav', f.colorFav || '#f1d396');
+    // Per-role visual matrix tint strength (used by name/message backgrounds).
+    set('--role-tint', Math.max(4, Math.min(60, num(f.roleTintStrength, 18))) + '%');
 
     set('--anim-duration', num(f.animationSpeed, 460) + 'ms');
 
@@ -728,6 +730,9 @@
     toggle('no-badges', !yes(f.displayBadges));
     toggle('no-name', str(f.nickColor, 'user') === 'remove');
     toggle('role-highlight', yes(f.roleHighlight));
+    toggle('role-namebg', yes(f.roleNameBg));
+    toggle('role-msgbg', yes(f.roleMsgBg));
+    toggle('role-msgtext', yes(f.roleMsgText));
     toggle('fx-perspective', px !== 0 || py !== 0 || pz !== 0);
     toggle('fx-crayon', yes(f.crayonTexture));
     // Real SVG refraction — opt-in AND only where the renderer can composite
@@ -936,8 +941,14 @@
       .indexOf((name || '').toLowerCase()) !== -1;
   }
 
+  function roleVisualsOn() {
+    return yes(F.roleHighlight) || yes(F.roleNameBg) || yes(F.roleMsgBg) || yes(F.roleMsgText);
+  }
   function roleClass(u) {
-    if (!yes(F.roleHighlight)) return '';
+    // The msg--role-* hook is needed by role-highlight AND the per-role visual
+    // matrix (name/message backgrounds, message text color), so emit it whenever
+    // any of those is enabled.
+    if (!roleVisualsOn()) return '';
     for (const r of ROLE_PRIORITY) if (u.roles.indexOf(r) !== -1) return ' msg--role-' + r;
     return '';
   }

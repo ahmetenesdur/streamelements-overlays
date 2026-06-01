@@ -239,6 +239,22 @@ test('nativeColorPlacement:off disables platform color fallback', () => {
   assert.ok(!html.includes('#123456'));
 });
 
+test('per-role visual matrix: msg-bg toggle emits role class even with highlight off', () => {
+  const { root, list, fire, rootStyle } = loadWidget({ roleHighlight: 'no', roleMsgBg: 'yes', roleTintStrength: 25 });
+  fire('message', { data: tw({ displayName: 'Mod', tags: { 'room-id': '1', 'user-id': 'u', id: 'm', mod: '1', badges: 'moderator/1' }, badges: [{ type: 'moderator' }] }) });
+  assert.ok(root.classList.contains('role-msgbg'), 'root carries role-msgbg toggle class');
+  assert.ok(!root.classList.contains('role-highlight'), 'highlight stays off');
+  assert.match(list.children[0].className, /msg--role-moderator/, 'role hook present for the CSS to target');
+  assert.strictEqual(rootStyle.getPropertyValue('--role-tint'), '25%');
+});
+
+test('per-role visual matrix: all toggles off → no role hook, no matrix classes', () => {
+  const { root, list, fire } = loadWidget({ roleHighlight: 'no', roleMsgBg: 'no', roleNameBg: 'no', roleMsgText: 'no' });
+  fire('message', { data: tw({ displayName: 'Mod', tags: { 'room-id': '1', 'user-id': 'u', id: 'm', mod: '1', badges: 'moderator/1' }, badges: [{ type: 'moderator' }] }) });
+  assert.ok(!root.classList.contains('role-msgbg'));
+  assert.ok(!/msg--role-/.test(list.children[0].className), 'no role hook when nothing needs it');
+});
+
 test('role icon override wins over global iconStyle', () => {
   const { list, fire } = loadWidget({ showAvatar: 'yes', iconStyle: 'avatar', iconMod: '★' });
   fire('message', { data: tw({

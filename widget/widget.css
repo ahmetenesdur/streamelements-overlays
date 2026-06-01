@@ -187,8 +187,16 @@ html, body {
 .se-chat[data-layout="horizontal"][data-hdir="left"] .se-chat__list { justify-content: flex-start; }
 .se-chat[data-layout="horizontal"] .msg {
   flex: 0 0 auto;                   /* each message keeps its natural width */
-  max-width: var(--row-maxwidth);
+  max-width: none;                  /* a ticker row never wraps to two lines */
+  align-items: center;              /* name + text + icon on one baseline */
+  white-space: nowrap;              /* keep every message a single line */
 }
+/* the text itself must not wrap or break in ticker mode */
+.se-chat[data-layout="horizontal"] .msg,
+.se-chat[data-layout="horizontal"] .msg__text,
+.se-chat[data-layout="horizontal"] .msg__body,
+.se-chat[data-layout="horizontal"] .msg__head { white-space: nowrap; word-break: normal; }
+.se-chat[data-layout="horizontal"] .msg__bubble { align-items: center; }
 /* anchor the whole row to top or bottom of the canvas */
 .se-chat[data-layout="horizontal"][data-valign="bottom"] { align-items: flex-end; }
 .se-chat[data-layout="horizontal"][data-valign="top"] { align-items: flex-start; }

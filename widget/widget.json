@@ -1,7 +1,25 @@
 {
+  "quickSetupPreset": {
+    "type": "dropdown",
+    "label": "Quick start scene (one click — overrides the fields below)",
+    "value": "manual",
+    "options": {
+      "manual": "Manual / custom (use the fields below)",
+      "cleanEditorial": "Clean editorial — type on video",
+      "frostedStack": "Frosted glass — stacked chat",
+      "pulseGaming": "Pulse — accent bar, high energy",
+      "daylightPrint": "Daylight — light, serif names",
+      "terminalDev": "Terminal — dev monospace",
+      "multistreamMinimal": "Multistream minimal — dots",
+      "roleRich": "Role-rich bubbles",
+      "bottomTicker": "Bottom ticker — horizontal",
+      "fullscreenFloat": "Full-screen float"
+    },
+    "group": "Style"
+  },
   "stylePreset": {
     "type": "dropdown",
-    "label": "Style preset",
+    "label": "Style preset (the look only)",
     "value": "editorial",
     "options": {
       "editorial": "Editorial — type on video (default)",
@@ -10,21 +28,6 @@
       "pulse": "Pulse — accent-forward, high energy",
       "daylight": "Daylight — light editorial print",
       "terminal": "Terminal — dev monospace"
-    },
-    "group": "Style"
-  },
-  "quickSetupPreset": {
-    "type": "dropdown",
-    "label": "Quick setup preset (overrides detailed fields)",
-    "value": "manual",
-    "options": {
-      "manual": "Manual / custom (use fields below)",
-      "cleanEditorial": "Clean editorial (transparent text)",
-      "frostedStack": "Frosted stacked chat",
-      "multistreamMinimal": "Multistream minimal dots",
-      "bottomTicker": "Bottom ticker",
-      "fullscreenFloat": "Full screen float",
-      "roleRich": "Role-rich bubbles"
     },
     "group": "Style"
   },

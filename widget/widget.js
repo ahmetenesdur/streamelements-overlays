@@ -149,6 +149,23 @@
       roleMsgBg: 'yes',
       roleMsgText: 'no',
       nativeColorPlacement: 'background'
+    },
+    pulseGaming: {
+      stylePreset: 'pulse', layoutMode: 'vertical', density: 'comfortable',
+      showAvatar: 'yes', showArrow: 'no', displayBadges: 'yes',
+      showPlatformLogo: 'no', showPlatformDot: 'yes',
+      messageGrouping: 'stack', dynamicOpacity: 'yes', oldestMessageOpacity: 40,
+      roleHighlight: 'yes'
+    },
+    daylightPrint: {
+      stylePreset: 'daylight', layoutMode: 'vertical', density: 'comfortable',
+      showAvatar: 'no', showArrow: 'no', showPlatformLogo: 'yes', showPlatformDot: 'no',
+      messageGrouping: 'off', dynamicOpacity: 'no', roleHighlight: 'yes'
+    },
+    terminalDev: {
+      stylePreset: 'terminal', layoutMode: 'vertical', density: 'compact',
+      showAvatar: 'no', showArrow: 'no', showPlatformLogo: 'no', showPlatformDot: 'yes',
+      messageGrouping: 'off', dynamicOpacity: 'no', roleHighlight: 'no'
     }
   };
   // Per-preset COLOR + FONT identity. applyTheme resolves each token as

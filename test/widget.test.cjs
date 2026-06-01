@@ -95,6 +95,23 @@ test('quickSetupPreset:bottomTicker applies compact horizontal ticker settings',
   assert.ok(!root.classList.contains('show-logo'));
 });
 
+test('quickSetupPreset: new preset scenes select their style + layout', () => {
+  const pulse = loadWidget({ quickSetupPreset: 'pulseGaming', stylePreset: 'editorial' });
+  assert.strictEqual(pulse.api.getFields().stylePreset, 'pulse');
+  assert.strictEqual(pulse.root.dataset.preset, 'pulse');
+  assert.ok(pulse.root.classList.contains('show-dot'), 'pulse gaming shows platform dots');
+
+  const day = loadWidget({ quickSetupPreset: 'daylightPrint', stylePreset: 'editorial' });
+  assert.strictEqual(day.api.getFields().stylePreset, 'daylight');
+  assert.strictEqual(day.root.dataset.preset, 'daylight');
+  assert.ok(day.root.classList.contains('role-highlight'), 'daylight print highlights roles');
+
+  const term = loadWidget({ quickSetupPreset: 'terminalDev', stylePreset: 'editorial', density: 'comfortable' });
+  assert.strictEqual(term.api.getFields().stylePreset, 'terminal');
+  assert.strictEqual(term.root.dataset.preset, 'terminal');
+  assert.strictEqual(term.root.dataset.density, 'compact', 'terminal dev is compact');
+});
+
 // Helper: a Twitch raw `message.data` with sensible defaults.
 function tw(over) {
   return Object.assign({

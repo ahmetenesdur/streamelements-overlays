@@ -160,9 +160,49 @@
         sub: ['subscriber-latest', { name: 'LoyalFan', amount: 6, tier: '1000', message: 'love the content!' }],
         tip: ['tip-latest', { name: 'Generous', amount: 25, message: 'keep it up!' }],
         cheer: ['cheer-latest', { name: 'BitLord', amount: 500 }],
-        raid: ['raid-latest', { name: 'BigStreamer', amount: 142 }]
+        raid: ['raid-latest', { name: 'BigStreamer', amount: 142 }],
+        superchat: ['tip-latest', { name: 'YTViewer', amount: '$20', provider: 'youtube', type: 'superchat', message: 'great stream!' }],
+        member: ['subscriber-latest', { name: 'YTMember', provider: 'youtube', type: 'member', amount: 1 }]
       }[type];
       if (e) dispatch(e[0], e[1]);
+    },
+
+    // ---- Phase 8 demos --------------------------------------------
+    // Two consecutive messages from the SAME sender → second-message stack.
+    grouped() {
+      MockSE.set('messageGrouping', 'stack');
+      const mk = (text) => {
+        const e = twitchRaw(text, { name: 'Nani', color: '#6be7ff', roles: ['subscriber'] });
+        e.data.displayName = 'Nani'; e.data.userId = 'nani';
+        e.data.tags['user-id'] = 'nani'; e.data.tags.id = 'grp-' + uid();
+        return e;
+      };
+      dispatch('message', mk('first grouped message'));
+      dispatch('message', mk('second grouped message — same sender, no new header'));
+    },
+    // A Twitch Shared Chat (Stream Together) message from a mapped source room.
+    shared() {
+      MockSE.set('sharedChatIndicator', 'yes');
+      MockSE.set('sharedChatLabels', '200:Ironmouse');
+      const event = twitchRaw('message from a shared chat');
+      event.data.displayName = 'GuestViewer'; event.data.userId = 'guest';
+      event.data.tags['room-id'] = '100';
+      event.data.tags['source-room-id'] = '200';
+      event.data.tags['user-id'] = 'guest';
+      event.data.tags.id = 'shared-preview-' + uid();
+      dispatch('message', event);
+    },
+    // Four messages so older visible rows fade by age.
+    ageFade() {
+      MockSE.set('dynamicOpacity', 'yes');
+      MockSE.set('oldestMessageOpacity', 35);
+      ['one', 'two', 'three', 'four'].forEach((text, index) => {
+        const event = twitchRaw('age fade message ' + text);
+        event.data.displayName = 'Viewer' + index; event.data.userId = 'age' + index;
+        event.data.tags['user-id'] = 'age' + index;
+        event.data.tags.id = 'age-preview-' + index + '-' + uid();
+        dispatch('message', event);
+      });
     },
 
     deleteLast() {

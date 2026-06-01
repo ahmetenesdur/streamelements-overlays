@@ -181,17 +181,23 @@
       dispatch('message', mk('first grouped message'));
       dispatch('message', mk('second grouped message — same sender, no new header'));
     },
-    // A Twitch Shared Chat (Stream Together) message from a mapped source room.
+    // Twitch Shared Chat (Stream Together): two guest channels → origin labels
+    // + the participants panel (host auto-named from the channel, guests mapped).
     shared() {
       MockSE.set('sharedChatIndicator', 'yes');
-      MockSE.set('sharedChatLabels', '200:Ironmouse');
-      const event = twitchRaw('message from a shared chat');
-      event.data.displayName = 'GuestViewer'; event.data.userId = 'guest';
-      event.data.tags['room-id'] = '100';
-      event.data.tags['source-room-id'] = '200';
-      event.data.tags['user-id'] = 'guest';
-      event.data.tags.id = 'shared-preview-' + uid();
-      dispatch('message', event);
+      MockSE.set('sharedChatPanel', 'yes');
+      MockSE.set('sharedChatLabels', '200:Ironmouse,300:Lirik');
+      const mk = (name, room, text) => {
+        const e = twitchRaw(text);
+        e.data.displayName = name; e.data.userId = name.toLowerCase();
+        e.data.tags['room-id'] = '100';
+        e.data.tags['source-room-id'] = room;
+        e.data.tags['user-id'] = name.toLowerCase();
+        e.data.tags.id = 'shared-' + uid();
+        return e;
+      };
+      dispatch('message', mk('GuestViewer', '200', "I'm chatting from Ironmouse's chat!"));
+      dispatch('message', mk('LirikFan', '300', 'Hi Lirik, love this collab stream!'));
     },
     // Fullscreen float: scatter several messages with overlap avoidance.
     floatScene() {

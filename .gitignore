@@ -8,6 +8,7 @@ relay/.env
 .cache/
 .agents/
 .claude/
+docs/superpowers/
 
 # Local competitor reference material
 competitor-analysis/

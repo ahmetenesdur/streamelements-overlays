@@ -37,29 +37,31 @@ Custom emote providers are also in **Multistream** — **7TV emotes**, **BTTV em
 
 ## 4. Configure (Fields panel) — simple first
 Start at the top **Style** group:
-- **Quick setup preset (overrides detailed fields)**: choose a ready setup first, or leave
-  `Manual / custom` if you want every detailed field below to stay fully in control.
-  Quick setup is a runtime preset layer, not a StreamElements button, so it is stable in the
-  SE editor and in OBS.
-  - `Clean editorial`: transparent text-on-video default.
-  - `Frosted stacked chat`: bubble style + avatar/arrow + second-message grouping + age fade.
-  - `Multistream minimal dots`: compact text with platform dots instead of logos.
-  - `Bottom ticker`: compact horizontal ticker.
-  - `Full screen float`: fullscreen scatter layout with overlap avoidance + age fade.
-  - `Role-rich bubbles`: role colors, avatars, badges, and role-tinted chips/washes.
-  Switch back to `Manual / custom` before fine-tuning individual detailed fields.
-- **Style preset**: `Editorial (text on video, default)` · `Frosted (clean glass panel)` · `Slate (solid chip)`.
-  Pick one and you have a polished look instantly.
-- **Accent color (leave empty = preset)**: leave empty to use the preset's accent, or set one to recolor
-  roles/alerts/keywords/dots at once.
+- **Quick start scene (one click — overrides the fields below)**: pick a ready-made look first,
+  or leave `Manual / custom` to keep every detailed field fully in control. It's a runtime layer
+  (not a StreamElements button), so it's stable in the SE editor and OBS.
+  - `Clean editorial` — transparent type-on-video.
+  - `Frosted glass` — glass bubbles + avatars + second-message grouping + age fade.
+  - `Pulse` — accent-bar, high-energy bubbles with platform dots.
+  - `Daylight` — light editorial-print with serif usernames.
+  - `Terminal` — compact dev monospace with dots.
+  - `Multistream minimal` · `Role-rich bubbles` · `Bottom ticker` (horizontal) · `Full-screen float`.
+  Switch back to `Manual / custom` before fine-tuning individual fields.
+- **Style preset (the look only)** — the surface identity, independent of layout/behaviour. Each
+  ships its own accent + font + one signature detail:
+  `Editorial` (type on video) · `Frosted` (refined liquid glass) · `Slate` (solid onyx) ·
+  `Pulse` (accent-bar) · `Daylight` (light editorial-print, serif names) · `Terminal` (dev monospace).
+- **Accent color (leave empty = preset)** — and most colour/font fields are **empty = preset**:
+  leave empty to inherit the preset's value, or set one and **your value beats the preset** on every preset.
 - **Overlay background**: defaults to fully transparent (`rgba(0,0,0,0)`). Set only if you want a tint
   behind the whole chat area.
 
 Then tweak only what you want. Groups: **Style, Layout, Typography,
 Username & Colors, Badges & Platform, Roles & Highlights, Messages, Animations,
 Alerts, Sound, Effects, Advanced glass, Multistream**.
-- **Advanced glass** overrides the active preset's surface/blur values only when
-  **Override preset surface values = Yes (use values below)**.
+- **Advanced glass** = craft your own surface (fill / blur / saturation / radius / shadow / top
+  highlight / **accent leading edge**); set **Override preset surface values = Yes** to use it.
+  It now beats the surface of *any* preset, not just editorial.
 - **Effects → Advanced glass refraction (Chromium/OBS only, GPU-heavy — keep Max Messages low)**:
   real SVG liquid-glass refraction. Works in Chromium / OBS; on unsupported renderers it
   auto-falls back to plain glassmorphism. GPU-heavy — keep **Max messages on screen** modest if you enable it.

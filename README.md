@@ -3,10 +3,10 @@
 ![CI](https://github.com/ahmetenesdur/streamelements-overlays/actions/workflows/ci.yml/badge.svg)
 
 A fully customizable, **professional multistream chat overlay** for StreamElements —
-shows **Twitch + YouTube + Kick** chat in one unified feed with a clean, modern
-"broadcast editorial" look — soft pastel palette, minimal shadows, no boxes or
-gradients — plus inline alerts, custom emotes, pronouns, roles, sounds, effects,
-and GitHub auto-update.
+shows **Twitch + YouTube + Kick** chat in one unified feed. Ships with **6 premium,
+genuinely distinct style presets** (no generic purple-gradient look) plus a full override
+layer, so you can pick a preset or craft your own — with inline alerts, custom emotes,
+pronouns, roles, sounds, effects, and GitHub auto-update.
 
 ## Features
 
@@ -15,19 +15,22 @@ bundled Railway relay). Per-platform show/hide: use one platform or combine any 
 The Kick relay supports an optional shared access token for public deployments.
 
 **Look & layout**
-- **Quick setup presets** for common setups (editorial, frosted stack, multistream dots,
-  ticker, fullscreen float, role-rich) plus Manual mode for full custom control.
-- 3 style presets: **Editorial** (text on video), **Frosted** (clean glass panel),
-  **Slate** (solid chip) — plus full token overrides.
+- **6 premium style presets**, each a committed identity with its own accent + font +
+  one signature detail: **Editorial** (type on video) · **Frosted** (refined liquid glass,
+  iridescent sheen) · **Slate** (solid onyx) · **Pulse** (accent-bar, high energy) ·
+  **Daylight** (light editorial-print, serif names) · **Terminal** (dev monospace, prompt caret).
+- **Quick-start scenes** apply a preset + layout + behaviour in one click; or go Manual and
+  **build your own — every surface / colour / font is overridable and beats the preset** (empty = preset).
 - 3 layouts: **Vertical** (column), **Horizontal** (side-by-side ticker — newest enters
   from the right/left, older clipped, never piles up), **Fullscreen** (wide column).
-- **Soft pastel palette** (harmonious role tints + champagne accent) and **minimal shadows**
-  by default — depth comes from a hairline top sheen, not heavy drop shadows.
+- Premium by construction: **no AI-slop gradients, no heavy shadows** — each preset earns its
+  depth from one signature detail (a sheen, an accent edge, a serif name), never decoration.
 - Left/right align, top/bottom origin, comfortable/compact density, max messages,
   hide-after, message width/gap.
 - **Second-message grouping** — legacy inline merge or a stacked follow-up that drops
   the repeated header, plus **dynamic opacity** that fades older visible rows by age.
-- Distinctive default font (Hanken Grotesk) or any Google font; full color/size control.
+- Distinctive per-preset fonts (Hanken Grotesk · Bricolage Grotesque · Instrument Serif ·
+  Space Mono) or set any Google font; full colour / size control.
 - Self-contained: **no external CSS/JS** (no animate.css, no md5) — only the chosen webfont.
 
 **Identity & roles**
@@ -97,19 +100,21 @@ docs/      INSTALL.md
 npm run preview     # http://localhost:5173/preview/index.html  (widen the window!)
 npm run validate    # validate widget.json + required files
 npm run build       # stamp widgetVersion from package.json (for auto-update)
-npm test            # validate + relay tests + 82 widget unit tests
+npm test            # validate + relay tests + 87 widget unit tests
 ```
 
-The preview page sends Twitch/YouTube/Kick messages, fires alerts, tests 7TV emotes
-and keywords, live-toggles every Fields setting (136 fields in 13 groups), and
-previews against flat test scenes (light / mid-gray / deep-teal / transparency checker).
-**Feature demos** buttons exercise message grouping, shared chat + participants panel,
-age fade, fullscreen float, and per-role colors — no StreamElements account needed.
+The preview is a **studio dashboard**: a top bar (live preset switcher · scene · device frame ·
+motion freeze), a device-framed stage (Desktop / OBS 16:9 / Mobile), an interactive **preset
+gallery**, and a **searchable** inspector that live-toggles every Fields setting (138 fields in
+13 groups). It sends Twitch/YouTube/Kick messages, fires alerts, and previews against flat test
+scenes (light / mid-gray / deep-teal / transparency checker). **Feature demos** exercise message
+grouping, shared chat + participants panel, age fade, fullscreen float, and per-role colors —
+no StreamElements account needed.
 
 ## Deploy
 
 - **Widget**: paste `widget.{html,css,js,json}` into the matching tabs of a SE Custom
-  Widget. Configure from the **Fields** panel (13 grouped sections; start at *Style → Quick setup preset*).
+  Widget. Configure from the **Fields** panel (13 grouped sections; start at *Style → Quick start scene*, then *Style preset*).
   Full steps in [docs/INSTALL.md](docs/INSTALL.md).
 - **Kick relay**: deploy `relay/` to Railway, then set **Relay WebSocket URL (Railway, wss://...)** +
   **Kick channel (slug, or numeric chatroom id if slug fails)** in the Multistream group.
@@ -125,12 +130,15 @@ validates, tests, and attaches the four widget files to a GitHub Release.
 
 ## Status
 
-**Current: v1.2.0** · 136 fields · 13 setting groups · 82 widget tests + 11 relay assertions · CI on push/PR (Node 18/20/22)
+**Current: v1.3.0** · 138 fields · 13 setting groups · 87 widget tests + 11 relay assertions · CI on push/PR (Node 18/20/22)
 
 Shipped and verified in the local preview:
 
+- ✅ **Premium presets** — 6 distinct identities (Editorial · Frosted · Slate · Pulse · Daylight · Terminal), each with its own accent + font + signature; verified legible on every scene under load
+- ✅ **Build your own** — every surface / colour / font overridable and beats the active preset (empty = preset); quick-start scenes for one-click looks
+- ✅ **Studio dashboard** — the preview is a real control room: top bar, interactive preset gallery, device frames, searchable inspector
 - ✅ **Multistream** — Twitch + YouTube (native SE) + Kick (Railway relay); per-platform show/hide
-- ✅ **Layout & style** — vertical / horizontal ticker / fullscreen; Editorial · Frosted · Slate presets; fullscreen float with overlap avoidance
+- ✅ **Layout** — vertical / horizontal ticker / fullscreen; fullscreen float with overlap avoidance
 - ✅ **Identity** — roles, pronouns, 53-glyph icon library, per-role icon overrides, 7TV/BTTV/FFZ emotes (incl. zero-width overlays)
 - ✅ **Messages** — second-message stack grouping, dynamic age opacity, shared-chat origin labels + participants panel
 - ✅ **Roles & alerts** — per-role visual matrix, YouTube Super Chat/member alerts, channel-point rewards, inline alert suite

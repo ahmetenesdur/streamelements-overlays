@@ -4,14 +4,14 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#0a0b0e" />
-  <title>Multistream Chat — Studio</title>
+  <title>Multistream Chat — Preview</title>
 
   <!-- The actual widget stylesheet (single source of truth) -->
   <link rel="stylesheet" href="../widget/widget.css" />
 
   <style>
     /* ================================================================
-       PREVIEW STUDIO — chrome only (NOT part of the widget).
+       PREVIEW — chrome only (NOT part of the widget).
        Every token is namespaced --pv-* so it can NEVER bleed into the
        widget's own custom properties. The widget renders with its real
        tokens; this is just the control room around it.
@@ -65,18 +65,10 @@
       background: linear-gradient(180deg, #14161d, var(--pv-surface));
       border-bottom: 1px solid var(--pv-line);
     }
-    .tb-brand { display: flex; align-items: center; gap: 9px; font-weight: 650; letter-spacing: -0.01em; white-space: nowrap; }
-    .tb-logo {
-      width: 22px; height: 22px; border-radius: 7px; flex: none;
-      background:
-        radial-gradient(circle at 30% 30%, #aeb8ff, var(--pv-accent) 60%, #5a67d8);
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 2px 8px -3px var(--pv-accent);
-    }
-    .tb-badge {
-      font: 600 9px/1 var(--pv-mono); letter-spacing: 0.14em; text-transform: uppercase;
-      color: var(--pv-accent); background: var(--pv-accent-weak);
-      padding: 4px 6px 3px; border-radius: 5px;
-    }
+    /* Honest, unbranded header — no fake logo / product name (there isn't one yet);
+       just what this is: a preview of the Multistream Chat overlay. */
+    .tb-brand { display: flex; align-items: baseline; gap: 8px; font-weight: 600; letter-spacing: -0.01em; white-space: nowrap; color: var(--pv-ink); }
+    .tb-tag { font: 600 9.5px/1 var(--pv-mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--pv-faint); }
     .tb-spring { flex: 1 1 auto; }
 
     .tb-controls { display: flex; align-items: center; gap: 8px; }
@@ -231,7 +223,7 @@
   <div id="app">
     <!-- ===== TOP BAR ===== -->
     <header id="topbar">
-      <div class="tb-brand"><span class="tb-logo" aria-hidden="true"></span> Multistream Chat <span class="tb-badge">Studio</span></div>
+      <div class="tb-brand">Multistream&nbsp;Chat <span class="tb-tag">preview</span></div>
       <div class="tb-spring"></div>
       <div class="tb-controls">
         <label class="tb-field"><span>Scene</span>

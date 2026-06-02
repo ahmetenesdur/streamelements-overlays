@@ -103,18 +103,8 @@
           currency: { code: 'USD', name: 'US Dollar', symbol: '$' }
         }
       }));
-      syncPresetUI();
     },
     set(key, val) { this.fieldData[key] = val; this.load(); },
-
-    // Pick a style preset from the gallery / top-bar switcher. It wins over any
-    // active quick-start scene, so the gallery is the source of truth for the look.
-    setPreset(p) {
-      this.fieldData.stylePreset = p;
-      this.fieldData.quickSetupPreset = 'manual';
-      this.load();
-      syncControlPanel();
-    },
 
     // Restore every field to its widget.json default (+ optional overrides) and
     // clear the chat — so each Feature demo is self-contained no matter what was
@@ -369,7 +359,6 @@
     Object.keys(json).forEach(k => {
       const f = json[k];
       if (f.type === 'hidden') return;
-      if (k === 'stylePreset') return;   // the preset gallery is its dedicated control — avoid a duplicate
       const g = f.group || 'Other';
       (groups[g] = groups[g] || []).push([k, f]);
     });
@@ -410,73 +399,6 @@
       stage.className = '';
       if (scene.value) stage.classList.add(scene.value);
     });
-  }
-
-  // ---- preset gallery + top-bar switcher ------------------------
-  // Representative card visuals (not the exact tokens — a quick read of each look).
-  const PRESET_META = [
-    { key: 'editorial', name: 'Editorial', desc: 'Type on video', accent: '#e3b34e', bg: '#15161b', chip: 'rgba(255,255,255,0.82)' },
-    { key: 'frosted',   name: 'Frosted',   desc: 'Liquid glass',  accent: '#6fd3e6', bg: '#2b3140', chip: 'rgba(255,255,255,0.8)' },
-    { key: 'slate',     name: 'Slate',     desc: 'Solid onyx',    accent: '#f2887e', bg: '#13151b', chip: 'rgba(255,255,255,0.82)' },
-    { key: 'pulse',     name: 'Pulse',     desc: 'High energy',   accent: '#977dff', bg: '#141621', chip: 'rgba(255,255,255,0.82)' },
-    { key: 'daylight',  name: 'Daylight',  desc: 'Light print',   accent: '#b8384b', bg: '#f4f1ea', chip: 'rgba(28,26,24,0.82)' },
-    { key: 'terminal',  name: 'Terminal',  desc: 'Dev mono',      accent: '#6ee7a8', bg: '#0d0f0d', chip: 'rgba(110,231,168,0.72)' }
-  ];
-
-  // The single preset picker: a labelled radiogroup of look cards.
-  function buildPresetGallery() {
-    const host = document.getElementById('gallery');
-    if (!host) return;
-    PRESET_META.forEach(p => {
-      const card = el('button', {
-        type: 'button', class: 'gcard', role: 'radio', 'data-preset': p.key,
-        'aria-checked': 'false', tabindex: '-1', 'aria-label': p.name + ' — ' + p.desc
-      });
-      card.style.setProperty('--g-bg', p.bg);
-      card.style.setProperty('--g-accent', p.accent);
-      card.style.setProperty('--g-chip', p.chip);
-      card.innerHTML =
-        '<span class="gcard-vis">' +
-          '<span class="gcard-row"><span class="gcard-chip w1"></span><span class="gcard-chip w2"></span></span>' +
-          '<span class="gcard-row"><span class="gcard-chip w1"></span><span class="gcard-chip w3"></span></span>' +
-        '</span>' +
-        '<span class="gcard-meta"><span class="gcard-name">' + p.name + '</span><span class="gcard-desc">' + p.desc + '</span></span>';
-      card.addEventListener('click', () => MockSE.setPreset(p.key));
-      host.appendChild(card);
-    });
-    // Radiogroup keyboard nav: arrows move + select, Home/End jump to ends.
-    host.addEventListener('keydown', e => {
-      const cards = Array.from(host.querySelectorAll('.gcard'));
-      const i = cards.indexOf(document.activeElement);
-      if (i < 0) return;
-      let j = -1;
-      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') j = (i + 1) % cards.length;
-      else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') j = (i - 1 + cards.length) % cards.length;
-      else if (e.key === 'Home') j = 0;
-      else if (e.key === 'End') j = cards.length - 1;
-      if (j < 0) return;
-      e.preventDefault();
-      cards[j].focus();
-      MockSE.setPreset(cards[j].dataset.preset);
-    });
-  }
-
-  // Reflect the resolved preset on the gallery (called after every load).
-  // Roving tabindex: the checked card is the single tab stop into the radiogroup.
-  function syncPresetUI() {
-    const chat = document.getElementById('seChat');
-    const p = chat ? chat.dataset.preset : '';
-    let active = null;
-    document.querySelectorAll('#gallery .gcard').forEach(b => {
-      const on = b.dataset.preset === p;
-      b.setAttribute('aria-checked', String(on));
-      b.tabIndex = on ? 0 : -1;
-      if (on) active = b;
-    });
-    const first = document.querySelector('#gallery .gcard');
-    if (!active && first) first.tabIndex = 0;
-    // keep the selected card in view (it may be scrolled off in the strip)
-    if (active && active.scrollIntoView) active.scrollIntoView({ inline: 'nearest', block: 'nearest' });
   }
 
   // ---- inspector search: filter settings by label ---------------
@@ -546,7 +468,6 @@
       MockSE.defaults = JSON.parse(JSON.stringify(fd));   // pristine baseline for resetFields()
       wire();
       buildFields(json);
-      buildPresetGallery();
       wireSearch();
       wireDevice();
       wireMotion();

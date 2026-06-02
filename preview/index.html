@@ -133,41 +133,6 @@
       color: rgba(255, 255, 255, 0.34); pointer-events: none;
     }
 
-    /* ---- PRESET PICKER (the single control: a labelled radiogroup of looks) --- */
-    #gallerybar { flex: 0 0 auto; display: flex; align-items: center; gap: 14px; padding: 0 22px 18px; }
-    .gallerybar-label {
-      flex: none; font: 600 9.5px/1 var(--pv-mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--pv-faint);
-    }
-    #gallery {
-      flex: 1 1 auto; display: flex; gap: 10px; min-width: 0;
-      overflow-x: auto; scrollbar-width: thin;
-      /* Padding so the active card's outset accent ring is never clipped by the
-         scroll container (overflow makes both axes clip). */
-      padding: 7px 8px; scroll-padding-inline: 8px;
-    }
-    .gcard {
-      appearance: none; cursor: pointer; flex: 0 0 auto; width: 132px; text-align: left;
-      padding: 0; border: 0; border-radius: var(--pv-r-lg); overflow: hidden;
-      background: var(--pv-surface); box-shadow: 0 0 0 1px var(--pv-line);
-      touch-action: manipulation;
-      transition-property: transform, box-shadow; transition-duration: 180ms; transition-timing-function: var(--pv-ease);
-    }
-    .gcard:hover { transform: translateY(-2px); box-shadow: 0 0 0 1px var(--pv-line-2), 0 14px 26px -16px rgba(0, 0, 0, 0.7); }
-    .gcard:active { transform: translateY(0) scale(0.98); }
-    .gcard[aria-checked="true"] { box-shadow: 0 0 0 1px var(--pv-accent), 0 0 0 4px var(--pv-accent-weak); }
-    .gcard-vis {
-      height: 56px; padding: 9px 10px; display: flex; flex-direction: column; justify-content: center; gap: 5px;
-      background: var(--g-bg, #15161b);
-    }
-    .gcard-row { display: flex; align-items: center; gap: 5px; }
-    .gcard-chip { height: 9px; border-radius: 5px; background: var(--g-chip, rgba(255, 255, 255, 0.16)); }
-    .gcard-chip.w1 { width: 26%; background: var(--g-accent, var(--pv-accent)); }
-    .gcard-chip.w2 { width: 52%; }
-    .gcard-chip.w3 { width: 38%; }
-    .gcard-meta { display: block; padding: 8px 11px 10px; border-top: 1px solid var(--pv-line); }
-    .gcard-name { display: block; font-size: 12px; font-weight: 600; letter-spacing: -0.01em; }
-    .gcard-desc { display: block; font-size: 10.5px; color: var(--pv-mut); margin-top: 2px; }
-
     /* ---- INSPECTOR ----------------------------------------------- */
     #panel {
       flex: 0 0 var(--pv-rail); width: var(--pv-rail);
@@ -299,11 +264,6 @@
               <div class="se-chat__list" id="chatList" role="log" aria-live="polite" aria-relevant="additions"></div>
             </div>
           </div>
-        </div>
-        <!-- the single preset picker: a labeled radiogroup of looks (built in JS) -->
-        <div id="gallerybar">
-          <span class="gallerybar-label" id="galleryLabel">Style preset</span>
-          <div id="gallery" role="radiogroup" aria-labelledby="galleryLabel"></div>
         </div>
       </section>
 

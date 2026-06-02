@@ -1,10 +1,10 @@
 /* ================================================================
    StreamElements · Multistream Chat Overlay — styles
    ----------------------------------------------------------------
-   DESIGN: "Broadcast Editorial".
+   DESIGN: "Broadcast Presets".
    - Typography-led. NO bordered boxes, NO decorative gradients,
-     NO glow rings. Legibility comes from a refined text halo and
-     (optionally) one calm translucent surface — never a frame.
+     NO glow rings, NO backdrop blur. Legibility comes from type,
+     contrast, and one intentional surface when a preset needs it.
    - One restrained accent. Color is rare and meaningful.
    - PRESET (data-preset on .se-chat) supplies a token bundle;
      widget.js applyTheme() writes overrides on top.
@@ -13,7 +13,7 @@
    ================================================================ */
 
 /* ================================================================
-   TOKENS — defaults = "Editorial" (no surface, pure type on video)
+   TOKENS — defaults = "Caption" (no surface, pure type on video)
    ================================================================ */
 :root {
   /* Typography — distinctive grotesque, not Inter/Roboto/system.
@@ -34,28 +34,21 @@
 
   /* Layout footprint */
   --row-gap: 9px;
-  --row-padding: 0px 0px;     /* editorial = no inner box padding */
+  --row-padding: 0px 0px;     /* caption = no inner box padding */
   --row-maxwidth: 460px;      /* horizontal (corner) mode */
   --row-width: 100%;          /* fullscreen mode width factor */
 
-  /* ---- SURFACE (calm, borderless) ----
-     Editorial default = fully transparent (no surface at all). Other presets
-     opt into a translucent panel. There is never a border line; the only edge
-     cue is a 1px inner top highlight. */
+  /* Surface. Caption default = transparent; other presets use solid or flat fills. */
   --surface: rgba(0, 0, 0, 0);     /* fill behind a message */
-  --surface-blur: 0px;
-  --surface-saturate: 1;
   --surface-radius: 14px;
   --surface-pad: 0px 0px;          /* inner padding when a surface exists */
-  /* Composite depth — each preset composes its own from three single-purpose,
-     transparent-by-default layers (editorial = none, pure type on video).
-     One signature detail per preset, never layered shadows or a gradient fill. */
+  /* Composite depth: transparent by default; preset-owned only. */
   --shadow: 0 0 0 0 transparent;        /* drop / contact shadow */
-  --sheen: inset 0 0 0 0 transparent;   /* inset top hairline = the only edge cue */
-  --edge: inset 0 0 0 0 transparent;    /* opt-in only (glassEdge override) — presets use no leading accent bar */
+  --sheen: inset 0 0 0 0 transparent;   /* optional inset top hairline */
+  --edge: inset 0 0 0 0 transparent;    /* optional accent cue */
 
-  /* Accent — editorial's luxe gold (each preset sets its own via applyTheme). Drives alerts + keywords. */
-  --accent: #e3b34e;
+  /* Accent — each preset sets its own via applyTheme. Drives alerts + keywords. */
+  --accent: #e8b85f;
 
   /* Overlay backdrop (transparent for OBS) */
   --overlay-bg: rgba(0, 0, 0, 0);
@@ -69,12 +62,13 @@
   --dot-youtube: #ef7479;
   --dot-kick: #6fdd54;
 
-  /* Roles — soft pastel username tints (no boxes). Harmonious lightness so no
-     single role shouts; distinct hues keep them readable apart. */
-  --role-broadcaster: #ff8a9b;
-  --role-leadmod: #5fd0c4;
-  --role-mod: #6fd58f;
-  --role-artist: #ffb273;
+  /* Roles — one coherent vivid palette shared by every dark preset (daylight
+     swaps in its own darker print palette via applyTheme). Distinct hues, even
+     lightness so no single role shouts; readable apart on video. */
+  --role-broadcaster: #ff7a8a;
+  --role-leadmod: #5fe0cf;
+  --role-mod: #74e08a;
+  --role-artist: #ffb066;
   --role-vip: #d99bf0;
   --role-sub: #8fb4ff;
   --role-fav: #f2cf6b;
@@ -89,59 +83,61 @@
    PRESETS
    ================================================================ */
 
-/* FROSTED — refined liquid glass. Blur + calm dark tint + ONE iridescent
-   hairline top-sheen (the accent tints the sheen, never a fill gradient).
-   Pairs with the opt-in SVG refraction (fx-advanced-glass) on Chromium/OBS. */
-.se-chat[data-preset="frosted"] {
-  --surface: rgba(12, 14, 18, 0.30);
-  --surface-blur: 26px;
-  --surface-saturate: 1.12;
-  --surface-radius: 16px;
-  --surface-pad: 9px 14px;
-  --row-padding: 9px 14px;
-  --sheen: inset 0 1px 0 color-mix(in srgb, var(--accent) 38%, rgba(255, 255, 255, 0.16));
-  --text-shadow: 0 1px 2px rgba(0, 0, 0, 0.22);
+/* CAPTION — pure type on video. Use when the stream already has strong art. */
+.se-chat[data-preset="caption"] {
+  --surface: rgba(0, 0, 0, 0);
+  --surface-pad: 0px 0px;
+  --row-padding: 0px 0px;
+  --shadow: 0 0 0 0 transparent;
+  --sheen: inset 0 0 0 0 transparent;
+  --text-shadow: 0 1px 3px rgba(0, 0, 0, 0.34);
 }
 
-/* SLATE — solid onyx chip for bright / busy scenes. Near-opaque deep tint,
-   a micro inner top-light, an ultra-tight contact shadow, and a whisper
-   accent hairline on the leading edge. Always readable, broadcast-grade. */
-.se-chat[data-preset="slate"] {
-  --surface: rgba(17, 19, 25, 0.9);
-  --surface-blur: 0px;
-  --surface-radius: 13px;
+/* ONYX (key: noir) — flat, neutral near-black chip. The universal workhorse:
+   readable on any scene. Signature: one hairline top sheen, nothing else. */
+.se-chat[data-preset="noir"] {
+  --surface: rgba(15, 16, 20, 0.9);
+  --surface-radius: 12px;
   --surface-pad: 9px 14px;
   --row-padding: 9px 14px;
-  --shadow: 0 2px 10px -7px rgba(0, 0, 0, 0.55);
-  --sheen: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  --shadow: 0 2px 12px -8px rgba(0, 0, 0, 0.7);
+  --sheen: inset 0 1px 0 rgba(255, 255, 255, 0.07);
   --text-shadow: none;
 }
 
-/* PULSE — high-energy, accent-forward chip for gaming / hype streams. The
-   signature is a 2px accent leading bar + a heavier accent-tinted name.
-   Controlled, never a glow-soup. */
-.se-chat[data-preset="pulse"] {
-  /* Accent-forward WITHOUT a leading bar: a whisper of the accent tints the whole
-     glass + the top sheen + a heavier name, so the energy reads as a hue, not a stripe. */
-  --surface: color-mix(in srgb, var(--accent) 10%, rgba(14, 15, 22, 0.82));
-  --surface-blur: 12px;
-  --surface-saturate: 1.18;
-  --surface-radius: 12px;
-  --surface-pad: 8px 13px;
-  --row-padding: 8px 13px;
+/* CAPSULE — friendly multistream look: big radius, soft neutral slate (no longer
+   a saturated purple that fights the role colours), built for avatars + dots. */
+.se-chat[data-preset="capsule"] {
+  --surface: rgba(33, 37, 52, 0.85);
+  --surface-radius: 20px;
+  --surface-pad: 10px 16px;
+  --row-padding: 10px 16px;
   --name-weight: 800;
-  --shadow: 0 2px 12px -8px rgba(0, 0, 0, 0.6);
-  --sheen: inset 0 1px 0 color-mix(in srgb, var(--accent) 24%, rgba(255, 255, 255, 0.1));
-  --text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow: 0 5px 18px -12px rgba(0, 0, 0, 0.7);
+  --sheen: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  --text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
 }
 
-/* DAYLIGHT — a refined LIGHT, editorial-print identity (most overlays are
+/* ROLECARD — elevated, role-forward card. Lighter than Onyx and wrapped in a
+   full hairline ACCENT RING (its signature — not a left bar) so it reads clearly
+   distinct from the flat Onyx chip even before any role-matrix toggle is on. */
+.se-chat[data-preset="rolecard"] {
+  --surface: rgba(28, 32, 43, 0.92);
+  --surface-radius: 14px;
+  --surface-pad: 10px 14px;
+  --row-padding: 10px 14px;
+  --name-weight: 800;
+  --shadow: 0 3px 14px -9px rgba(0, 0, 0, 0.65);
+  --sheen: inset 0 1px 0 rgba(255, 255, 255, 0.09);
+  --edge: inset 0 0 0 1px color-mix(in srgb, var(--accent) 38%, transparent);
+  --text-shadow: none;
+}
+
+/* DAYLIGHT — a refined LIGHT, print-led identity (most overlays are
    dark; this is the distinctive one). Warm off-white surface, ink text
    (set by applyTheme), a serif display name, and a hairline rule. */
 .se-chat[data-preset="daylight"] {
   --surface: rgba(244, 241, 234, 0.93);
-  --surface-blur: 6px;
-  --surface-saturate: 1.05;
   --surface-radius: 13px;
   --surface-pad: 9px 14px;
   --row-padding: 9px 14px;
@@ -155,8 +151,7 @@
 /* TERMINAL — dev / tech monospace identity. Deep chip, faint phosphor ring,
    a "›" prompt caret before each name (added below). Tabular by nature. */
 .se-chat[data-preset="terminal"] {
-  --surface: rgba(10, 13, 11, 0.82);
-  --surface-blur: 4px;
+  --surface: rgba(8, 12, 10, 0.85);
   --surface-radius: 8px;
   --surface-pad: 8px 12px;
   --row-padding: 8px 12px;
@@ -229,20 +224,6 @@ html, body {
 .se-chat[data-layout="fullscreen"] .msg { width: var(--row-width); max-width: none; }
 .se-chat[data-layout="fullscreen"] .se-chat__list { gap: calc(var(--row-gap) * 1.25); }
 
-/* ---- FULLSCREEN FLOAT: messages scatter to JS-computed absolute spots that
-   avoid overlapping each other. The list becomes the positioning context. ---- */
-.se-chat[data-layout="fullscreen"].fx-float .se-chat__list {
-  display: block;
-  position: relative;
-  height: 100%;
-}
-.se-chat[data-layout="fullscreen"].fx-float .msg {
-  position: absolute;
-  width: auto;
-  max-width: var(--row-maxwidth);
-  margin: 0;
-}
-
 /* ---- HORIZONTAL: a single row; messages sit side by side and the row
    scrolls so the newest stays in view. Overflow simply clips older ones
    (messagesLimit + lifetime keep the count sane). No absolute positioning,
@@ -276,8 +257,9 @@ html, body {
 
 /* Density */
 .se-chat[data-density="compact"] { --row-gap: 6px; }
-.se-chat[data-density="compact"][data-preset="frosted"],
-.se-chat[data-density="compact"][data-preset="slate"] { --row-padding: 6px 11px; --surface-pad: 6px 11px; }
+.se-chat[data-density="compact"][data-preset="noir"],
+.se-chat[data-density="compact"][data-preset="capsule"],
+.se-chat[data-density="compact"][data-preset="rolecard"] { --row-padding: 6px 11px; --surface-pad: 6px 11px; }
 
 /* ================================================================
    MESSAGE ROW
@@ -309,10 +291,8 @@ html, body {
   padding: var(--surface-pad);
   border-radius: var(--surface-radius);
   background: var(--surface);
-  -webkit-backdrop-filter: blur(var(--surface-blur)) saturate(var(--surface-saturate));
-  backdrop-filter: blur(var(--surface-blur)) saturate(var(--surface-saturate));
   /* Composite depth: one drop/contact shadow + one inset top hairline + one
-     accent edge — each preset sets only the layers it needs (editorial = none).
+     accent edge — each preset sets only the layers it needs (caption = none).
      No large diffuse shadow, no gradient fill. */
   box-shadow: var(--shadow), var(--sheen), var(--edge);
   text-shadow: var(--text-shadow);
@@ -320,14 +300,12 @@ html, body {
 
 /* Speech-bubble arrow / tail — opt-in; only meaningful on surface presets. */
 .msg__arrow { display: none; }
-.se-chat.show-arrow[data-preset="frosted"] .msg__arrow,
-.se-chat.show-arrow[data-preset="slate"] .msg__arrow {
+.se-chat.show-arrow:not([data-preset="caption"]) .msg__arrow {
   display: block; position: absolute; bottom: 8px; left: -6px;
   width: 0; height: 0; border: 7px solid transparent;
   border-right-color: var(--surface); border-left: 0;
 }
-.se-chat.show-arrow[data-preset="frosted"][data-halign="right"] .msg__arrow,
-.se-chat.show-arrow[data-preset="slate"][data-halign="right"] .msg__arrow {
+.se-chat.show-arrow:not([data-preset="caption"])[data-halign="right"] .msg__arrow {
   left: auto; right: -6px; border-right: 0;
   border-left-color: var(--surface); border-left-width: 7px;
 }
@@ -443,8 +421,7 @@ html, body {
   letter-spacing: 0.04em;
 }
 
-/* Shared Chat participants panel — opt-in roster overlay, any corner.
-   Frosted backing + one inset top sheen (no heavy shadow, no gradient). */
+/* Shared Chat participants panel — opt-in roster overlay, any corner. */
 .se-chat__participants {
   position: absolute;
   z-index: 5;
@@ -452,10 +429,8 @@ html, body {
   max-width: 42%;
   padding: 8px 11px 9px;
   border-radius: 12px;
-  background: rgba(12, 14, 18, 0.42);
-  -webkit-backdrop-filter: blur(14px) saturate(1.2);
-  backdrop-filter: blur(14px) saturate(1.2);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  background: rgba(14, 16, 22, 0.88);
+  box-shadow: 0 2px 10px -7px rgba(0, 0, 0, 0.58), inset 0 1px 0 rgba(255, 255, 255, 0.08);
   font-size: calc(var(--font-size) * 0.62);
   line-height: 1.25;
   pointer-events: none;
@@ -550,7 +525,7 @@ html, body {
   padding: 0.04em 0.38em 0.08em;
   text-shadow: none;
 }
-/* No colon in editorial type style — weight + spacing separate name from text */
+/* No colon in caption type style — weight + spacing separate name from text */
 .msg__colon { display: none; }
 .se-chat.no-name .msg__name { display: none; }
 .se-chat.no-name .msg__head { margin-right: 0; }
@@ -629,7 +604,7 @@ html, body {
 
 /* On ANY surface preset, alerts read through a calm FLAT accent wash + the accent
    glyph + accent name — no colored leading bar, no glow ring. */
-.se-chat:not([data-preset="editorial"]) .msg--alert .msg__bubble {
+.se-chat:not([data-preset="caption"]) .msg--alert .msg__bubble {
   background: color-mix(in srgb, var(--accent) 15%, var(--surface));
   box-shadow: var(--shadow), var(--sheen);
 }
@@ -684,13 +659,6 @@ html, body {
 .se-chat[data-mask="top"]    .se-chat__list { -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 12%); mask-image: linear-gradient(to bottom, transparent 0%, #000 12%); }
 .se-chat[data-mask="bottom"] .se-chat__list { -webkit-mask-image: linear-gradient(to top, transparent 0%, #000 12%);    mask-image: linear-gradient(to top, transparent 0%, #000 12%); }
 .se-chat[data-mask="both"]   .se-chat__list { -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 12%, #000 88%, transparent 100%); mask-image: linear-gradient(to bottom, transparent 0, #000 12%, #000 88%, transparent 100%); }
-
-/* Advanced glass: real SVG refraction layered into the surface backdrop.
-   Only meaningful on surface presets; opt-in + Chromium probe (widget.js). */
-.se-chat.fx-advanced-glass .msg__bubble {
-  -webkit-backdrop-filter: blur(var(--surface-blur)) saturate(var(--surface-saturate)) url(#liquid-glass);
-  backdrop-filter: blur(var(--surface-blur)) saturate(var(--surface-saturate)) url(#liquid-glass);
-}
 
 /* Disable all animations */
 .se-chat.no-anim .msg { animation: none !important; }

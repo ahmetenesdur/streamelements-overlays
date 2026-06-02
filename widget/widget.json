@@ -1,34 +1,24 @@
 {
   "quickSetupPreset": {
     "type": "dropdown",
-    "label": "Quick start — fills every setting for a scene, then returns to Manual",
+    "label": "Preset",
     "value": "manual",
     "options": {
-      "manual": "Manual / custom (use the fields below)",
-      "cleanEditorial": "Clean editorial — type on video",
-      "frostedStack": "Frosted glass — stacked chat",
-      "pulseGaming": "Pulse — accent bar, high energy",
-      "daylightPrint": "Daylight — light, serif names",
-      "terminalDev": "Terminal — dev monospace",
-      "multistreamMinimal": "Multistream minimal — dots",
-      "roleRich": "Role-rich bubbles",
-      "bottomTicker": "Bottom ticker — horizontal",
-      "fullscreenFloat": "Full-screen float"
+      "manual": "Custom / keep current settings",
+      "cleanCaption": "Clean Caption — type on video",
+      "noirChip": "Onyx — readable dark chip",
+      "softCapsule": "Soft Capsule — friendly multistream",
+      "roleCards": "Role Cards — role-rich bubbles",
+      "bottomTicker": "Bottom Ticker — horizontal",
+      "daylight": "Daylight — light print",
+      "terminal": "Terminal — compact monospace"
     },
     "group": "Style"
   },
   "stylePreset": {
-    "type": "dropdown",
-    "label": "Style preset (the look only)",
-    "value": "editorial",
-    "options": {
-      "editorial": "Editorial — type on video (default)",
-      "frosted": "Frosted — refined liquid glass",
-      "slate": "Slate — solid onyx chip",
-      "pulse": "Pulse — accent-forward, high energy",
-      "daylight": "Daylight — light editorial print",
-      "terminal": "Terminal — dev monospace"
-    },
+    "type": "hidden",
+    "label": "Internal preset style",
+    "value": "caption",
     "group": "Style"
   },
   "accent": {
@@ -71,16 +61,6 @@
     "options": {
       "bottom": "Bottom (newest at bottom)",
       "top": "Top (newest at top)"
-    },
-    "group": "Layout"
-  },
-  "fullscreenFloat": {
-    "type": "dropdown",
-    "label": "Full screen: float & avoid overlapping",
-    "value": "no",
-    "options": {
-      "yes": "Yes",
-      "no": "No"
     },
     "group": "Layout"
   },
@@ -263,7 +243,7 @@
   },
   "showArrow": {
     "type": "dropdown",
-    "label": "Show bubble arrow / tail (frosted & slate presets)",
+    "label": "Show bubble arrow / tail",
     "value": "no",
     "options": {
       "yes": "Yes",
@@ -1101,16 +1081,6 @@
     "step": 1,
     "group": "Effects"
   },
-  "glassAdvanced": {
-    "type": "dropdown",
-    "label": "Advanced glass refraction (Chromium/OBS only, GPU-heavy — keep Max Messages low)",
-    "value": "no",
-    "options": {
-      "yes": "Yes",
-      "no": "No"
-    },
-    "group": "Effects"
-  },
   "perspectiveX": {
     "type": "slider",
     "label": "Perspective tilt · X (deg)",
@@ -1166,81 +1136,11 @@
     },
     "group": "Effects"
   },
-  "glassOverride": {
-    "type": "dropdown",
-    "label": "Override preset surface values",
-    "value": "no",
-    "options": {
-      "no": "No (use preset)",
-      "yes": "Yes (use values below)"
-    },
-    "group": "Advanced glass"
-  },
-  "glassTint": {
-    "type": "colorpicker",
-    "label": "Surface fill (with opacity)",
-    "value": "rgba(12,14,18,0.34)",
-    "group": "Advanced glass"
-  },
-  "glassBlur": {
-    "type": "slider",
-    "label": "Backdrop blur (px)",
-    "value": 24,
-    "min": 0,
-    "max": 40,
-    "step": 1,
-    "group": "Advanced glass"
-  },
-  "glassRadius": {
-    "type": "slider",
-    "label": "Corner radius (px)",
-    "value": 16,
-    "min": 0,
-    "max": 36,
-    "step": 1,
-    "group": "Advanced glass"
-  },
-  "glassSaturate": {
-    "type": "slider",
-    "label": "Backdrop saturation (%)",
-    "value": 112,
-    "min": 100,
-    "max": 200,
-    "step": 1,
-    "group": "Advanced glass"
-  },
-  "glassEdge": {
-    "type": "slider",
-    "label": "Accent leading edge (px, 0 = none)",
-    "value": 0,
-    "min": 0,
-    "max": 4,
-    "step": 1,
-    "group": "Advanced glass"
-  },
-  "glassHighlight": {
-    "type": "slider",
-    "label": "Top highlight strength (%)",
-    "value": 10,
-    "min": 0,
-    "max": 40,
-    "step": 1,
-    "group": "Advanced glass"
-  },
-  "glassShadow": {
-    "type": "slider",
-    "label": "Shadow depth (%)",
-    "value": 12,
-    "min": 0,
-    "max": 100,
-    "step": 1,
-    "group": "Advanced glass"
-  },
   "emoteCacheTTL": {
     "type": "number",
     "label": "Emote cache refresh (minutes, 0 = no refresh)",
     "value": 0,
-    "group": "Advanced glass"
+    "group": "Advanced"
   },
   "debugMode": {
     "type": "dropdown",
@@ -1250,7 +1150,7 @@
       "yes": "Yes",
       "no": "No"
     },
-    "group": "Advanced glass"
+    "group": "Advanced"
   },
   "showTwitch": {
     "type": "dropdown",

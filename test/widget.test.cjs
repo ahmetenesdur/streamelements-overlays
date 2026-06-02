@@ -19,10 +19,20 @@ function jsonDefaults() {
   Object.keys(j).forEach(k => { fd[k] = j[k].value; });
   return fd;
 }
+function jsonFields() {
+  return JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'widget', 'widget.json'), 'utf8'));
+}
 
 test('phase 8 fields ship with conservative defaults', () => {
   const fd = jsonDefaults();
   assert.strictEqual(fd.quickSetupPreset, 'manual');
+  const schema = jsonFields();
+  assert.strictEqual(schema.quickSetupPreset.label, 'Preset');
+  assert.strictEqual(schema.stylePreset.type, 'hidden');
+  [
+    'glassAdvanced', 'glassOverride', 'glassTint', 'glassBlur', 'glassRadius',
+    'glassSaturate', 'glassEdge', 'glassHighlight', 'glassShadow'
+  ].forEach(key => assert.strictEqual(schema[key], undefined, key + ' removed'));
   assert.strictEqual(fd.messageGrouping, 'off');
   assert.strictEqual(fd.dynamicOpacity, 'no');
   assert.strictEqual(fd.oldestMessageOpacity, 38);
@@ -37,54 +47,60 @@ test('phase 8 fields ship with conservative defaults', () => {
   assert.strictEqual(fd.testKick, undefined);
 });
 
-test('quickSetupPreset:manual leaves detailed fields in control', () => {
+test('preset:manual leaves detailed fields in control', () => {
   const { api, root } = loadWidget({
     quickSetupPreset: 'manual',
-    stylePreset: 'slate',
+    stylePreset: 'noir',
     layoutMode: 'horizontal',
     messageGrouping: 'inline',
     showPlatformDot: 'yes'
   });
-  assert.strictEqual(api.getFields().stylePreset, 'slate');
+  assert.strictEqual(api.getFields().stylePreset, 'noir');
   assert.strictEqual(api.getFields().messageGrouping, 'inline');
-  assert.strictEqual(root.dataset.preset, 'slate');
+  assert.strictEqual(root.dataset.preset, 'noir');
   assert.strictEqual(root.dataset.layout, 'horizontal');
   assert.ok(root.classList.contains('show-dot'));
 });
 
-test('quickSetupPreset:frostedStack applies a ready grouped bubble setup', () => {
+test('preset:softCapsule applies the competitor-grade grouped multistream setup', () => {
   const { api, root, list, fire } = loadWidget({
-    quickSetupPreset: 'frostedStack',
-    stylePreset: 'editorial',
+    quickSetupPreset: 'softCapsule',
+    stylePreset: 'caption',
     layoutMode: 'horizontal',
     messageGrouping: 'off',
     dynamicOpacity: 'no',
     showAvatar: 'no',
     showArrow: 'no'
   });
-  assert.strictEqual(api.getFields().stylePreset, 'frosted');
+  assert.strictEqual(api.getFields().stylePreset, 'capsule');
   assert.strictEqual(api.getFields().layoutMode, 'vertical');
   assert.strictEqual(api.getFields().messageGrouping, 'stack');
   assert.strictEqual(api.getFields().dynamicOpacity, 'yes');
-  assert.strictEqual(root.dataset.preset, 'frosted');
+  assert.strictEqual(api.getFields().showPlatformLogo, 'no');
+  assert.strictEqual(api.getFields().showPlatformDot, 'yes');
+  assert.strictEqual(api.getFields().iconStyle, 'avatar');
+  assert.strictEqual(root.dataset.preset, 'capsule');
   assert.strictEqual(root.dataset.layout, 'vertical');
   assert.ok(root.classList.contains('show-icon'));
   assert.ok(root.classList.contains('show-arrow'));
+  assert.ok(root.classList.contains('show-dot'));
   fire('message', { data: tw({ userId: 'u1', displayName: 'Ada', text: 'first', tags: { 'room-id': '1', 'user-id': 'u1', id: 'm1' } }) });
   fire('message', { data: tw({ userId: 'u1', displayName: 'Ada', text: 'second', tags: { 'room-id': '1', 'user-id': 'u1', id: 'm2' } }) });
   assert.strictEqual(list.children.length, 1);
   assert.match(list.children[0].innerHTML, /msg__text--continued/);
+  assert.ok(!list.children[0].innerHTML.includes('>heart<'), 'invalid legacy icon string must not render as text');
 });
 
-test('quickSetupPreset:bottomTicker applies compact horizontal ticker settings', () => {
+test('preset:bottomTicker applies compact horizontal ticker settings', () => {
   const { api, root } = loadWidget({
     quickSetupPreset: 'bottomTicker',
-    stylePreset: 'editorial',
+    stylePreset: 'caption',
     layoutMode: 'vertical',
     density: 'comfortable',
     showPlatformDot: 'no',
     showPlatformLogo: 'yes'
   });
+  assert.strictEqual(api.getFields().stylePreset, 'noir');
   assert.strictEqual(api.getFields().layoutMode, 'horizontal');
   assert.strictEqual(api.getFields().density, 'compact');
   assert.strictEqual(api.getFields().showPlatformDot, 'yes');
@@ -95,18 +111,57 @@ test('quickSetupPreset:bottomTicker applies compact horizontal ticker settings',
   assert.ok(!root.classList.contains('show-logo'));
 });
 
-test('quickSetupPreset: new preset scenes select their style + layout', () => {
-  const pulse = loadWidget({ quickSetupPreset: 'pulseGaming', stylePreset: 'editorial' });
-  assert.strictEqual(pulse.api.getFields().stylePreset, 'pulse');
-  assert.strictEqual(pulse.root.dataset.preset, 'pulse');
-  assert.ok(pulse.root.classList.contains('show-dot'), 'pulse gaming shows platform dots');
+test('preset scenes reset scene-controlled toggles instead of leaking a prior scene', () => {
+  const { api, root, seApiCalls } = loadWidget(Object.assign({}, jsonDefaults(), {
+    quickSetupPreset: 'bottomTicker',
+    roleHighlight: 'yes',
+    roleNameBg: 'yes',
+    roleMsgBg: 'yes',
+    roleMsgText: 'yes',
+    nativeColorPlacement: 'background',
+    displayBadges: 'yes',
+    showArrow: 'yes',
+    showAvatar: 'yes',
+    showPlatformLogo: 'yes'
+  }));
+  assert.strictEqual(api.getFields().stylePreset, 'noir');
+  assert.strictEqual(api.getFields().layoutMode, 'horizontal');
+  assert.strictEqual(api.getFields().roleHighlight, 'no');
+  assert.strictEqual(api.getFields().roleNameBg, 'no');
+  assert.strictEqual(api.getFields().roleMsgBg, 'no');
+  assert.strictEqual(api.getFields().roleMsgText, 'no');
+  assert.strictEqual(api.getFields().nativeColorPlacement, 'text');
+  assert.ok(!root.classList.contains('role-highlight'));
+  assert.ok(!root.classList.contains('role-namebg'));
+  assert.ok(!root.classList.contains('role-msgbg'));
 
-  const day = loadWidget({ quickSetupPreset: 'daylightPrint', stylePreset: 'editorial' });
+  const written = Object.fromEntries(seApiCalls);
+  assert.strictEqual(written.roleHighlight, 'no');
+  assert.strictEqual(written.roleNameBg, 'no');
+  assert.strictEqual(written.roleMsgBg, 'no');
+  assert.strictEqual(written.quickSetupPreset, 'manual');
+});
+
+test('preset scenes select their style + layout with clear identities', () => {
+  const noir = loadWidget({ quickSetupPreset: 'noirChip', stylePreset: 'caption' });
+  assert.strictEqual(noir.api.getFields().stylePreset, 'noir');
+  assert.strictEqual(noir.root.dataset.preset, 'noir');
+  assert.ok(noir.root.classList.contains('show-logo'), 'noir chip keeps platform logos');
+
+  const role = loadWidget({ quickSetupPreset: 'roleCards', stylePreset: 'caption' });
+  assert.strictEqual(role.api.getFields().stylePreset, 'rolecard');
+  assert.strictEqual(role.root.dataset.preset, 'rolecard');
+  assert.ok(role.root.classList.contains('show-icon'), 'role cards show avatars/icons');
+  assert.ok(role.root.classList.contains('role-highlight'), 'role cards use role hooks');
+  assert.ok(role.root.classList.contains('role-namebg'), 'role cards use name chips');
+  assert.ok(role.root.classList.contains('role-msgbg'), 'role cards tint message surfaces');
+
+  const day = loadWidget({ quickSetupPreset: 'daylight', stylePreset: 'caption' });
   assert.strictEqual(day.api.getFields().stylePreset, 'daylight');
   assert.strictEqual(day.root.dataset.preset, 'daylight');
   assert.ok(day.root.classList.contains('role-highlight'), 'daylight print highlights roles');
 
-  const term = loadWidget({ quickSetupPreset: 'terminalDev', stylePreset: 'editorial', density: 'comfortable' });
+  const term = loadWidget({ quickSetupPreset: 'terminal', stylePreset: 'caption', density: 'comfortable' });
   assert.strictEqual(term.api.getFields().stylePreset, 'terminal');
   assert.strictEqual(term.root.dataset.preset, 'terminal');
   assert.strictEqual(term.root.dataset.density, 'compact', 'terminal dev is compact');
@@ -115,10 +170,10 @@ test('quickSetupPreset: new preset scenes select their style + layout', () => {
 test('quick start is ONE-SHOT: writes the bundle to SE fields + releases to manual', () => {
   // Picking a starter must FILL the fields then reset quickSetupPreset to 'manual',
   // so the bundle never re-overrides (and locks) the user's later edits.
-  const { seApiCalls } = loadWidget({ quickSetupPreset: 'fullscreenFloat', layoutMode: 'vertical' });
+  const { seApiCalls } = loadWidget({ quickSetupPreset: 'softCapsule', layoutMode: 'vertical' });
   const written = Object.fromEntries(seApiCalls);
-  assert.strictEqual(written.layoutMode, 'fullscreen', 'bundle written into the real fields');
-  assert.strictEqual(written.fullscreenFloat, 'yes');
+  assert.strictEqual(written.stylePreset, 'capsule', 'bundle written into the real fields');
+  assert.strictEqual(written.messageGrouping, 'stack');
   assert.strictEqual(written.quickSetupPreset, 'manual', 'released to manual so it never re-locks');
 });
 
@@ -815,20 +870,18 @@ test('empty override fields clear stale preset CSS variables', () => {
       accent: '', textShadow: '', keywordColor: '', colorRegular: ''
     }), channel: {}, session: { data: {} } }
   });
-  // Accent now resolves to the active preset's accent when cleared (editorial → luxe gold),
+  // Accent now resolves to the active preset's accent when cleared (caption → broadcast gold),
   // not to empty — each preset owns a distinct default accent.
-  assert.strictEqual(rootStyle.getPropertyValue('--accent'), '#e3b34e');
+  assert.strictEqual(rootStyle.getPropertyValue('--accent'), '#e8b85f');
   assert.strictEqual(rootStyle.getPropertyValue('--text-shadow'), '');
   assert.strictEqual(rootStyle.getPropertyValue('--keyword-color'), '');
   assert.strictEqual(rootStyle.getPropertyValue('--role-regular'), '');
 });
 
-test('glass override beats the active preset and clears cleanly when disabled', () => {
+test('removed glass fields are ignored even when stale fieldData still contains them', () => {
   const defaults = jsonDefaults();
-  // Override ON over a non-editorial preset (frosted) — proves overrides write to
-  // the .se-chat element and beat the [data-preset] stylesheet on every preset.
-  const { window, rootStyle } = loadWidget(Object.assign({}, defaults, {
-    stylePreset: 'frosted',
+  const { root, rootStyle, window } = loadWidget(Object.assign({}, defaults, {
+    stylePreset: 'capsule',
     glassOverride: 'yes',
     glassTint: 'rgba(10,20,30,0.4)',
     glassBlur: 30,
@@ -836,38 +889,24 @@ test('glass override beats the active preset and clears cleanly when disabled', 
     glassRadius: 24,
     glassShadow: 70,
     glassHighlight: 35,
-    glassEdge: 3
+    glassEdge: 3,
+    glassAdvanced: 'yes'
   }));
-  assert.strictEqual(rootStyle.getPropertyValue('--surface'), 'rgba(10,20,30,0.4)');
-  assert.strictEqual(rootStyle.getPropertyValue('--surface-blur'), '30px');
-  assert.strictEqual(rootStyle.getPropertyValue('--surface-saturate'), '1.4');
-  assert.strictEqual(rootStyle.getPropertyValue('--surface-radius'), '24px');
-  assert.strictEqual(rootStyle.getPropertyValue('--shadow'), '0 2px 10px -6px rgba(0,0,0,0.7)');
-  assert.strictEqual(rootStyle.getPropertyValue('--sheen'), 'inset 0 1px 0 rgba(255,255,255,0.35)');
-  assert.strictEqual(rootStyle.getPropertyValue('--edge'), 'inset 3px 0 0 var(--accent)');
-
-  window.dispatchEvent({
-    type: 'onWidgetLoad',
-    detail: { fieldData: Object.assign({}, defaults, {
-      stylePreset: 'frosted',
-      glassOverride: 'no',
-      glassTint: '', glassBlur: '', glassSaturate: '', glassRadius: '',
-      glassShadow: '', glassHighlight: '', glassEdge: 0
-    }), channel: {}, session: { data: {} } }
-  });
   ['--surface', '--surface-blur', '--surface-saturate', '--surface-radius', '--shadow', '--sheen', '--edge']
-    .forEach(k => assert.strictEqual(rootStyle.getPropertyValue(k), '', k + ' cleared → falls back to the preset'));
+    .forEach(k => assert.strictEqual(rootStyle.getPropertyValue(k), '', k + ' stays stylesheet-owned'));
+  assert.ok(!root.classList.contains('fx-advanced-glass'));
+  assert.strictEqual(window.document.getElementById('se-liquid-glass-svg'), null);
 });
 
 // ---- premium presets (Phase A) ------------------------------------
 test('each preset resolves its own accent + font when those fields are empty', () => {
   const cases = {
-    editorial: { accent: '#e3b34e', font: 'Hanken Grotesk' },
-    frosted:   { accent: '#6fd3e6', font: 'Hanken Grotesk' },
-    slate:     { accent: '#f2887e', font: 'Hanken Grotesk' },
-    pulse:     { accent: '#977dff', font: 'Bricolage Grotesque' },
-    daylight:  { accent: '#b8384b', font: 'Hanken Grotesk' },
-    terminal:  { accent: '#6ee7a8', font: 'Space Mono' }
+    caption:  { accent: '#e8b85f', font: 'Hanken Grotesk' },
+    noir:     { accent: '#8fd0e0', font: 'Hanken Grotesk' },
+    capsule:  { accent: '#f7a8c4', font: 'Bricolage Grotesque' },
+    rolecard: { accent: '#9bdcff', font: 'Bricolage Grotesque' },
+    daylight: { accent: '#b8384b', font: 'Hanken Grotesk' },
+    terminal: { accent: '#6ee7a8', font: 'JetBrains Mono' }
   };
   for (const preset of Object.keys(cases)) {
     const { rootStyle } = loadWidget({ stylePreset: preset, accent: '', fontName: '' });
@@ -876,8 +915,17 @@ test('each preset resolves its own accent + font when those fields are empty', (
   }
 });
 
+test('stale removed stylePreset values fall back to the safe caption preset', () => {
+  ['editorial', 'frosted', 'slate', 'pastel', 'pulse'].forEach(oldPreset => {
+    const { root, rootStyle } = loadWidget({ stylePreset: oldPreset, accent: '', fontName: '' });
+    assert.strictEqual(root.dataset.preset, 'caption', oldPreset + ' data-preset fallback');
+    assert.strictEqual(rootStyle.getPropertyValue('--accent'), '#e8b85f', oldPreset + ' accent fallback');
+    assert.strictEqual(rootStyle.getPropertyValue('--font-name'), "'Hanken Grotesk'", oldPreset + ' font fallback');
+  });
+});
+
 test('user accent + font override the preset defaults', () => {
-  const { rootStyle } = loadWidget({ stylePreset: 'pulse', accent: '#123456', fontName: 'Roboto' });
+  const { rootStyle } = loadWidget({ stylePreset: 'rolecard', accent: '#123456', fontName: 'Roboto' });
   assert.strictEqual(rootStyle.getPropertyValue('--accent'), '#123456');
   assert.strictEqual(rootStyle.getPropertyValue('--font-name'), "'Roboto'");
 });
@@ -891,46 +939,6 @@ test('daylight preset uses ink text, a serif name font, and a darker role palett
 
 test('fontName ships empty so the preset font is used out of the box', () => {
   assert.strictEqual(jsonDefaults().fontName, '');
-});
-
-// ---- fullscreen float / collision avoidance -----------------------
-function seqRng(arr) { let i = 0; return () => arr[i++ % arr.length]; }
-
-test('rectsOverlap: detects overlap and respects padding gap', () => {
-  const { api } = loadWidget({});
-  const a = { x: 0, y: 0, w: 100, h: 100 };
-  assert.strictEqual(api.fn.rectsOverlap(a, { x: 50, y: 50, w: 100, h: 100 }, 0), true, 'clearly overlapping');
-  assert.strictEqual(api.fn.rectsOverlap(a, { x: 120, y: 0, w: 50, h: 50 }, 0), false, 'separated on X');
-  assert.strictEqual(api.fn.rectsOverlap(a, { x: 108, y: 0, w: 50, h: 50 }, 10), true, 'within padding gap counts as overlap');
-});
-
-test('pickFloatPosition: empty stage returns an in-bounds spot', () => {
-  const { api } = loadWidget({});
-  const p = api.fn.pickFloatPosition(1000, 1000, 200, 100, [], { rng: () => 0.5 });
-  assert.strictEqual(p.x, 400);
-  assert.strictEqual(p.y, 450);
-  assert.strictEqual(p.fit, true);
-});
-
-test('pickFloatPosition: skips a colliding spot for a clear one', () => {
-  const { api } = loadWidget({});
-  const occupied = [{ x: 0, y: 0, w: 500, h: 1000 }];          // left half blocked
-  const p = api.fn.pickFloatPosition(1000, 1000, 200, 100, occupied, { rng: seqRng([0.1, 0.5, 0.9, 0.5]), pad: 8 });
-  assert.strictEqual(p.fit, true);
-  assert.strictEqual(api.fn.rectsOverlap(p, occupied[0], 8), false, 'chosen spot clears the blocked region');
-});
-
-test('pickFloatPosition: fully blocked stage returns best-effort fit:false', () => {
-  const { api } = loadWidget({});
-  const p = api.fn.pickFloatPosition(800, 600, 200, 100, [{ x: 0, y: 0, w: 800, h: 600 }], { rng: () => 0, tries: 10 });
-  assert.strictEqual(p.fit, false);
-});
-
-test('fx-float class only engages in fullscreen layout', () => {
-  const on = loadWidget({ layoutMode: 'fullscreen', fullscreenFloat: 'yes' });
-  assert.ok(on.root.classList.contains('fx-float'), 'fullscreen + float → fx-float on');
-  const off = loadWidget({ layoutMode: 'vertical', fullscreenFloat: 'yes' });
-  assert.ok(!off.root.classList.contains('fx-float'), 'float ignored outside fullscreen');
 });
 
 test('applyTheme exposes perspective zoom and fov CSS variables', () => {

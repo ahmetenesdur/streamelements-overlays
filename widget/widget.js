@@ -58,9 +58,58 @@
   let emoteLastLoad = 0;            // timestamp of last emote fetch (for TTL refresh)
 
   const ROLE_PRIORITY = ['broadcaster', 'leadmod', 'moderator', 'artist', 'vip', 'subscriber', 'fav', 'regular'];
+  const QUICK_SETUP_BASELINE = {
+    stylePreset: 'caption',
+    accent: '',
+    overlayBackground: 'rgba(0,0,0,0)',
+    layoutMode: 'vertical',
+    hAlign: 'left',
+    vAlign: 'bottom',
+    density: 'comfortable',
+    messagesLimit: 8,
+    rowMaxWidth: 460,
+    rowWidth: 100,
+    rowGap: 9,
+    hDirection: 'right',
+    fontName: '',
+    fontColor: '',
+    textShadow: '',
+    customNickColor: '',
+    keywordColor: '',
+    nickColor: 'user',
+    nativeColorPlacement: 'text',
+    displayBadges: 'yes',
+    showAvatar: 'no',
+    showArrow: 'no',
+    showPlatformLogo: 'yes',
+    showPlatformDot: 'no',
+    dotTwitchOn: 'yes',
+    dotYouTubeOn: 'yes',
+    dotKickOn: 'yes',
+    showColon: 'no',
+    iconStyle: 'avatar',
+    messageGrouping: 'off',
+    mergeMessages: 'no',
+    dynamicOpacity: 'no',
+    oldestMessageOpacity: 38,
+    roleHighlight: 'no',
+    roleNameBg: 'no',
+    roleMsgBg: 'no',
+    roleMsgText: 'no',
+    roleTintStrength: 18,
+    sharedChatIndicator: 'no',
+    sharedChatPanel: 'no',
+    maskFade: 'none',
+    crayonTexture: 'no',
+    perspectiveX: 0,
+    perspectiveY: 0,
+    perspectiveZ: 0,
+    perspectiveZoom: 100,
+    perspectiveFov: 1000
+  };
   const QUICK_SETUP_PRESETS = {
-    cleanEditorial: {
-      stylePreset: 'editorial',
+    cleanCaption: {
+      stylePreset: 'caption',
       layoutMode: 'vertical',
       density: 'comfortable',
       showAvatar: 'no',
@@ -69,77 +118,50 @@
       showPlatformDot: 'no',
       messageGrouping: 'off',
       dynamicOpacity: 'no',
-      fullscreenFloat: 'no',
       roleHighlight: 'no',
       roleNameBg: 'no',
       roleMsgBg: 'no',
       roleMsgText: 'no'
     },
-    frostedStack: {
-      stylePreset: 'frosted',
+    noirChip: {
+      stylePreset: 'noir',
       layoutMode: 'vertical',
       density: 'comfortable',
-      showAvatar: 'yes',
-      showArrow: 'yes',
-      showPlatformLogo: 'yes',
-      showPlatformDot: 'no',
-      messageGrouping: 'stack',
-      dynamicOpacity: 'yes',
-      oldestMessageOpacity: 38,
-      fullscreenFloat: 'no'
-    },
-    multistreamMinimal: {
-      stylePreset: 'editorial',
-      layoutMode: 'vertical',
-      density: 'compact',
+      rowMaxWidth: 480,
       showAvatar: 'no',
       showArrow: 'no',
+      showPlatformLogo: 'yes',
+      showPlatformDot: 'no',
+      messageGrouping: 'off',
+      dynamicOpacity: 'no'
+    },
+    softCapsule: {
+      stylePreset: 'capsule',
+      layoutMode: 'vertical',
+      density: 'comfortable',
+      rowMaxWidth: 520,
+      messagesLimit: 9,
+      showAvatar: 'yes',
+      showArrow: 'yes',
       showPlatformLogo: 'no',
       showPlatformDot: 'yes',
-      dotTwitchOn: 'yes',
-      dotYouTubeOn: 'yes',
-      dotKickOn: 'yes',
       messageGrouping: 'stack',
       dynamicOpacity: 'yes',
-      oldestMessageOpacity: 40,
+      oldestMessageOpacity: 45,
+      roleHighlight: 'yes',
+      roleNameBg: 'yes',
+      roleMsgBg: 'no',
+      roleMsgText: 'no',
+      nativeColorPlacement: 'background',
       sharedChatIndicator: 'yes'
     },
-    bottomTicker: {
-      stylePreset: 'slate',
-      layoutMode: 'horizontal',
-      hDirection: 'right',
-      density: 'compact',
-      messagesLimit: 10,
-      rowMaxWidth: 420,
-      showAvatar: 'no',
-      showArrow: 'no',
-      showPlatformLogo: 'no',
-      showPlatformDot: 'yes',
-      messageGrouping: 'off',
-      dynamicOpacity: 'no',
-      fullscreenFloat: 'no'
-    },
-    fullscreenFloat: {
-      stylePreset: 'frosted',
-      layoutMode: 'fullscreen',
-      fullscreenFloat: 'yes',
-      density: 'comfortable',
-      messagesLimit: 12,
-      rowWidth: 100,
-      showAvatar: 'yes',
-      showArrow: 'yes',
-      showPlatformLogo: 'yes',
-      showPlatformDot: 'no',
-      messageGrouping: 'off',
-      dynamicOpacity: 'yes',
-      oldestMessageOpacity: 35
-    },
-    roleRich: {
-      stylePreset: 'frosted',
+    roleCards: {
+      stylePreset: 'rolecard',
       layoutMode: 'vertical',
       density: 'comfortable',
+      rowMaxWidth: 500,
       showAvatar: 'yes',
-      showArrow: 'yes',
+      showArrow: 'no',
       displayBadges: 'yes',
       showPlatformLogo: 'yes',
       showPlatformDot: 'no',
@@ -150,19 +172,27 @@
       roleMsgText: 'no',
       nativeColorPlacement: 'background'
     },
-    pulseGaming: {
-      stylePreset: 'pulse', layoutMode: 'vertical', density: 'comfortable',
-      showAvatar: 'yes', showArrow: 'no', displayBadges: 'yes',
-      showPlatformLogo: 'no', showPlatformDot: 'yes',
-      messageGrouping: 'stack', dynamicOpacity: 'yes', oldestMessageOpacity: 40,
-      roleHighlight: 'yes'
+    bottomTicker: {
+      stylePreset: 'noir',
+      layoutMode: 'horizontal',
+      hDirection: 'right',
+      density: 'compact',
+      messagesLimit: 10,
+      rowMaxWidth: 420,
+      showAvatar: 'no',
+      showArrow: 'no',
+      showPlatformLogo: 'no',
+      showPlatformDot: 'yes',
+      messageGrouping: 'off',
+      dynamicOpacity: 'no'
     },
-    daylightPrint: {
+    daylight: {
       stylePreset: 'daylight', layoutMode: 'vertical', density: 'comfortable',
       showAvatar: 'no', showArrow: 'no', showPlatformLogo: 'yes', showPlatformDot: 'no',
-      messageGrouping: 'off', dynamicOpacity: 'no', roleHighlight: 'yes'
+      messageGrouping: 'off', dynamicOpacity: 'no', roleHighlight: 'yes',
+      nativeColorPlacement: 'text'
     },
-    terminalDev: {
+    terminal: {
       stylePreset: 'terminal', layoutMode: 'vertical', density: 'compact',
       showAvatar: 'no', showArrow: 'no', showPlatformLogo: 'no', showPlatformDot: 'yes',
       messageGrouping: 'off', dynamicOpacity: 'no', roleHighlight: 'no'
@@ -170,24 +200,22 @@
   };
   // Per-preset COLOR + FONT identity. applyTheme resolves each token as
   // `user field -> preset value -> global default`. Surface/structure lives in
-  // CSS [data-preset]; this is the slice applyTheme must own because it sets
-  // those tokens unconditionally and injects webfonts. Distinctive, non-cliché
-  // accents + fonts (never Inter / a purple gradient) give each its own feel.
+  // CSS [data-preset]; this slice owns only color, type, dots, and role palettes.
   const PRESET_THEME = {
-    editorial: { accent: '#e3b34e', font: 'Hanken Grotesk' },                              // luxe gold
-    frosted:   { accent: '#6fd3e6', font: 'Hanken Grotesk' },                              // glacial cyan
-    slate:     { accent: '#f2887e', font: 'Hanken Grotesk' },                              // warm coral
-    pulse:     { accent: '#977dff', font: 'Bricolage Grotesque' },                         // vivid violet
-    daylight:  {
-      accent: '#b8384b', font: 'Hanken Grotesk', nameFont: 'Instrument Serif',            // editorial crimson on cream
+    caption:  { accent: '#e8b85f', font: 'Hanken Grotesk' },                              // type on video — warm gold
+    noir:     { accent: '#8fd0e0', font: 'Hanken Grotesk' },                              // onyx chip — cool ice accent
+    capsule:  { accent: '#f7a8c4', font: 'Bricolage Grotesque' },                         // friendly soft slate — rose accent
+    rolecard: { accent: '#9bdcff', font: 'Bricolage Grotesque' },                         // elevated role card — sky + accent ring
+    daylight: {
+      accent: '#b8384b', font: 'Hanken Grotesk', nameFont: 'Instrument Serif',            // light print — crimson on cream
       ink: 'rgba(28,26,24,0.94)', nick: '#3f5fb0',
       dotTwitch: '#7a52c8', dotYouTube: '#cc3b3b', dotKick: '#3a9e2a',
       roles: {
         broadcaster: '#b8384b', leadmod: '#1f8f7e', mod: '#2f9c57',
-        artist: '#b5631f', vip: '#9a3f86', sub: '#3f5fb0', fav: '#9a7416'
+        artist: '#b5631f', vip: '#9a3f86', sub: '#3f5fb0', fav: '#8a6a12'
       }
     },
-    terminal:  { accent: '#6ee7a8', font: 'Space Mono', nameFont: 'Space Mono' }           // mint phosphor
+    terminal: { accent: '#6ee7a8', font: 'JetBrains Mono', nameFont: 'JetBrains Mono' }    // dev mono — mint phosphor
   };
   const pronounCache = {};   // twitch login -> short pronoun label ('' = none)
   let pronounMap = null;     // id -> short label (loaded once)
@@ -204,7 +232,6 @@
     rootEl = document.getElementById('seChat');
     listEl = document.getElementById('chatList');
 
-    injectLiquidGlassFilter();
     injectCrayonFilter();
     injectFont(F.fontName);
     applyTheme(F);
@@ -264,7 +291,7 @@
       raw.quickSetupPreset = 'manual';
       return raw;
     }
-    return Object.assign(raw, overrides, { quickSetupPreset: preset });
+    return Object.assign(raw, QUICK_SETUP_BASELINE, overrides, { quickSetupPreset: preset });
   }
 
   // Quick start is a ONE-SHOT starter: when a scene is picked, write its bundle into
@@ -278,7 +305,8 @@
     if (preset === 'manual' || !bundle) return;
     if (!(window.SE_API && typeof window.SE_API.setField === 'function')) return;
     try {
-      Object.keys(bundle).forEach(function (k) { window.SE_API.setField(k, bundle[k]); });
+      const fields = Object.assign({}, QUICK_SETUP_BASELINE, bundle);
+      Object.keys(fields).forEach(function (k) { window.SE_API.setField(k, fields[k]); });
       window.SE_API.setField('quickSetupPreset', 'manual');
     } catch (e) { if (debugMode()) console.warn('[se-chat] quick-start commit failed:', e); }
   }
@@ -586,8 +614,6 @@
     listEl.appendChild(row);
     enforceLimit();
     refreshDynamicOpacity();
-    // Fullscreen float: drop the row at a non-overlapping absolute position.
-    if (isFullscreenFloat()) placeFloating(row);
     // In horizontal mode keep the newest message scrolled into view.
     if (str(F.layoutMode, 'vertical') === 'horizontal') {
       const toRight = str(F.hDirection, 'right') === 'right';
@@ -662,8 +688,10 @@
       // A chosen glyph icon (emoji) — shown for every message.
       inner = '<span class="msg__glyphicon">' + htmlEncode(style) + '</span>';
     } else {
+      // Only encode a real avatar URL — the platformLogo() fallback is already a
+      // valid data: URI (encodeURI would double-escape its %23 and break it → black disc).
       inner = '<img class="msg__avatar" alt="" src="' +
-        encodeURI(u.avatar || platformLogo(u.platform)) + '">';
+        (u.avatar ? encodeURI(u.avatar) : platformLogo(u.platform)) + '">';
     }
     return '<div class="msg__icon">' + inner + '<span class="msg__dot"></span></div>';
   }
@@ -836,60 +864,6 @@
     });
   }
 
-  // ---- Fullscreen float / collision avoidance ---------------------
-  // Two axis-aligned rects overlap if they overlap on BOTH axes (with padding).
-  function rectsOverlap(a, b, pad) {
-    return !(a.x + a.w + pad <= b.x || b.x + b.w + pad <= a.x ||
-             a.y + a.h + pad <= b.y || b.y + b.h + pad <= a.y);
-  }
-  // Find a spot for a rw×rh box inside cw×ch that clears every occupied rect.
-  // Sampling-based: returns the first collision-free spot, else the least-bad
-  // one. rng is injectable so the placement is deterministic in tests.
-  function pickFloatPosition(cw, ch, rw, rh, occupied, opts) {
-    opts = opts || {};
-    const pad = opts.pad != null ? opts.pad : 8;
-    const tries = opts.tries || 40;
-    const rng = opts.rng || Math.random;
-    const maxX = Math.max(0, cw - rw), maxY = Math.max(0, ch - rh);
-    let best = null, bestHits = Infinity;
-    for (let i = 0; i < tries; i++) {
-      const x = Math.round(rng() * maxX), y = Math.round(rng() * maxY);
-      const cand = { x: x, y: y, w: rw, h: rh };
-      let hits = 0;
-      for (let j = 0; j < occupied.length; j++) {
-        if (rectsOverlap(cand, occupied[j], pad)) hits++;
-      }
-      if (hits === 0) return { x: x, y: y, fit: true };
-      if (hits < bestHits) { bestHits = hits; best = { x: x, y: y, fit: false }; }
-    }
-    return best || { x: 0, y: 0, fit: false };
-  }
-
-  function isFullscreenFloat() {
-    return str(F.layoutMode, 'vertical') === 'fullscreen' && yes(F.fullscreenFloat);
-  }
-
-  // Measure the freshly added row + its siblings and drop it at a
-  // non-overlapping absolute position within the fullscreen stage.
-  function placeFloating(row) {
-    if (!listEl || !row) return;
-    const cw = listEl.clientWidth || 0, ch = listEl.clientHeight || 0;
-    const rw = row.offsetWidth || 0, rh = row.offsetHeight || 0;
-    if (!cw || !ch || !rw || !rh) return;     // not laid out yet → skip gracefully
-    const occupied = [];
-    Array.prototype.forEach.call(listEl.children, function (el) {
-      if (el === row) return;
-      occupied.push({
-        x: parseFloat(el.style.left) || 0, y: parseFloat(el.style.top) || 0,
-        w: el.offsetWidth || 0, h: el.offsetHeight || 0
-      });
-    });
-    const pos = pickFloatPosition(cw, ch, rw, rh, occupied, { pad: 10 });
-    row.style.position = 'absolute';
-    row.style.left = pos.x + 'px';
-    row.style.top = pos.y + 'px';
-  }
-
   function scheduleRemoval(row, u) {
     // hideAfter is the master "auto-hide" control. 0 = keep forever (only the
     // messagesLimit removes rows). Same behaviour in every layout.
@@ -949,8 +923,9 @@
     const setIf = (k, v) => { hasOverride(v) ? set(k, v) : clear(k); };
 
     // ---- Per-preset identity (color + font): user field -> preset -> default ----
-    const preset = str(f.stylePreset, 'editorial');
-    const pt = PRESET_THEME[preset] || PRESET_THEME.editorial;
+    const requestedPreset = str(f.stylePreset, 'caption');
+    const preset = PRESET_THEME[requestedPreset] ? requestedPreset : 'caption';
+    const pt = PRESET_THEME[preset] || PRESET_THEME.caption;
     const userFont = (f.fontName && String(f.fontName).trim()) || '';
     const bodyFont = userFont || pt.font || 'Hanken Grotesk';
     const nameFont = pt.nameFont || bodyFont;
@@ -973,21 +948,8 @@
     set('--row-width', num(f.rowWidth, 100) + '%');
 
     // ---- Accent: user override -> preset accent -> default. Overlay simple-first. ----
-    set('--accent', (f.accent && String(f.accent).trim()) || pt.accent || '#e3b34e');
+    set('--accent', (f.accent && String(f.accent).trim()) || pt.accent || '#e8b85f');
     set('--overlay-bg', f.overlayBackground || 'rgba(0,0,0,0)');
-
-    // ---- Surface overrides (only when the gate is on) ----
-    if (yes(f.glassOverride)) {
-      setIf('--surface', f.glassTint);
-      hasOverride(f.glassBlur) ? set('--surface-blur', num(f.glassBlur, 22) + 'px') : clear('--surface-blur');
-      hasOverride(f.glassSaturate) ? set('--surface-saturate', String(num(f.glassSaturate, 112) / 100)) : clear('--surface-saturate');
-      hasOverride(f.glassRadius) ? set('--surface-radius', num(f.glassRadius, 16) + 'px') : clear('--surface-radius');
-      hasOverride(f.glassShadow) ? set('--shadow', '0 2px 10px -6px rgba(0,0,0,' + (num(f.glassShadow, 30) / 100) + ')') : clear('--shadow');
-      hasOverride(f.glassHighlight) ? set('--sheen', 'inset 0 1px 0 rgba(255,255,255,' + (num(f.glassHighlight, 10) / 100) + ')') : clear('--sheen');
-      num(f.glassEdge, 0) > 0 ? set('--edge', 'inset ' + num(f.glassEdge, 0) + 'px 0 0 var(--accent)') : clear('--edge');
-    } else {
-      ['--surface', '--surface-blur', '--surface-saturate', '--surface-radius', '--shadow', '--sheen', '--edge'].forEach(clear);
-    }
 
     // ---- Username / highlight / dots / roles ----
     // Fallbacks mirror the widget.json field defaults, so clearing a color
@@ -1002,12 +964,12 @@
     // Roles: user field -> preset palette (e.g. Daylight's darker ink set) -> default.
     const rt = pt.roles || {};
     const role = (k, field, dflt) => f[field] || rt[k] || dflt;
-    const rBroadcaster = role('broadcaster', 'colorBroadcaster', '#ff8a9b');
-    const rMod = role('mod', 'colorMod', '#6fd58f');
+    const rBroadcaster = role('broadcaster', 'colorBroadcaster', '#ff7a8a');
+    const rMod = role('mod', 'colorMod', '#74e08a');
     const rVip = role('vip', 'colorVip', '#d99bf0');
     const rSub = role('sub', 'colorSub', '#8fb4ff');
-    const rLeadmod = role('leadmod', 'colorLeadMod', '#5fd0c4');
-    const rArtist = role('artist', 'colorArtist', '#ffb273');
+    const rLeadmod = role('leadmod', 'colorLeadMod', '#5fe0cf');
+    const rArtist = role('artist', 'colorArtist', '#ffb066');
     const rFav = role('fav', 'colorFav', '#f2cf6b');
     set('--role-broadcaster', rBroadcaster);
     set('--role-mod', rMod);
@@ -1042,7 +1004,7 @@
     set('--persp-fov', fov + 'px');
 
     if (!rootEl) return;
-    rootEl.dataset.preset = str(f.stylePreset, 'editorial');
+    rootEl.dataset.preset = preset;
     rootEl.dataset.layout = str(f.layoutMode, 'vertical');
     rootEl.dataset.halign = str(f.hAlign, 'left');
     rootEl.dataset.valign = str(f.vAlign, 'bottom');
@@ -1064,11 +1026,7 @@
     toggle('role-msgbg', yes(f.roleMsgBg));
     toggle('role-msgtext', yes(f.roleMsgText));
     toggle('fx-perspective', px !== 0 || py !== 0 || pz !== 0);
-    toggle('fx-float', str(f.layoutMode, 'vertical') === 'fullscreen' && yes(f.fullscreenFloat));
     toggle('fx-crayon', yes(f.crayonTexture));
-    // Real SVG refraction — opt-in AND only where the renderer can composite
-    // it (Chromium / OBS). Otherwise stay on safe glassmorphism (no class).
-    toggle('fx-advanced-glass', yes(f.glassAdvanced) && advancedGlassSupported());
     toggle('no-anim', yes(f.disableAllAnimations));
     toggle('show-colon', yes(f.showColon));
 
@@ -1411,24 +1369,6 @@
     document.head.appendChild(l);
   }
 
-  // Liquid Glass refraction: a procedural (size-independent) noise displacement
-  // of the backdrop. feTurbulence avoids per-element bezel maps, so it stays
-  // cheap across many small bubbles. The specular sheen is done in CSS.
-  function injectLiquidGlassFilter() {
-    if (document.getElementById('se-liquid-glass-svg')) return;
-    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    svg.id = 'se-liquid-glass-svg';
-    svg.setAttribute('width', '0'); svg.setAttribute('height', '0');
-    svg.style.position = 'absolute';
-    svg.innerHTML =
-      "<filter id='liquid-glass' x='-15%' y='-15%' width='130%' height='130%' color-interpolation-filters='sRGB'>" +
-        "<feTurbulence type='fractalNoise' baseFrequency='0.008 0.012' numOctaves='2' seed='7' result='noise'/>" +
-        "<feGaussianBlur in='noise' stdDeviation='1.4' result='soft'/>" +
-        "<feDisplacementMap in='SourceGraphic' in2='soft' scale='16' xChannelSelector='R' yChannelSelector='G'/>" +
-      "</filter>";
-    document.body.appendChild(svg);
-  }
-
   // Hand-drawn "crayon" wobble (opt-in). Injected once, applied via .fx-crayon.
   function injectCrayonFilter() {
     if (document.getElementById('se-crayon-svg')) return;
@@ -1438,17 +1378,6 @@
     svg.style.position = 'absolute';
     svg.innerHTML = "<filter id='crayon'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' result='n'/><feDisplacementMap in='SourceGraphic' in2='n' scale='1.4'/></filter>";
     document.body.appendChild(svg);
-  }
-
-  // Can this renderer composite an SVG filter inside backdrop-filter?
-  // (Chromium/OBS yes; Firefox/Safari no → we fall back to glassmorphism.)
-  function advancedGlassSupported() {
-    try {
-      const bf = (window.CSS && (CSS.supports('backdrop-filter', 'blur(2px)') ||
-        CSS.supports('-webkit-backdrop-filter', 'blur(2px)')));
-      const chromium = !!window.chrome || /\b(Chrome|Chromium|Edg)\//.test(navigator.userAgent || '');
-      return !!bf && chromium;
-    } catch (_) { return false; }
   }
 
   // Stable per-user fallback color (self-contained hash; no md5 dependency).
@@ -1547,9 +1476,7 @@
       htmlEncode: htmlEncode,
       applyQuickSetup: applyQuickSetup,
       commitQuickSetup: commitQuickSetup,
-      buttonFieldFromEvent: buttonFieldFromEvent,
-      pickFloatPosition: pickFloatPosition,
-      rectsOverlap: rectsOverlap
+      buttonFieldFromEvent: buttonFieldFromEvent
     }
   };
 })();

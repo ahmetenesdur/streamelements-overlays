@@ -220,18 +220,6 @@
       dispatch('message', mk('GuestViewer', '200', "I'm chatting from Ironmouse's chat!"));
       dispatch('message', mk('LirikFan', '300', 'Hi Lirik, love this collab stream!'));
     },
-    // Fullscreen float: scatter several messages with overlap avoidance.
-    floatScene() {
-      MockSE.resetFields({ layoutMode: 'fullscreen', fullscreenFloat: 'yes', hideAfter: 0 });
-      ['floating chat one', 'second message drifts in', 'a third one here',
-       'number four floats', 'fifth and counting', 'sixth message', 'lucky seven', 'last one'
-      ].forEach((text, i) => {
-        const e = twitchRaw(text);
-        e.data.displayName = 'Viewer' + i; e.data.userId = 'float' + i;
-        e.data.tags['user-id'] = 'float' + i; e.data.tags.id = 'float-' + i + '-' + uid();
-        dispatch('message', e);
-      });
-    },
     // Per-role visual matrix: each role gets its own tinted name + bubble.
     roleMatrix() {
       MockSE.resetFields({ roleHighlight: 'yes', roleNameBg: 'yes', roleMsgBg: 'yes' });
@@ -274,7 +262,7 @@
   // ================================================================
   const GROUP_ORDER = ['Style', 'Layout', 'Typography', 'Username & Colors',
     'Badges & Platform', 'Roles & Highlights', 'Messages', 'Animations',
-    'Alerts', 'Sound', 'Effects', 'Advanced glass', 'Multistream'];
+    'Alerts', 'Sound', 'Effects', 'Advanced', 'Multistream'];
 
   function el(tag, attrs, text) {
     const e = document.createElement(tag);
@@ -381,8 +369,8 @@
     const order = GROUP_ORDER.filter(g => groups[g])
       .concat(Object.keys(groups).filter(g => GROUP_ORDER.indexOf(g) === -1));
     order.forEach((g, gi) => {
-      const det = el('details', { class: 'grp' }); if (gi === 0) det.open = true;
-      det.appendChild(el('summary', null, g));
+      const det = el('details', { class: 'grp', 'data-group': g }); if (gi === 0) det.open = true;
+      det.appendChild(el('summary', null, g === 'Style' ? 'Preset' : g));
       const pad = el('div', { class: 'pad' });
       groups[g].forEach(([key, f]) => {
         if (f.type === 'button') {
@@ -390,7 +378,8 @@
           b.addEventListener('click', () => dispatch('widget-button', { field: key }));
           pad.appendChild(b); return;
         }
-        const wide = f.type === 'text' || f.type === 'googleFont' || f.type === 'sound-input';
+        const wide = f.type === 'text' || f.type === 'googleFont' || f.type === 'sound-input'
+          || key === 'quickSetupPreset';
         const row = el('div', { class: 'field' + (wide ? ' wide' : '') });
         row.appendChild(el('label', { for: 'field-' + key }, f.label || key));
         row.appendChild(controlFor(key, f));
@@ -444,8 +433,8 @@
         if (!grp.hidden) anyVisible = true;
         if (q) grp.open = true;
       });
-      const test = document.querySelector('.grp[data-group="Test"]');
-      if (test) test.hidden = !!q;            // hide the test tools while searching settings
+      const previewTools = document.querySelector('.grp[data-group="Preview Tools"]');
+      if (previewTools) previewTools.hidden = !!q;   // hide local-only simulator tools while searching settings
       if (panel) panel.classList.toggle('no-results', !!q && !anyVisible);
     };
     input.addEventListener('input', apply);

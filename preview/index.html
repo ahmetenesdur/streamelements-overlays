@@ -32,7 +32,8 @@
       --pv-r: 10px;
       --pv-r-lg: 15px;
       --pv-rail: 364px;
-      --pv-top: 54px;
+      --pv-top: 62px;
+      --pv-control: 44px;
       --pv-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
       --pv-ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
       --pv-ease: cubic-bezier(0.2, 0, 0, 1);
@@ -77,13 +78,13 @@
       appearance: none; -webkit-appearance: none;
       background: var(--pv-surface-2) no-repeat right 8px center/9px url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238b909e' stroke-width='1.6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
       color: var(--pv-ink); border: 1px solid var(--pv-line); border-radius: 8px;
-      padding: 7px 26px 7px 10px; font-size: 12px; min-height: 34px; cursor: pointer;
+      padding: 9px 28px 9px 12px; font-size: 12px; min-height: var(--pv-control); cursor: pointer;
       transition: border-color 150ms, background-color 150ms;
     }
     .tb-field select:hover { border-color: var(--pv-line-2); }
     .tb-toggle {
       appearance: none; border: 1px solid var(--pv-line); background: var(--pv-surface-2); color: var(--pv-mut);
-      border-radius: 8px; min-height: 34px; padding: 0 11px; font-size: 12px; cursor: pointer; white-space: nowrap;
+      border-radius: 8px; min-height: var(--pv-control); padding: 0 13px; font-size: 12px; cursor: pointer; white-space: nowrap;
       display: inline-flex; align-items: center; gap: 6px; touch-action: manipulation;
       transition-property: color, background-color, border-color, transform; transition-duration: 150ms; transition-timing-function: var(--pv-ease);
     }
@@ -140,14 +141,14 @@
     .srch { position: relative; }
     .srch svg { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); width: 14px; height: 14px; color: var(--pv-faint); pointer-events: none; }
     #search {
-      width: 100%; min-height: 38px; background: var(--pv-surface-2); color: var(--pv-ink);
-      border: 1px solid var(--pv-line); border-radius: var(--pv-r); padding: 8px 30px 8px 32px; font-size: 13px;
+      width: 100%; min-height: var(--pv-control); background: var(--pv-surface-2); color: var(--pv-ink);
+      border: 1px solid var(--pv-line); border-radius: var(--pv-r); padding: 9px 38px 9px 34px; font-size: 13px;
       transition: border-color 150ms, background-color 150ms;
     }
     #search::placeholder { color: var(--pv-faint); }
     #search:hover { border-color: var(--pv-line-2); }
     #search:focus { outline: none; border-color: color-mix(in srgb, var(--pv-accent) 55%, transparent); box-shadow: 0 0 0 3px var(--pv-accent-weak); }
-    .srch-clear { position: absolute; right: 7px; top: 50%; transform: translateY(-50%); width: 22px; height: 22px; border: 0; border-radius: 6px; background: transparent; color: var(--pv-mut); cursor: pointer; display: none; align-items: center; justify-content: center; }
+    .srch-clear { position: absolute; right: 7px; top: 50%; transform: translateY(-50%); width: 30px; height: 30px; border: 0; border-radius: 7px; background: transparent; color: var(--pv-mut); cursor: pointer; display: none; align-items: center; justify-content: center; }
     .srch-clear:hover { background: var(--pv-surface-3); color: var(--pv-ink); }
     .srch.has-value .srch-clear { display: flex; }
     .srch-empty { display: none; padding: 18px 4px 6px; color: var(--pv-faint); font-size: 12px; text-align: center; }
@@ -158,7 +159,7 @@
     .grp[hidden] { display: none; }
     .grp > summary {
       list-style: none; cursor: pointer; user-select: none;
-      min-height: 42px; padding: 12px 16px; font: 600 11px/1 var(--pv-mono); letter-spacing: 0.08em;
+      min-height: var(--pv-control); padding: 12px 16px; font: 600 11px/1 var(--pv-mono); letter-spacing: 0.08em;
       text-transform: uppercase; color: var(--pv-mut); display: flex; align-items: center; gap: 9px;
     }
     .grp > summary::-webkit-details-marker { display: none; }
@@ -176,8 +177,8 @@
     .field.wide .ctl { width: 100%; }
 
     select.ctl, input[type=text], input[type=number] {
-      min-height: 38px; width: 156px; background: var(--pv-surface-2); color: var(--pv-ink);
-      border: 1px solid var(--pv-line); border-radius: 9px; padding: 7px 9px; font-size: 12.5px;
+      min-height: var(--pv-control); width: 156px; background: var(--pv-surface-2); color: var(--pv-ink);
+      border: 1px solid var(--pv-line); border-radius: 9px; padding: 9px 10px; font-size: 12.5px;
       transition: border-color 150ms, background-color 150ms;
     }
     select.ctl { appearance: none; -webkit-appearance: none; padding-right: 26px;
@@ -185,8 +186,8 @@
     input[type=text]:hover, input[type=number]:hover, select.ctl:hover { border-color: var(--pv-line-2); }
     input[type=text]:focus, input[type=number]:focus, select.ctl:focus { outline: none; border-color: color-mix(in srgb, var(--pv-accent) 55%, transparent); box-shadow: 0 0 0 3px var(--pv-accent-weak); }
     .field.wide select.ctl, .field.wide input { width: 100%; }
-    input[type=range] { width: 156px; min-height: 36px; accent-color: var(--pv-accent); cursor: pointer; }
-    input[type=color] { width: 38px; height: 38px; padding: 3px; border: 1px solid var(--pv-line); border-radius: 9px; background: var(--pv-surface-2); cursor: pointer; }
+    input[type=range] { width: 156px; min-height: var(--pv-control); accent-color: var(--pv-accent); cursor: pointer; }
+    input[type=color] { width: var(--pv-control); height: var(--pv-control); padding: 4px; border: 1px solid var(--pv-line); border-radius: 9px; background: var(--pv-surface-2); cursor: pointer; }
     .rangewrap { display: flex; align-items: center; gap: 9px; justify-content: flex-end; }
     .rangewrap .val { font-family: var(--pv-mono); color: var(--pv-mut); font-size: 11px; min-width: 32px; text-align: right; }
     .colorwrap { display: flex; align-items: center; gap: 7px; justify-content: flex-end; }
@@ -196,7 +197,7 @@
     .row { display: flex; flex-wrap: wrap; gap: 6px; }
     button.sim {
       flex: 1 1 auto; background: var(--pv-surface-2); color: var(--pv-ink); border: 1px solid var(--pv-line);
-      min-height: 38px; border-radius: 9px; padding: 8px 10px; font-size: 12px; cursor: pointer;
+      min-height: var(--pv-control); border-radius: 9px; padding: 9px 10px; font-size: 12px; cursor: pointer;
       touch-action: manipulation;
       transition-property: transform, background-color, box-shadow, border-color; transition-duration: 140ms; transition-timing-function: var(--pv-ease);
     }
@@ -216,6 +217,13 @@
     @media (max-width: 620px) {
       #topbar { flex-wrap: wrap; height: auto; padding: 8px 12px; gap: 8px; }
       #presetSwitch { order: 3; max-width: 100%; width: 100%; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 1ms !important;
+        transition-duration: 1ms !important;
+        scroll-behavior: auto !important;
+      }
     }
   </style>
 </head>
@@ -270,8 +278,11 @@
           <div class="srch-empty" role="status" aria-live="polite">No settings match your search.</div>
         </div>
 
-        <details open class="grp" data-group="Test">
-          <summary>Test</summary>
+        <!-- All widget.json fields are injected here, grouped + collapsible -->
+        <div id="fields"></div>
+
+        <details class="grp" data-group="Preview Tools">
+          <summary>Preview Tools</summary>
           <div class="pad">
             <div class="row">
               <button type="button" class="sim tw" data-act="twitch">Twitch</button>
@@ -301,7 +312,6 @@
               <button type="button" class="sim" data-act="grouped" title="Two messages from the same user → second-message stack grouping">Grouping</button>
               <button type="button" class="sim" data-act="shared" title="Twitch Stream Together: guest channels + participants panel">Shared chat</button>
               <button type="button" class="sim" data-act="ageFade" title="Older visible messages fade by age (dynamic opacity)">Age fade</button>
-              <button type="button" class="sim" data-act="floatScene" title="Full-screen layout: messages float with overlap avoidance">Float</button>
               <button type="button" class="sim" data-act="roleMatrix" title="Per-role colored name chips + message backgrounds">Role colors</button>
             </div>
             <div class="lbl">Control</div>
@@ -314,8 +324,6 @@
           </div>
         </details>
 
-        <!-- All widget.json fields are injected here, grouped + collapsible -->
-        <div id="fields"></div>
       </aside>
     </div>
   </div>

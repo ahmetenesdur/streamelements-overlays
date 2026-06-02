@@ -174,20 +174,20 @@
   // those tokens unconditionally and injects webfonts. Distinctive, non-cliché
   // accents + fonts (never Inter / a purple gradient) give each its own feel.
   const PRESET_THEME = {
-    editorial: { accent: '#e8c99a', font: 'Hanken Grotesk' },
-    frosted:   { accent: '#bcd3ff', font: 'Hanken Grotesk' },
-    slate:     { accent: '#e8c99a', font: 'Hanken Grotesk' },
-    pulse:     { accent: '#7c9cff', font: 'Bricolage Grotesque' },
+    editorial: { accent: '#e3b34e', font: 'Hanken Grotesk' },                              // luxe gold
+    frosted:   { accent: '#6fd3e6', font: 'Hanken Grotesk' },                              // glacial cyan
+    slate:     { accent: '#f2887e', font: 'Hanken Grotesk' },                              // warm coral
+    pulse:     { accent: '#977dff', font: 'Bricolage Grotesque' },                         // vivid violet
     daylight:  {
-      accent: '#b9762e', font: 'Hanken Grotesk', nameFont: 'Instrument Serif',
-      ink: 'rgba(28,26,24,0.94)', nick: '#4a63b8',
+      accent: '#b8384b', font: 'Hanken Grotesk', nameFont: 'Instrument Serif',            // editorial crimson on cream
+      ink: 'rgba(28,26,24,0.94)', nick: '#3f5fb0',
       dotTwitch: '#7a52c8', dotYouTube: '#cc3b3b', dotKick: '#3a9e2a',
       roles: {
-        broadcaster: '#c0445c', leadmod: '#1f8f7e', mod: '#2f9c57',
-        artist: '#b5631f', vip: '#b54a93', sub: '#4a63b8', fav: '#9a7416'
+        broadcaster: '#b8384b', leadmod: '#1f8f7e', mod: '#2f9c57',
+        artist: '#b5631f', vip: '#9a3f86', sub: '#3f5fb0', fav: '#9a7416'
       }
     },
-    terminal:  { accent: '#8bf2a6', font: 'Space Mono', nameFont: 'Space Mono' }
+    terminal:  { accent: '#6ee7a8', font: 'Space Mono', nameFont: 'Space Mono' }           // mint phosphor
   };
   const pronounCache = {};   // twitch login -> short pronoun label ('' = none)
   let pronounMap = null;     // id -> short label (loaded once)
@@ -956,7 +956,7 @@
     set('--row-width', num(f.rowWidth, 100) + '%');
 
     // ---- Accent: user override -> preset accent -> default. Overlay simple-first. ----
-    set('--accent', (f.accent && String(f.accent).trim()) || pt.accent || '#e8c99a');
+    set('--accent', (f.accent && String(f.accent).trim()) || pt.accent || '#e3b34e');
     set('--overlay-bg', f.overlayBackground || 'rgba(0,0,0,0)');
 
     // ---- Surface overrides (only when the gate is on) ----
@@ -985,13 +985,13 @@
     // Roles: user field -> preset palette (e.g. Daylight's darker ink set) -> default.
     const rt = pt.roles || {};
     const role = (k, field, dflt) => f[field] || rt[k] || dflt;
-    const rBroadcaster = role('broadcaster', 'colorBroadcaster', '#f2969d');
-    const rMod = role('mod', 'colorMod', '#90d9a4');
-    const rVip = role('vip', 'colorVip', '#efa8d6');
-    const rSub = role('sub', 'colorSub', '#a7bef2');
-    const rLeadmod = role('leadmod', 'colorLeadMod', '#84d2c2');
-    const rArtist = role('artist', 'colorArtist', '#f4b083');
-    const rFav = role('fav', 'colorFav', '#f1d396');
+    const rBroadcaster = role('broadcaster', 'colorBroadcaster', '#ff8a9b');
+    const rMod = role('mod', 'colorMod', '#6fd58f');
+    const rVip = role('vip', 'colorVip', '#d99bf0');
+    const rSub = role('sub', 'colorSub', '#8fb4ff');
+    const rLeadmod = role('leadmod', 'colorLeadMod', '#5fd0c4');
+    const rArtist = role('artist', 'colorArtist', '#ffb273');
+    const rFav = role('fav', 'colorFav', '#f2cf6b');
     set('--role-broadcaster', rBroadcaster);
     set('--role-mod', rMod);
     set('--role-vip', rVip);

@@ -54,8 +54,8 @@
   --sheen: inset 0 0 0 0 transparent;   /* inset top hairline = the only edge cue */
   --edge: inset 0 0 0 0 transparent;    /* opt-in only (glassEdge override) — presets use no leading accent bar */
 
-  /* Accent — one warm, refined tone (soft champagne). Drives alerts + keywords only. */
-  --accent: #e8c99a;
+  /* Accent — editorial's luxe gold (each preset sets its own via applyTheme). Drives alerts + keywords. */
+  --accent: #e3b34e;
 
   /* Overlay backdrop (transparent for OBS) */
   --overlay-bg: rgba(0, 0, 0, 0);
@@ -71,13 +71,13 @@
 
   /* Roles — soft pastel username tints (no boxes). Harmonious lightness so no
      single role shouts; distinct hues keep them readable apart. */
-  --role-broadcaster: #f2969d;
-  --role-leadmod: #84d2c2;
-  --role-mod: #90d9a4;
-  --role-artist: #f4b083;
-  --role-vip: #efa8d6;
-  --role-sub: #a7bef2;
-  --role-fav: #f1d396;
+  --role-broadcaster: #ff8a9b;
+  --role-leadmod: #5fd0c4;
+  --role-mod: #6fd58f;
+  --role-artist: #ffb273;
+  --role-vip: #d99bf0;
+  --role-sub: #8fb4ff;
+  --role-fav: #f2cf6b;
   --role-regular: ;
 
   /* Animation */

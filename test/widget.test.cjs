@@ -800,9 +800,9 @@ test('empty override fields clear stale preset CSS variables', () => {
       accent: '', textShadow: '', keywordColor: '', colorRegular: ''
     }), channel: {}, session: { data: {} } }
   });
-  // Accent now resolves to the active preset's accent when cleared (editorial → champagne),
+  // Accent now resolves to the active preset's accent when cleared (editorial → luxe gold),
   // not to empty — each preset owns a distinct default accent.
-  assert.strictEqual(rootStyle.getPropertyValue('--accent'), '#e8c99a');
+  assert.strictEqual(rootStyle.getPropertyValue('--accent'), '#e3b34e');
   assert.strictEqual(rootStyle.getPropertyValue('--text-shadow'), '');
   assert.strictEqual(rootStyle.getPropertyValue('--keyword-color'), '');
   assert.strictEqual(rootStyle.getPropertyValue('--role-regular'), '');
@@ -847,12 +847,12 @@ test('glass override beats the active preset and clears cleanly when disabled', 
 // ---- premium presets (Phase A) ------------------------------------
 test('each preset resolves its own accent + font when those fields are empty', () => {
   const cases = {
-    editorial: { accent: '#e8c99a', font: 'Hanken Grotesk' },
-    frosted:   { accent: '#bcd3ff', font: 'Hanken Grotesk' },
-    slate:     { accent: '#e8c99a', font: 'Hanken Grotesk' },
-    pulse:     { accent: '#7c9cff', font: 'Bricolage Grotesque' },
-    daylight:  { accent: '#b9762e', font: 'Hanken Grotesk' },
-    terminal:  { accent: '#8bf2a6', font: 'Space Mono' }
+    editorial: { accent: '#e3b34e', font: 'Hanken Grotesk' },
+    frosted:   { accent: '#6fd3e6', font: 'Hanken Grotesk' },
+    slate:     { accent: '#f2887e', font: 'Hanken Grotesk' },
+    pulse:     { accent: '#977dff', font: 'Bricolage Grotesque' },
+    daylight:  { accent: '#b8384b', font: 'Hanken Grotesk' },
+    terminal:  { accent: '#6ee7a8', font: 'Space Mono' }
   };
   for (const preset of Object.keys(cases)) {
     const { rootStyle } = loadWidget({ stylePreset: preset, accent: '', fontName: '' });
@@ -871,7 +871,7 @@ test('daylight preset uses ink text, a serif name font, and a darker role palett
   const { rootStyle } = loadWidget({ stylePreset: 'daylight', fontColor: '', colorSub: '' });
   assert.strictEqual(rootStyle.getPropertyValue('--font-color'), 'rgba(28,26,24,0.94)');
   assert.strictEqual(rootStyle.getPropertyValue('--name-font'), "'Instrument Serif'");
-  assert.strictEqual(rootStyle.getPropertyValue('--role-sub'), '#4a63b8');
+  assert.strictEqual(rootStyle.getPropertyValue('--role-sub'), '#3f5fb0');
 });
 
 test('fontName ships empty so the preset font is used out of the box', () => {

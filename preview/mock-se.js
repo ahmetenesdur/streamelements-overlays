@@ -415,12 +415,12 @@
   // ---- preset gallery + top-bar switcher ------------------------
   // Representative card visuals (not the exact tokens — a quick read of each look).
   const PRESET_META = [
-    { key: 'editorial', name: 'Editorial', desc: 'Type on video', accent: '#e8c99a', bg: '#15161b', chip: 'rgba(255,255,255,0.82)' },
-    { key: 'frosted',   name: 'Frosted',   desc: 'Liquid glass',  accent: '#bcd3ff', bg: '#2b3140', chip: 'rgba(255,255,255,0.8)' },
-    { key: 'slate',     name: 'Slate',     desc: 'Solid onyx',    accent: '#e8c99a', bg: '#13151b', chip: 'rgba(255,255,255,0.82)' },
-    { key: 'pulse',     name: 'Pulse',     desc: 'High energy',   accent: '#7c9cff', bg: '#141621', chip: 'rgba(255,255,255,0.82)' },
-    { key: 'daylight',  name: 'Daylight',  desc: 'Light print',   accent: '#b9762e', bg: '#f4f1ea', chip: 'rgba(28,26,24,0.82)' },
-    { key: 'terminal',  name: 'Terminal',  desc: 'Dev mono',      accent: '#8bf2a6', bg: '#0d0f0d', chip: 'rgba(139,242,166,0.7)' }
+    { key: 'editorial', name: 'Editorial', desc: 'Type on video', accent: '#e3b34e', bg: '#15161b', chip: 'rgba(255,255,255,0.82)' },
+    { key: 'frosted',   name: 'Frosted',   desc: 'Liquid glass',  accent: '#6fd3e6', bg: '#2b3140', chip: 'rgba(255,255,255,0.8)' },
+    { key: 'slate',     name: 'Slate',     desc: 'Solid onyx',    accent: '#f2887e', bg: '#13151b', chip: 'rgba(255,255,255,0.82)' },
+    { key: 'pulse',     name: 'Pulse',     desc: 'High energy',   accent: '#977dff', bg: '#141621', chip: 'rgba(255,255,255,0.82)' },
+    { key: 'daylight',  name: 'Daylight',  desc: 'Light print',   accent: '#b8384b', bg: '#f4f1ea', chip: 'rgba(28,26,24,0.82)' },
+    { key: 'terminal',  name: 'Terminal',  desc: 'Dev mono',      accent: '#6ee7a8', bg: '#0d0f0d', chip: 'rgba(110,231,168,0.72)' }
   ];
 
   // The single preset picker: a labelled radiogroup of look cards.
@@ -475,6 +475,8 @@
     });
     const first = document.querySelector('#gallery .gcard');
     if (!active && first) first.tabIndex = 0;
+    // keep the selected card in view (it may be scrolled off in the strip)
+    if (active && active.scrollIntoView) active.scrollIntoView({ inline: 'nearest', block: 'nearest' });
   }
 
   // ---- inspector search: filter settings by label ---------------

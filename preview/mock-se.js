@@ -103,8 +103,18 @@
           currency: { code: 'USD', name: 'US Dollar', symbol: '$' }
         }
       }));
+      syncPresetUI();
     },
     set(key, val) { this.fieldData[key] = val; this.load(); },
+
+    // Pick a style preset from the gallery / top-bar switcher. It wins over any
+    // active quick-start scene, so the gallery is the source of truth for the look.
+    setPreset(p) {
+      this.fieldData.stylePreset = p;
+      this.fieldData.quickSetupPreset = 'manual';
+      this.load();
+      syncControlPanel();
+    },
 
     // Restore every field to its widget.json default (+ optional overrides) and
     // clear the chat — so each Feature demo is self-contained no matter what was
@@ -401,6 +411,114 @@
     });
   }
 
+  // ---- preset gallery + top-bar switcher ------------------------
+  // Representative card visuals (not the exact tokens — a quick read of each look).
+  const PRESET_META = [
+    { key: 'editorial', name: 'Editorial', desc: 'Type on video', accent: '#e8c99a', bg: '#15161b', chip: 'rgba(255,255,255,0.82)' },
+    { key: 'frosted',   name: 'Frosted',   desc: 'Liquid glass',  accent: '#bcd3ff', bg: '#2b3140', chip: 'rgba(255,255,255,0.8)' },
+    { key: 'slate',     name: 'Slate',     desc: 'Solid onyx',    accent: '#e8c99a', bg: '#13151b', chip: 'rgba(255,255,255,0.82)' },
+    { key: 'pulse',     name: 'Pulse',     desc: 'High energy',   accent: '#7c9cff', bg: '#141621', chip: 'rgba(255,255,255,0.82)' },
+    { key: 'daylight',  name: 'Daylight',  desc: 'Light print',   accent: '#b9762e', bg: '#f4f1ea', chip: 'rgba(28,26,24,0.82)' },
+    { key: 'terminal',  name: 'Terminal',  desc: 'Dev mono',      accent: '#8bf2a6', bg: '#0d0f0d', chip: 'rgba(139,242,166,0.7)' }
+  ];
+
+  function buildPresetSwitch() {
+    const host = document.getElementById('presetSwitch');
+    if (!host) return;
+    PRESET_META.forEach(p => {
+      const b = el('button', { type: 'button', class: 'seg', 'data-preset': p.key, 'aria-pressed': 'false', title: p.name + ' — ' + p.desc });
+      b.style.setProperty('--seg-accent', p.accent);
+      b.innerHTML = '<span class="seg-dot"></span>' + p.name;
+      b.addEventListener('click', () => MockSE.setPreset(p.key));
+      host.appendChild(b);
+    });
+  }
+
+  function buildPresetGallery() {
+    const host = document.getElementById('gallery');
+    if (!host) return;
+    PRESET_META.forEach(p => {
+      const card = el('button', { type: 'button', class: 'gcard', 'data-preset': p.key, 'aria-pressed': 'false', 'aria-label': p.name + ' preset — ' + p.desc });
+      card.style.setProperty('--g-bg', p.bg);
+      card.style.setProperty('--g-accent', p.accent);
+      card.style.setProperty('--g-chip', p.chip);
+      card.innerHTML =
+        '<span class="gcard-vis">' +
+          '<span class="gcard-row"><span class="gcard-chip w1"></span><span class="gcard-chip w2"></span></span>' +
+          '<span class="gcard-row"><span class="gcard-chip w1"></span><span class="gcard-chip w3"></span></span>' +
+        '</span>' +
+        '<span class="gcard-meta"><span class="gcard-name">' + p.name + '</span><span class="gcard-desc">' + p.desc + '</span></span>';
+      card.addEventListener('click', () => MockSE.setPreset(p.key));
+      host.appendChild(card);
+    });
+  }
+
+  // Reflect the resolved preset on the switcher + gallery (called after every load).
+  function syncPresetUI() {
+    const chat = document.getElementById('seChat');
+    const p = chat ? chat.dataset.preset : '';
+    document.querySelectorAll('#presetSwitch .seg, #gallery .gcard').forEach(b => {
+      b.setAttribute('aria-pressed', String(b.dataset.preset === p));
+    });
+  }
+
+  // ---- inspector search: filter settings by label ---------------
+  function wireSearch() {
+    const input = document.getElementById('search');
+    const clearBtn = document.getElementById('searchClear');
+    const panel = document.getElementById('panel');
+    if (!input) return;
+    const srch = input.closest('.srch');
+    const apply = () => {
+      const q = input.value.trim().toLowerCase();
+      if (srch) srch.classList.toggle('has-value', !!q);
+      let anyVisible = false;
+      document.querySelectorAll('#fields .grp').forEach(grp => {
+        let visible = 0;
+        grp.querySelectorAll('.field').forEach(field => {
+          const lbl = field.querySelector('label');
+          const match = !q || (lbl && lbl.textContent.toLowerCase().includes(q));
+          field.hidden = !match;
+          if (match) visible++;
+        });
+        grp.querySelectorAll('.fieldbtn').forEach(b => {
+          const match = !q || (b.textContent || '').toLowerCase().includes(q);
+          b.hidden = !match; if (match) visible++;
+        });
+        grp.hidden = !!q && visible === 0;
+        if (!grp.hidden) anyVisible = true;
+        if (q) grp.open = true;
+      });
+      const test = document.querySelector('.grp[data-group="Test"]');
+      if (test) test.hidden = !!q;            // hide the test tools while searching settings
+      if (panel) panel.classList.toggle('no-results', !!q && !anyVisible);
+    };
+    input.addEventListener('input', apply);
+    if (clearBtn) clearBtn.addEventListener('click', () => { input.value = ''; apply(); input.focus(); });
+  }
+
+  // ---- device frame + motion freeze -----------------------------
+  function wireDevice() {
+    const sel = document.getElementById('deviceSel');
+    const stage = document.getElementById('stage');
+    if (!sel || !stage) return;
+    const labels = { desktop: 'Desktop', obs: 'OBS 1920 × 1080', mobile: 'Mobile 9:16' };
+    sel.addEventListener('change', () => {
+      stage.dataset.device = sel.value;
+      stage.dataset.label = labels[sel.value] || sel.value;
+    });
+  }
+  function wireMotion() {
+    const btn = document.getElementById('motionToggle');
+    if (!btn) return;
+    btn.addEventListener('click', () => {
+      const next = btn.getAttribute('aria-pressed') !== 'true';
+      btn.setAttribute('aria-pressed', String(next));
+      btn.textContent = next ? 'Frozen' : 'Motion';
+      MockSE.set('disableAllAnimations', next ? 'yes' : 'no');
+    });
+  }
+
   // ---- boot: load widget.json defaults, build panel, start ------
   fetch('../widget/widget.json')
     .then(r => r.json())
@@ -411,6 +529,11 @@
       MockSE.defaults = JSON.parse(JSON.stringify(fd));   // pristine baseline for resetFields()
       wire();
       buildFields(json);
+      buildPresetSwitch();
+      buildPresetGallery();
+      wireSearch();
+      wireDevice();
+      wireMotion();
       MockSE.load();
       MockSE.twitch(); MockSE.youtube(); MockSE.alert('follow');
     })

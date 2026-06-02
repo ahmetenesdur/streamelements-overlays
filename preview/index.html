@@ -3,196 +3,393 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Multistream Chat — Preview</title>
+  <title>Multistream Chat — Studio</title>
 
   <!-- The actual widget stylesheet (single source of truth) -->
   <link rel="stylesheet" href="../widget/widget.css" />
 
   <style>
-    /* ---- preview-only chrome (NOT part of the widget) ---- */
+    /* ================================================================
+       PREVIEW STUDIO — chrome only (NOT part of the widget).
+       Every token is namespaced --pv-* so it can NEVER bleed into the
+       widget's own custom properties. The widget renders with its real
+       tokens; this is just the control room around it.
+       ================================================================ */
     :root {
-      /* Preview-chrome tokens are namespaced (--pv-*) so they can NEVER bleed
-         into the widget's own CSS custom properties (e.g. --accent). The widget
-         must render with its real default accent, not the panel's blue. */
       color-scheme: dark;
-      --pw: 340px;            /* panel width */
-      --ink: #e9eaf0; --mut: #8b8f9c; --line: rgba(255,255,255,.08);
-      --field-bg: #16181f; --field-bd: rgba(255,255,255,.10);
-      --pv-accent: #6ea8fe;
+      --pv-bg: #0a0b0e;
+      --pv-surface: #101218;
+      --pv-surface-2: #161922;
+      --pv-surface-3: #1d212c;
+      --pv-line: rgba(255, 255, 255, 0.07);
+      --pv-line-2: rgba(255, 255, 255, 0.12);
+      --pv-ink: #e9eaf0;
+      --pv-mut: #8b909e;
+      --pv-faint: #5b606d;
+      --pv-accent: #8b9bf5;
+      --pv-accent-weak: rgba(139, 155, 245, 0.16);
+      --pv-r: 10px;
+      --pv-r-lg: 15px;
+      --pv-rail: 364px;
+      --pv-top: 54px;
+      --pv-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+      --pv-ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+      --pv-ease: cubic-bezier(0.2, 0, 0, 1);
     }
     * { box-sizing: border-box; }
-    html, body { height: 100%; }
+    html, body { height: 100%; margin: 0; }
     body {
-      margin: 0; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif; color: var(--ink);
-      -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+      background: var(--pv-bg);
+      color: var(--pv-ink);
+      font-family: var(--pv-ui);
+      font-size: 13px;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      font-variant-numeric: tabular-nums;
+    }
+    button, input, select { font-family: inherit; }
+    :is(button, select, input, summary, [tabindex]):focus-visible {
+      outline: 2px solid var(--pv-accent);
+      outline-offset: 2px;
+      border-radius: 8px;
     }
 
-    /* Default stage = clean flat dark, so the chat itself is easy to judge.
-       Switch to a colored/photo scene below to test glass over video. */
-    #stage {
-      position: absolute; inset: 0 var(--pw) 0 0;
-      background: #15161b;
+    #app { display: flex; flex-direction: column; height: 100%; }
+
+    /* ---- TOP BAR ------------------------------------------------- */
+    #topbar {
+      flex: 0 0 var(--pv-top);
+      display: flex; align-items: center; gap: 16px;
+      padding: 0 14px 0 16px;
+      background: linear-gradient(180deg, #14161d, var(--pv-surface));
+      border-bottom: 1px solid var(--pv-line);
     }
-    /* Flat, gradient-free test scenes — solid tones spanning the luminance range
-       so chat legibility can be judged honestly, without decorative backgrounds. */
-    #stage.scene-light { background: #e9edf3; }   /* bright scene */
-    #stage.scene-mid   { background: #4a4e57; }   /* mid-gray — the toughest case for contrast */
-    #stage.scene-ocean { background: #143a40; }   /* a calm deep-color scene */
-    #stage.scene-checker {                          /* transparency check — tiled pattern, not a gradient */
+    .tb-brand { display: flex; align-items: center; gap: 9px; font-weight: 650; letter-spacing: -0.01em; white-space: nowrap; }
+    .tb-logo {
+      width: 22px; height: 22px; border-radius: 7px; flex: none;
+      background:
+        radial-gradient(circle at 30% 30%, #aeb8ff, var(--pv-accent) 60%, #5a67d8);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 2px 8px -3px var(--pv-accent);
+    }
+    .tb-badge {
+      font: 600 9px/1 var(--pv-mono); letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--pv-accent); background: var(--pv-accent-weak);
+      padding: 4px 6px 3px; border-radius: 5px;
+    }
+    .tb-spring { flex: 1 1 auto; }
+
+    /* Segmented preset switcher (built in JS) */
+    #presetSwitch {
+      display: flex; gap: 2px; padding: 3px; border-radius: 11px;
+      background: var(--pv-surface-2); box-shadow: inset 0 0 0 1px var(--pv-line);
+      overflow: hidden; max-width: min(46vw, 560px); overflow-x: auto; scrollbar-width: none;
+    }
+    #presetSwitch::-webkit-scrollbar { display: none; }
+    .seg {
+      appearance: none; border: 0; cursor: pointer; white-space: nowrap;
+      padding: 7px 12px; border-radius: 8px; font-size: 12px; font-weight: 550;
+      color: var(--pv-mut); background: transparent;
+      transition-property: color, background-color, transform; transition-duration: 150ms; transition-timing-function: var(--pv-ease);
+    }
+    .seg:hover { color: var(--pv-ink); }
+    .seg:active { transform: scale(0.97); }
+    .seg[aria-pressed="true"] {
+      color: var(--pv-ink); background: var(--pv-surface-3);
+      box-shadow: inset 0 0 0 1px var(--pv-line-2), 0 1px 2px rgba(0, 0, 0, 0.3);
+    }
+    .seg[aria-pressed="true"] .seg-dot { background: var(--seg-accent, var(--pv-accent)); }
+    .seg-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--pv-faint); display: inline-block; margin-right: 7px; vertical-align: 0.5px; transition: background-color 150ms; }
+
+    .tb-controls { display: flex; align-items: center; gap: 8px; }
+    .tb-live {
+      display: inline-flex; align-items: center; gap: 7px;
+      font: 600 10px/1 var(--pv-mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--pv-mut);
+      padding-right: 4px;
+    }
+    .tb-live i { width: 8px; height: 8px; border-radius: 50%; background: #4ade80; box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.5); animation: pvpulse 2.4s var(--pv-ease) infinite; }
+    @keyframes pvpulse { 0% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.45); } 70% { box-shadow: 0 0 0 7px rgba(74, 222, 128, 0); } 100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); } }
+    @media (prefers-reduced-motion: reduce) { .tb-live i { animation: none; } }
+
+    .tb-field { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; color: var(--pv-mut); }
+    .tb-field select {
+      appearance: none; -webkit-appearance: none;
+      background: var(--pv-surface-2) no-repeat right 8px center/9px url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238b909e' stroke-width='1.6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      color: var(--pv-ink); border: 1px solid var(--pv-line); border-radius: 8px;
+      padding: 7px 26px 7px 10px; font-size: 12px; min-height: 34px; cursor: pointer;
+      transition: border-color 150ms, background-color 150ms;
+    }
+    .tb-field select:hover { border-color: var(--pv-line-2); }
+    .tb-toggle {
+      appearance: none; border: 1px solid var(--pv-line); background: var(--pv-surface-2); color: var(--pv-mut);
+      border-radius: 8px; min-height: 34px; padding: 0 11px; font-size: 12px; cursor: pointer; white-space: nowrap;
+      display: inline-flex; align-items: center; gap: 6px;
+      transition-property: color, background-color, border-color, transform; transition-duration: 150ms; transition-timing-function: var(--pv-ease);
+    }
+    .tb-toggle:hover { color: var(--pv-ink); border-color: var(--pv-line-2); }
+    .tb-toggle:active { transform: scale(0.97); }
+    .tb-toggle[aria-pressed="true"] { color: var(--pv-accent); border-color: color-mix(in srgb, var(--pv-accent) 50%, transparent); background: var(--pv-accent-weak); }
+    .tb-toggle::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: currentColor; opacity: 0.5; }
+    .tb-toggle[aria-pressed="true"]::before { opacity: 1; }
+
+    /* ---- WORKSPACE ----------------------------------------------- */
+    #workspace { flex: 1 1 auto; display: flex; min-height: 0; }
+
+    #stagewrap { flex: 1 1 auto; display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+    #stagepad {
+      flex: 1 1 auto; min-height: 0; display: flex; align-items: stretch; justify-content: center;
+      padding: 22px; gap: 0;
+    }
+    /* The stage = the real preview canvas. Device frames resize it. */
+    #stage {
+      position: relative; width: 100%; height: 100%;
+      border-radius: 12px; overflow: hidden;
+      background: #15161b;
+      box-shadow: 0 0 0 1px var(--pv-line), 0 24px 60px -28px rgba(0, 0, 0, 0.8);
+    }
+    #stage[data-device="obs"]   { width: auto; aspect-ratio: 16 / 9; height: 100%; max-width: 100%; }
+    #stage[data-device="mobile"]{ width: auto; aspect-ratio: 9 / 16; height: 100%; max-width: 100%; }
+    /* Flat, gradient-free test scenes spanning the luminance range. */
+    #stage.scene-light  { background: #e9edf3; }
+    #stage.scene-mid    { background: #4a4e57; }
+    #stage.scene-ocean  { background: #143a40; }
+    #stage.scene-checker {
       background-color: #14141c;
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28'%3E%3Crect width='14' height='14' fill='%231b1b25'/%3E%3Crect x='14' y='14' width='14' height='14' fill='%231b1b25'/%3E%3C/svg%3E");
     }
-
-    /* ---- panel: clean, Apple-ish, grouped + collapsible ---- */
-    #panel {
-      position: absolute; top: 0; right: 0; bottom: 0; width: var(--pw);
-      background: #0c0d11; border-left: 1px solid var(--line);
-      overflow-y: auto; font-size: 13px;
+    /* a faint corner label of the active device size */
+    #stage::after {
+      content: attr(data-label); position: absolute; left: 10px; bottom: 9px; z-index: 6;
+      font: 600 9px/1 var(--pv-mono); letter-spacing: 0.1em; text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.34); pointer-events: none;
     }
-    #panel header { padding: 16px 16px 10px; position: sticky; top: 0; background: #0c0d11; z-index: 2; border-bottom: 1px solid var(--line); }
-    #panel h1 { font-size: 15px; margin: 0; letter-spacing: -.01em; font-weight: 650; text-wrap: balance; }
-    #panel .sub { font-size: 11px; color: var(--mut); margin: 3px 0 0; }
 
-    .grp { border-bottom: 1px solid var(--line); }
+    /* ---- PRESET GALLERY (filmstrip of looks) --------------------- */
+    #gallery {
+      flex: 0 0 auto; display: flex; gap: 10px; padding: 0 22px 18px;
+      overflow-x: auto; scrollbar-width: thin;
+    }
+    .gcard {
+      appearance: none; cursor: pointer; flex: 0 0 auto; width: 132px; text-align: left;
+      padding: 0; border: 0; border-radius: var(--pv-r-lg); overflow: hidden;
+      background: var(--pv-surface); box-shadow: 0 0 0 1px var(--pv-line);
+      transition-property: transform, box-shadow; transition-duration: 180ms; transition-timing-function: var(--pv-ease);
+    }
+    .gcard:hover { transform: translateY(-2px); box-shadow: 0 0 0 1px var(--pv-line-2), 0 14px 26px -16px rgba(0, 0, 0, 0.7); }
+    .gcard:active { transform: translateY(0) scale(0.98); }
+    .gcard[aria-pressed="true"] { box-shadow: 0 0 0 1px var(--pv-accent), 0 0 0 4px var(--pv-accent-weak); }
+    .gcard-vis {
+      height: 56px; padding: 9px 10px; display: flex; flex-direction: column; justify-content: center; gap: 5px;
+      background: var(--g-bg, #15161b);
+    }
+    .gcard-row { display: flex; align-items: center; gap: 5px; }
+    .gcard-chip { height: 9px; border-radius: 5px; background: var(--g-chip, rgba(255, 255, 255, 0.16)); }
+    .gcard-chip.w1 { width: 26%; background: var(--g-accent, var(--pv-accent)); }
+    .gcard-chip.w2 { width: 52%; }
+    .gcard-chip.w3 { width: 38%; }
+    .gcard-meta { padding: 8px 11px 10px; border-top: 1px solid var(--pv-line); }
+    .gcard-name { font-size: 12px; font-weight: 600; letter-spacing: -0.01em; }
+    .gcard-desc { font-size: 10.5px; color: var(--pv-mut); margin-top: 1px; }
+
+    /* ---- INSPECTOR ----------------------------------------------- */
+    #panel {
+      flex: 0 0 var(--pv-rail); width: var(--pv-rail);
+      background: var(--pv-surface); border-left: 1px solid var(--pv-line);
+      overflow-y: auto; display: flex; flex-direction: column;
+    }
+    #panel::-webkit-scrollbar { width: 10px; }
+    #panel::-webkit-scrollbar-thumb { background: var(--pv-surface-3); border-radius: 6px; border: 3px solid var(--pv-surface); }
+    #inspectorHead {
+      position: sticky; top: 0; z-index: 3; background: var(--pv-surface);
+      padding: 13px 14px; border-bottom: 1px solid var(--pv-line);
+    }
+    .srch { position: relative; }
+    .srch svg { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); width: 14px; height: 14px; color: var(--pv-faint); pointer-events: none; }
+    #search {
+      width: 100%; min-height: 38px; background: var(--pv-surface-2); color: var(--pv-ink);
+      border: 1px solid var(--pv-line); border-radius: var(--pv-r); padding: 8px 30px 8px 32px; font-size: 13px;
+      transition: border-color 150ms, background-color 150ms;
+    }
+    #search::placeholder { color: var(--pv-faint); }
+    #search:hover { border-color: var(--pv-line-2); }
+    #search:focus { outline: none; border-color: color-mix(in srgb, var(--pv-accent) 55%, transparent); box-shadow: 0 0 0 3px var(--pv-accent-weak); }
+    .srch-clear { position: absolute; right: 7px; top: 50%; transform: translateY(-50%); width: 22px; height: 22px; border: 0; border-radius: 6px; background: transparent; color: var(--pv-mut); cursor: pointer; display: none; align-items: center; justify-content: center; }
+    .srch-clear:hover { background: var(--pv-surface-3); color: var(--pv-ink); }
+    .srch.has-value .srch-clear { display: flex; }
+    .srch-empty { display: none; padding: 18px 4px 6px; color: var(--pv-faint); font-size: 12px; text-align: center; }
+    #panel.no-results .srch-empty { display: block; }
+
+    /* groups (Simulate is hard-coded; field groups built in JS) */
+    .grp { border-bottom: 1px solid var(--pv-line); }
+    .grp[hidden] { display: none; }
     .grp > summary {
       list-style: none; cursor: pointer; user-select: none;
-      min-height: 40px; padding: 11px 16px; font-size: 11px; font-weight: 700; letter-spacing: .06em;
-      text-transform: uppercase; color: var(--mut); display: flex; align-items: center; gap: 8px;
+      min-height: 42px; padding: 12px 16px; font: 600 11px/1 var(--pv-mono); letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--pv-mut); display: flex; align-items: center; gap: 9px;
     }
     .grp > summary::-webkit-details-marker { display: none; }
-    .grp > summary::before { content: "›"; transition: transform .15s ease; font-size: 14px; color: var(--mut); }
+    .grp > summary::before { content: "›"; transition: transform 0.15s var(--pv-ease); font-size: 14px; color: var(--pv-faint); }
     .grp[open] > summary::before { transform: rotate(90deg); }
-    .grp > summary:hover { color: var(--ink); }
-    .pad { padding: 4px 16px 14px; display: flex; flex-direction: column; gap: 9px; }
+    .grp > summary:hover { color: var(--pv-ink); }
+    .grp .count { margin-left: auto; font: 500 10px/1 var(--pv-mono); color: var(--pv-faint); }
+    .pad { padding: 6px 16px 16px; display: flex; flex-direction: column; gap: 10px; }
 
     .field { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 10px; }
-    .field > label { color: #c7cad4; font-size: 12px; line-height: 1.3; }
-    .field .ctl { justify-self: end; width: 150px; }
+    .field[hidden] { display: none; }
+    .field > label { color: #c4c8d4; font-size: 12.5px; line-height: 1.32; }
+    .field .ctl { justify-self: end; width: 156px; }
     .field.wide { grid-template-columns: 1fr; }
     .field.wide .ctl { width: 100%; }
 
-    select, input[type=text], input[type=number] {
-      min-height: 40px;
-      width: 150px; background: var(--field-bg); color: var(--ink);
-      border: 1px solid var(--field-bd); border-radius: 7px; padding: 6px 8px; font-size: 12px; font-family: inherit;
+    select.ctl, input[type=text], input[type=number] {
+      min-height: 38px; width: 156px; background: var(--pv-surface-2); color: var(--pv-ink);
+      border: 1px solid var(--pv-line); border-radius: 9px; padding: 7px 9px; font-size: 12.5px;
+      transition: border-color 150ms, background-color 150ms;
     }
-    .field.wide select, .field.wide input { width: 100%; }
-    input[type=range] { width: 150px; min-height: 40px; accent-color: var(--pv-accent); }
-    input[type=color] { width: 40px; height: 40px; padding: 3px; border: 1px solid var(--field-bd); border-radius: 8px; background: var(--field-bg); }
-    .rangewrap { display: flex; align-items: center; gap: 8px; justify-content: flex-end; }
-    .rangewrap .val { font-variant-numeric: tabular-nums; color: var(--mut); font-size: 11px; min-width: 30px; text-align: right; }
-    .colorwrap { display: flex; align-items: center; gap: 6px; justify-content: flex-end; }
-    .colorwrap input[type=text] { width: 108px; }
+    select.ctl { appearance: none; -webkit-appearance: none; padding-right: 26px;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238b909e' stroke-width='1.6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 9px center; background-size: 9px; cursor: pointer; }
+    input[type=text]:hover, input[type=number]:hover, select.ctl:hover { border-color: var(--pv-line-2); }
+    input[type=text]:focus, input[type=number]:focus, select.ctl:focus { outline: none; border-color: color-mix(in srgb, var(--pv-accent) 55%, transparent); box-shadow: 0 0 0 3px var(--pv-accent-weak); }
+    .field.wide select.ctl, .field.wide input { width: 100%; }
+    input[type=range] { width: 156px; min-height: 36px; accent-color: var(--pv-accent); cursor: pointer; }
+    input[type=color] { width: 38px; height: 38px; padding: 3px; border: 1px solid var(--pv-line); border-radius: 9px; background: var(--pv-surface-2); cursor: pointer; }
+    .rangewrap { display: flex; align-items: center; gap: 9px; justify-content: flex-end; }
+    .rangewrap .val { font-family: var(--pv-mono); color: var(--pv-mut); font-size: 11px; min-width: 32px; text-align: right; }
+    .colorwrap { display: flex; align-items: center; gap: 7px; justify-content: flex-end; }
+    .colorwrap input[type=text] { width: 110px; font-family: var(--pv-mono); font-size: 11px; }
 
+    /* simulate / test buttons */
     .row { display: flex; flex-wrap: wrap; gap: 6px; }
     button.sim {
-      flex: 1 1 auto; background: var(--field-bg); color: var(--ink); border: 1px solid var(--field-bd);
-      min-height: 40px; border-radius: 7px; padding: 8px 10px; font-size: 12px; cursor: pointer; font-family: inherit;
+      flex: 1 1 auto; background: var(--pv-surface-2); color: var(--pv-ink); border: 1px solid var(--pv-line);
+      min-height: 38px; border-radius: 9px; padding: 8px 10px; font-size: 12px; cursor: pointer;
       touch-action: manipulation;
-      transition-property: transform, background-color, box-shadow, border-color;
-      transition-duration: 140ms;
-      transition-timing-function: ease-out;
+      transition-property: transform, background-color, box-shadow, border-color; transition-duration: 140ms; transition-timing-function: var(--pv-ease);
     }
-    button.sim:hover { background: #1f222b; }
+    button.sim:hover { background: var(--pv-surface-3); border-color: var(--pv-line-2); }
     button.sim:active { transform: scale(0.96); }
-    :is(button, select, input, summary):focus-visible {
-      outline: 2px solid var(--pv-accent);
-      outline-offset: 2px;
-      box-shadow: 0 0 0 4px rgba(110, 168, 254, 0.18);
-    }
-    button.sim.tw { border-color: #9146ff66; } button.sim.yt { border-color: #ff000066; }
-    button.sim.kk { border-color: #53fc1866; } button.sim.al { border-color: #e9c37c66; }
+    button.sim.tw { box-shadow: inset 3px 0 0 #9146ff; } button.sim.yt { box-shadow: inset 3px 0 0 #ff4d4d; }
+    button.sim.kk { box-shadow: inset 3px 0 0 #53fc18; } button.sim.al { box-shadow: inset 3px 0 0 #e9c37c; }
     button.fieldbtn { width: 100%; }
-    .lbl { font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: var(--mut); margin-top: 4px; }
+    .lbl { font: 600 9.5px/1 var(--pv-mono); text-transform: uppercase; letter-spacing: 0.1em; color: var(--pv-faint); margin-top: 6px; }
 
-    @media (max-width: 760px) {
-      :root { --pw: 100vw; }
-      #stage { inset: 0 0 44vh 0; }
-      #panel {
-        top: auto; left: 0; right: 0; width: 100%; height: 44vh;
-        border-left: 0; border-top: 1px solid var(--line);
-      }
-      #panel header { padding: 12px 14px 8px; }
-      .pad { padding: 4px 14px 14px; }
-      .field { grid-template-columns: 1fr; align-items: stretch; }
-      .field .ctl, select, input[type=text], input[type=number], input[type=range] { width: 100%; }
-      .rangewrap, .colorwrap { justify-content: stretch; }
-      .rangewrap input[type=range] { flex: 1 1 auto; }
-      .colorwrap input[type=text] { flex: 1 1 auto; width: auto; }
+    /* ---- responsive: stack on narrow screens --------------------- */
+    @media (max-width: 880px) {
+      :root { --pv-rail: 100%; }
+      #workspace { flex-direction: column; }
+      #panel { flex: 0 0 auto; width: 100%; max-height: 46vh; border-left: 0; border-top: 1px solid var(--pv-line); }
+      #presetSwitch { max-width: 52vw; }
+      .tb-field span { display: none; }
+    }
+    @media (max-width: 620px) {
+      #topbar { flex-wrap: wrap; height: auto; padding: 8px 12px; gap: 8px; }
+      #presetSwitch { order: 3; max-width: 100%; width: 100%; }
     }
   </style>
 </head>
 <body>
-  <!-- ===== widget DOM (mirror of widget.html) ===== -->
-  <div id="stage">
-    <div class="se-chat" id="seChat" data-layout="vertical" data-halign="left" data-valign="bottom">
-      <div class="se-chat__list" id="chatList" role="log" aria-live="polite" aria-relevant="additions"></div>
-    </div>
-  </div>
-
-  <!-- ===== preview control panel ===== -->
-  <aside id="panel">
-    <header>
-      <h1>Multistream Chat</h1>
-      <p class="sub">Live preview — every setting below is the real widget field.</p>
-    </header>
-
-    <details open class="grp">
-      <summary>Simulate</summary>
-      <div class="pad">
-        <div class="row">
-          <button type="button" class="sim tw" data-act="twitch">Twitch</button>
-          <button type="button" class="sim yt" data-act="youtube">YouTube</button>
-          <button type="button" class="sim kk" data-act="kick">Kick</button>
-        </div>
-        <div class="row">
-          <button type="button" class="sim" data-act="action">/me</button>
-          <button type="button" class="sim" data-act="long">Long</button>
-          <button type="button" class="sim" data-act="emote">Emotes</button>
-          <button type="button" class="sim" data-act="seventv">7TV</button>
-          <button type="button" class="sim" data-act="keywords">Keywords</button>
-        </div>
-        <div class="lbl">Alerts</div>
-        <div class="row">
-          <button type="button" class="sim al" data-act="alert:follow">Follow</button>
-          <button type="button" class="sim al" data-act="alert:sub">Sub</button>
-          <button type="button" class="sim al" data-act="alert:tip">Tip</button>
-          <button type="button" class="sim al" data-act="alert:cheer">Cheer</button>
-          <button type="button" class="sim al" data-act="alert:raid">Raid</button>
-          <button type="button" class="sim al" data-act="alert:superchat">Super Chat</button>
-          <button type="button" class="sim al" data-act="alert:member">Member</button>
-          <button type="button" class="sim al" data-act="alert:reward">Reward</button>
-        </div>
-        <div class="lbl">Feature demos</div>
-        <div class="row">
-          <button type="button" class="sim" data-act="grouped" title="Two messages from the same user → second-message stack grouping">Grouping</button>
-          <button type="button" class="sim" data-act="shared" title="Twitch Stream Together: guest channels + participants panel">Shared chat</button>
-          <button type="button" class="sim" data-act="ageFade" title="Older visible messages fade by age (dynamic opacity)">Age fade</button>
-          <button type="button" class="sim" data-act="floatScene" title="Full-screen layout: messages float with overlap avoidance">Float</button>
-          <button type="button" class="sim" data-act="roleMatrix" title="Per-role colored name chips + message backgrounds">Role colors</button>
-        </div>
-        <div class="lbl">Control</div>
-        <div class="row">
-          <button type="button" class="sim" data-act="rain">Rain ×20</button>
-          <button type="button" class="sim" data-act="deleteLast">Delete last</button>
-          <button type="button" class="sim" data-act="clear" title="Remove all messages (keeps current settings)">Clear</button>
-          <button type="button" class="sim" data-act="reset" title="Restore all settings to defaults + clear (recover from a demo)">Reset</button>
-        </div>
-        <div class="field"><label for="previewScene">Preview scene</label>
-          <select class="ctl" id="previewScene" name="previewScene" data-scene>
+  <div id="app">
+    <!-- ===== TOP BAR ===== -->
+    <header id="topbar">
+      <div class="tb-brand"><span class="tb-logo" aria-hidden="true"></span> Multistream Chat <span class="tb-badge">Studio</span></div>
+      <div id="presetSwitch" role="group" aria-label="Style preset"></div>
+      <div class="tb-spring"></div>
+      <div class="tb-controls">
+        <span class="tb-live" title="Live preview"><i aria-hidden="true"></i> live</span>
+        <label class="tb-field"><span>Scene</span>
+          <select id="sceneSel" data-scene aria-label="Preview scene">
             <option value="">Plain dark</option>
             <option value="scene-light">Light</option>
             <option value="scene-mid">Mid gray</option>
             <option value="scene-ocean">Deep teal</option>
-            <option value="scene-checker">Checker (transparency)</option>
+            <option value="scene-checker">Checker</option>
           </select>
-        </div>
+        </label>
+        <label class="tb-field"><span>Device</span>
+          <select id="deviceSel" aria-label="Device frame">
+            <option value="desktop">Desktop</option>
+            <option value="obs">OBS 16:9</option>
+            <option value="mobile">Mobile</option>
+          </select>
+        </label>
+        <button type="button" class="tb-toggle" id="motionToggle" aria-pressed="false" title="Freeze animations">Motion</button>
       </div>
-    </details>
+    </header>
 
-    <!-- All widget.json fields are injected here, grouped + collapsible -->
-    <div id="fields"></div>
-  </aside>
+    <!-- ===== WORKSPACE ===== -->
+    <div id="workspace">
+      <section id="stagewrap">
+        <div id="stagepad">
+          <!-- the real widget DOM (mirror of widget.html) -->
+          <div id="stage" data-device="desktop" data-label="Desktop">
+            <div class="se-chat" id="seChat" data-layout="vertical" data-halign="left" data-valign="bottom">
+              <div class="se-chat__list" id="chatList" role="log" aria-live="polite" aria-relevant="additions"></div>
+            </div>
+          </div>
+        </div>
+        <!-- interactive preset gallery (built in JS) -->
+        <div id="gallery" role="group" aria-label="Preset gallery"></div>
+      </section>
+
+      <!-- ===== INSPECTOR ===== -->
+      <aside id="panel" aria-label="Settings inspector">
+        <div id="inspectorHead">
+          <div class="srch">
+            <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.6"/><path d="M11 11l3 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            <input id="search" type="search" placeholder="Search settings…" autocomplete="off" spellcheck="false" aria-label="Search settings" />
+            <button type="button" class="srch-clear" id="searchClear" aria-label="Clear search">✕</button>
+          </div>
+          <div class="srch-empty">No settings match your search.</div>
+        </div>
+
+        <details open class="grp" data-group="Test">
+          <summary>Test</summary>
+          <div class="pad">
+            <div class="row">
+              <button type="button" class="sim tw" data-act="twitch">Twitch</button>
+              <button type="button" class="sim yt" data-act="youtube">YouTube</button>
+              <button type="button" class="sim kk" data-act="kick">Kick</button>
+            </div>
+            <div class="row">
+              <button type="button" class="sim" data-act="action">/me</button>
+              <button type="button" class="sim" data-act="long">Long</button>
+              <button type="button" class="sim" data-act="emote">Emotes</button>
+              <button type="button" class="sim" data-act="seventv">7TV</button>
+              <button type="button" class="sim" data-act="keywords">Keywords</button>
+            </div>
+            <div class="lbl">Alerts</div>
+            <div class="row">
+              <button type="button" class="sim al" data-act="alert:follow">Follow</button>
+              <button type="button" class="sim al" data-act="alert:sub">Sub</button>
+              <button type="button" class="sim al" data-act="alert:tip">Tip</button>
+              <button type="button" class="sim al" data-act="alert:cheer">Cheer</button>
+              <button type="button" class="sim al" data-act="alert:raid">Raid</button>
+              <button type="button" class="sim al" data-act="alert:superchat">Super Chat</button>
+              <button type="button" class="sim al" data-act="alert:member">Member</button>
+              <button type="button" class="sim al" data-act="alert:reward">Reward</button>
+            </div>
+            <div class="lbl">Feature demos</div>
+            <div class="row">
+              <button type="button" class="sim" data-act="grouped" title="Two messages from the same user → second-message stack grouping">Grouping</button>
+              <button type="button" class="sim" data-act="shared" title="Twitch Stream Together: guest channels + participants panel">Shared chat</button>
+              <button type="button" class="sim" data-act="ageFade" title="Older visible messages fade by age (dynamic opacity)">Age fade</button>
+              <button type="button" class="sim" data-act="floatScene" title="Full-screen layout: messages float with overlap avoidance">Float</button>
+              <button type="button" class="sim" data-act="roleMatrix" title="Per-role colored name chips + message backgrounds">Role colors</button>
+            </div>
+            <div class="lbl">Control</div>
+            <div class="row">
+              <button type="button" class="sim" data-act="rain">Rain ×20</button>
+              <button type="button" class="sim" data-act="deleteLast">Delete last</button>
+              <button type="button" class="sim" data-act="clear" title="Remove all messages (keeps current settings)">Clear</button>
+              <button type="button" class="sim" data-act="reset" title="Restore all settings to defaults + clear (recover from a demo)">Reset</button>
+            </div>
+          </div>
+        </details>
+
+        <!-- All widget.json fields are injected here, grouped + collapsible -->
+        <div id="fields"></div>
+      </aside>
+    </div>
+  </div>
 
   <script src="../widget/widget.js"></script>
   <script src="./mock-se.js"></script>

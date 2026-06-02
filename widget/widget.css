@@ -52,7 +52,7 @@
      One signature detail per preset, never layered shadows or a gradient fill. */
   --shadow: 0 0 0 0 transparent;        /* drop / contact shadow */
   --sheen: inset 0 0 0 0 transparent;   /* inset top hairline = the only edge cue */
-  --edge: inset 0 0 0 0 transparent;    /* inset accent leading edge (signature) */
+  --edge: inset 0 0 0 0 transparent;    /* opt-in only (glassEdge override) — presets use no leading accent bar */
 
   /* Accent — one warm, refined tone (soft champagne). Drives alerts + keywords only. */
   --accent: #e8c99a;
@@ -114,7 +114,6 @@
   --row-padding: 9px 14px;
   --shadow: 0 2px 10px -7px rgba(0, 0, 0, 0.55);
   --sheen: inset 0 1px 0 rgba(255, 255, 255, 0.06);
-  --edge: inset 1px 0 0 color-mix(in srgb, var(--accent) 50%, transparent);
   --text-shadow: none;
 }
 
@@ -122,16 +121,17 @@
    signature is a 2px accent leading bar + a heavier accent-tinted name.
    Controlled, never a glow-soup. */
 .se-chat[data-preset="pulse"] {
-  --surface: rgba(14, 15, 22, 0.72);
+  /* Accent-forward WITHOUT a leading bar: a whisper of the accent tints the whole
+     glass + the top sheen + a heavier name, so the energy reads as a hue, not a stripe. */
+  --surface: color-mix(in srgb, var(--accent) 10%, rgba(14, 15, 22, 0.82));
   --surface-blur: 12px;
-  --surface-saturate: 1.15;
+  --surface-saturate: 1.18;
   --surface-radius: 12px;
   --surface-pad: 8px 13px;
   --row-padding: 8px 13px;
   --name-weight: 800;
   --shadow: 0 2px 12px -8px rgba(0, 0, 0, 0.6);
-  --sheen: inset 0 1px 0 rgba(255, 255, 255, 0.08);
-  --edge: inset 2px 0 0 var(--accent);
+  --sheen: inset 0 1px 0 color-mix(in srgb, var(--accent) 24%, rgba(255, 255, 255, 0.1));
   --text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
 }
 
@@ -627,14 +627,11 @@ html, body {
   font-variant-numeric: tabular-nums;
 }
 
-/* On ANY surface preset, alerts get a calm FLAT accent wash (single color,
-   no gradient) + a 2px accent edge — still no glow ring. */
+/* On ANY surface preset, alerts read through a calm FLAT accent wash + the accent
+   glyph + accent name — no colored leading bar, no glow ring. */
 .se-chat:not([data-preset="editorial"]) .msg--alert .msg__bubble {
-  background: color-mix(in srgb, var(--accent) 12%, var(--surface));
-  box-shadow: var(--shadow), var(--sheen), inset 2px 0 0 var(--accent);
-}
-.se-chat:not([data-preset="editorial"])[data-halign="right"] .msg--alert .msg__bubble {
-  box-shadow: var(--shadow), var(--sheen), inset -2px 0 0 var(--accent);
+  background: color-mix(in srgb, var(--accent) 15%, var(--surface));
+  box-shadow: var(--shadow), var(--sheen);
 }
 
 /* ================================================================

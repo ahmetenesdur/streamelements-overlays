@@ -112,6 +112,21 @@ test('quickSetupPreset: new preset scenes select their style + layout', () => {
   assert.strictEqual(term.root.dataset.density, 'compact', 'terminal dev is compact');
 });
 
+test('quick start is ONE-SHOT: writes the bundle to SE fields + releases to manual', () => {
+  // Picking a starter must FILL the fields then reset quickSetupPreset to 'manual',
+  // so the bundle never re-overrides (and locks) the user's later edits.
+  const { seApiCalls } = loadWidget({ quickSetupPreset: 'fullscreenFloat', layoutMode: 'vertical' });
+  const written = Object.fromEntries(seApiCalls);
+  assert.strictEqual(written.layoutMode, 'fullscreen', 'bundle written into the real fields');
+  assert.strictEqual(written.fullscreenFloat, 'yes');
+  assert.strictEqual(written.quickSetupPreset, 'manual', 'released to manual so it never re-locks');
+});
+
+test('quick start = manual writes nothing (never locks)', () => {
+  const { seApiCalls } = loadWidget({ quickSetupPreset: 'manual', layoutMode: 'horizontal' });
+  assert.strictEqual(seApiCalls.length, 0);
+});
+
 // Helper: a Twitch raw `message.data` with sensible defaults.
 function tw(over) {
   return Object.assign({

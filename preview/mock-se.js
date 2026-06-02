@@ -106,6 +106,19 @@
     },
     set(key, val) { this.fieldData[key] = val; this.load(); },
 
+    // Quick start = ONE-SHOT: apply a scene's full bundle into the fields, then
+    // release back to 'manual' so nothing stays locked (mirrors the widget's SE
+    // behaviour). The user sees every control fill in, then can tweak anything.
+    applyStarter(preset) {
+      if (!preset || preset === 'manual') { this.set('quickSetupPreset', 'manual'); return; }
+      const fn = window.__seChat && window.__seChat.fn && window.__seChat.fn.applyQuickSetup;
+      const merged = fn ? fn(Object.assign({}, this.fieldData, { quickSetupPreset: preset }))
+                        : Object.assign({}, this.fieldData, { quickSetupPreset: preset });
+      this.fieldData = Object.assign({}, merged, { quickSetupPreset: 'manual' });
+      this.load();
+      syncControlPanel();
+    },
+
     // Restore every field to its widget.json default (+ optional overrides) and
     // clear the chat — so each Feature demo is self-contained no matter what was
     // clicked before (e.g. the Float demo's fullscreen layout no longer leaks).
@@ -287,7 +300,10 @@
         if (String(cur) === v) o.selected = true;
         s.appendChild(o);
       });
-      s.addEventListener('change', () => MockSE.set(key, s.value));
+      s.addEventListener('change', () => {
+        if (key === 'quickSetupPreset') MockSE.applyStarter(s.value);   // one-shot starter
+        else MockSE.set(key, s.value);
+      });
       return s;
     }
     if (f.type === 'number') {

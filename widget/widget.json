@@ -1,7 +1,7 @@
 {
   "quickSetupPreset": {
     "type": "dropdown",
-    "label": "Quick start scene (one click — overrides the fields below)",
+    "label": "Quick start — fills every setting for a scene, then returns to Manual",
     "value": "manual",
     "options": {
       "manual": "Manual / custom (use the fields below)",

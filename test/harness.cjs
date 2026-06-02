@@ -91,8 +91,12 @@ function loadWidget(fields, options) {
   // Record scheduled timers (delay in ms + whether it fired) so tests can assert
   // auto-hide timing without real waiting. fn is NOT auto-run.
   const timers = [];
+  // Mock SE_API so the one-shot quick-start (commitQuickSetup → SE_API.setField) is
+  // testable: every write is recorded into seApiCalls.
+  const seApiCalls = [];
   const window = {
     document,
+    SE_API: { setField: (k, v) => { seApiCalls.push([k, v]); } },
     addEventListener: (type, cb) => { (listeners[type] = listeners[type] || []).push(cb); },
     dispatchEvent: (ev) => { (listeners[ev.type] || []).forEach(cb => cb(ev)); return true; },
     setTimeout: (fn, ms) => { timers.push({ fn, ms }); return timers.length; },
@@ -131,7 +135,7 @@ function loadWidget(fields, options) {
   // .se-chat root element (so overrides beat the [data-preset] stylesheet), for
   // theme-token assertions.
   const rootStyle = root.style;
-  return { api, root, list, fire, window, timers, rootStyle };
+  return { api, root, list, fire, window, timers, rootStyle, seApiCalls };
 }
 
 module.exports = { loadWidget, makeEl };

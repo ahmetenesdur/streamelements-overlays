@@ -198,6 +198,7 @@
   window.addEventListener('onWidgetLoad', function (obj) {
     const detail = obj.detail || {};
     F = applyQuickSetup(detail.fieldData || {});
+    commitQuickSetup(detail.fieldData || {});   // one-shot: write the starter's bundle + release to manual
     const ch = detail.channel || {};
     channelName = ch.username || ch.name || ch.displayName || channelName;
     rootEl = document.getElementById('seChat');
@@ -264,6 +265,22 @@
       return raw;
     }
     return Object.assign(raw, overrides, { quickSetupPreset: preset });
+  }
+
+  // Quick start is a ONE-SHOT starter: when a scene is picked, write its bundle into
+  // the real StreamElements fields and release back to "manual" — so nothing stays
+  // LOCKED. (Without this, applyQuickSetup re-applies the bundle on every load and
+  // silently overrides every later edit, which feels broken.) SE editor only; the
+  // local preview does the same one-shot in mock-se.js.
+  function commitQuickSetup(raw) {
+    const preset = String((raw && raw.quickSetupPreset) || 'manual');
+    const bundle = QUICK_SETUP_PRESETS[preset];
+    if (preset === 'manual' || !bundle) return;
+    if (!(window.SE_API && typeof window.SE_API.setField === 'function')) return;
+    try {
+      Object.keys(bundle).forEach(function (k) { window.SE_API.setField(k, bundle[k]); });
+      window.SE_API.setField('quickSetupPreset', 'manual');
+    } catch (e) { if (debugMode()) console.warn('[se-chat] quick-start commit failed:', e); }
   }
 
   function buttonFieldFromEvent(listener, detail, event) {
@@ -1529,6 +1546,7 @@
       safeCssColor: safeCssColor,
       htmlEncode: htmlEncode,
       applyQuickSetup: applyQuickSetup,
+      commitQuickSetup: commitQuickSetup,
       buttonFieldFromEvent: buttonFieldFromEvent,
       pickFloatPosition: pickFloatPosition,
       rectsOverlap: rectsOverlap

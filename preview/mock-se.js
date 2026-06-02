@@ -369,6 +369,7 @@
     Object.keys(json).forEach(k => {
       const f = json[k];
       if (f.type === 'hidden') return;
+      if (k === 'stylePreset') return;   // the preset gallery is its dedicated control — avoid a duplicate
       const g = f.group || 'Other';
       (groups[g] = groups[g] || []).push([k, f]);
     });
@@ -422,23 +423,15 @@
     { key: 'terminal',  name: 'Terminal',  desc: 'Dev mono',      accent: '#8bf2a6', bg: '#0d0f0d', chip: 'rgba(139,242,166,0.7)' }
   ];
 
-  function buildPresetSwitch() {
-    const host = document.getElementById('presetSwitch');
-    if (!host) return;
-    PRESET_META.forEach(p => {
-      const b = el('button', { type: 'button', class: 'seg', 'data-preset': p.key, 'aria-pressed': 'false', title: p.name + ' — ' + p.desc });
-      b.style.setProperty('--seg-accent', p.accent);
-      b.innerHTML = '<span class="seg-dot"></span>' + p.name;
-      b.addEventListener('click', () => MockSE.setPreset(p.key));
-      host.appendChild(b);
-    });
-  }
-
+  // The single preset picker: a labelled radiogroup of look cards.
   function buildPresetGallery() {
     const host = document.getElementById('gallery');
     if (!host) return;
     PRESET_META.forEach(p => {
-      const card = el('button', { type: 'button', class: 'gcard', 'data-preset': p.key, 'aria-pressed': 'false', 'aria-label': p.name + ' preset — ' + p.desc });
+      const card = el('button', {
+        type: 'button', class: 'gcard', role: 'radio', 'data-preset': p.key,
+        'aria-checked': 'false', tabindex: '-1', 'aria-label': p.name + ' — ' + p.desc
+      });
       card.style.setProperty('--g-bg', p.bg);
       card.style.setProperty('--g-accent', p.accent);
       card.style.setProperty('--g-chip', p.chip);
@@ -451,15 +444,37 @@
       card.addEventListener('click', () => MockSE.setPreset(p.key));
       host.appendChild(card);
     });
+    // Radiogroup keyboard nav: arrows move + select, Home/End jump to ends.
+    host.addEventListener('keydown', e => {
+      const cards = Array.from(host.querySelectorAll('.gcard'));
+      const i = cards.indexOf(document.activeElement);
+      if (i < 0) return;
+      let j = -1;
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') j = (i + 1) % cards.length;
+      else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') j = (i - 1 + cards.length) % cards.length;
+      else if (e.key === 'Home') j = 0;
+      else if (e.key === 'End') j = cards.length - 1;
+      if (j < 0) return;
+      e.preventDefault();
+      cards[j].focus();
+      MockSE.setPreset(cards[j].dataset.preset);
+    });
   }
 
-  // Reflect the resolved preset on the switcher + gallery (called after every load).
+  // Reflect the resolved preset on the gallery (called after every load).
+  // Roving tabindex: the checked card is the single tab stop into the radiogroup.
   function syncPresetUI() {
     const chat = document.getElementById('seChat');
     const p = chat ? chat.dataset.preset : '';
-    document.querySelectorAll('#presetSwitch .seg, #gallery .gcard').forEach(b => {
-      b.setAttribute('aria-pressed', String(b.dataset.preset === p));
+    let active = null;
+    document.querySelectorAll('#gallery .gcard').forEach(b => {
+      const on = b.dataset.preset === p;
+      b.setAttribute('aria-checked', String(on));
+      b.tabIndex = on ? 0 : -1;
+      if (on) active = b;
     });
+    const first = document.querySelector('#gallery .gcard');
+    if (!active && first) first.tabIndex = 0;
   }
 
   // ---- inspector search: filter settings by label ---------------
@@ -529,7 +544,6 @@
       MockSE.defaults = JSON.parse(JSON.stringify(fd));   // pristine baseline for resetFields()
       wire();
       buildFields(json);
-      buildPresetSwitch();
       buildPresetGallery();
       wireSearch();
       wireDevice();
